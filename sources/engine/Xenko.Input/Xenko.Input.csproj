@@ -28,6 +28,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <XenkoNativeLib Include="..\..\..\deps\SDL2\gamecontrollerdb.txt">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </XenkoNativeLib>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Xenko.Games\Xenko.Games.csproj" />
     <PackageReference Include="SharpDX.RawInput" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' And $(TargetFramework.StartsWith('net4'))" />
     <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
