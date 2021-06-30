@@ -154,12 +154,6 @@ namespace Xenko.VirtualReality
             // supports that form factor. The response we get is a ulong that is the System ID.
             var getInfo = new SystemGetInfo(formFactor: FormFactor.HeadMountedDisplay);
             CheckResult(Xr.GetSystem(Instance, in getInfo, ref system_id));
-
-            // Get the appropriate enabling extension, or fail if we can't.
-            //if (!Xr.TryGetInstanceExtension(null, Instance, out VulkanEnable))
-            //{
-            //    throw new("Failed to get the graphics binding extension!");
-            //}
         }
 
         private void ReleaseUnmanagedResources()
@@ -343,18 +337,6 @@ namespace Xenko.VirtualReality
             headPos.Y = (views[0].Pose.Position.Y + views[1].Pose.Position.Y) * -0.5f;
             headPos.Z = (views[0].Pose.Position.Z + views[1].Pose.Position.Z) *  0.5f;
 
-            //! @todo Move this action processing to before xrWaitFrame, probably.
-            /*const XrActiveActionSet active_actionsets[] = {
-            {.actionSet = gameplay_actionset, .subactionPath = XR_NULL_PATH}};
-
-            XrActionsSyncInfo actions_sync_info = {
-		    .type = XR_TYPE_ACTIONS_SYNC_INFO,
-		    .countActiveActionSets = sizeof(active_actionsets) / sizeof(active_actionsets[0]),
-		    .activeActionSets = active_actionsets,
-        };
-            result = xrSyncActions(session, &actions_sync_info);
-            xr_check(instance, result, "failed to sync actions!");*/
-
             ActiveActionSet active_actionsets = new ActiveActionSet()
             {
                  ActionSet = globalActionSet
@@ -404,68 +386,14 @@ namespace Xenko.VirtualReality
             // array of view_count ints, storing the length of swapchains
             uint[] swapchain_lengths;
 
-            // depth swapchain equivalent to the VR color swapchains
+            // depth swapchain equivalent to the VR color swapchains (not supported yet)
             Swapchain depth_swapchains;
             uint[] depth_swapchain_lengths;
-
-            /*struct
-            {
-                // supporting depth layers is *optional* for runtimes
-                bool supported;
-                XrCompositionLayerDepthInfoKHR* infos;
-            }
-            depth;*/
 
             // reuse this variable for all our OpenXR return codes
             Result result = Result.Success;
 
-            // xrEnumerate*() functions are usually called once with CapacityInput = 0.
-            // The function will write the required amount into CountOutput. We then have
-            // to allocate an array to hold CountOutput elements and call the function
-            // with CountOutput as CapacityInput.
             Prepare();
-
-            // TODO: instance null will not be able to convert XrResult to string
-            /*if (!xr_check(NULL, result, "Failed to enumerate number of extension properties"))
-                return 1;
-
-            XrExtensionProperties* ext_props = malloc(sizeof(XrExtensionProperties) * ext_count);
-            for (uint16_t i = 0; i < ext_count; i++)
-            {
-                // we usually have to fill in the type (for validation) and set
-                // next to NULL (or a pointer to an extension specific struct)
-                ext_props[i].type = XR_TYPE_EXTENSION_PROPERTIES;
-                ext_props[i].next = NULL;
-            }
-
-            result = xrEnumerateInstanceExtensionProperties(NULL, ext_count, &ext_count, ext_props);
-            if (!xr_check(NULL, result, "Failed to enumerate extension properties"))
-                return 1;
-
-            bool opengl_supported = false;
-
-            printf("Runtime supports %d extensions\n", ext_count);
-            for (uint32_t i = 0; i < ext_count; i++)
-            {
-                printf("\t%s v%d\n", ext_props[i].extensionName, ext_props[i].extensionVersion);
-                if (strcmp(XR_KHR_OPENGL_ENABLE_EXTENSION_NAME, ext_props[i].extensionName) == 0)
-                {
-                    opengl_supported = true;
-                }
-
-                if (strcmp(XR_KHR_COMPOSITION_LAYER_DEPTH_EXTENSION_NAME, ext_props[i].extensionName) == 0)
-                {
-                    depth.supported = true;
-                }
-            }
-            free(ext_props);
-
-            // A graphics extension like OpenGL is required to draw anything in VR
-            if (!opengl_supported)
-            {
-                printf("Runtime does not support OpenGL extension!\n");
-                return 1;
-            }*/
 
             SystemProperties system_props = new SystemProperties() {
                 Type = StructureType.TypeSystemProperties,
@@ -535,10 +463,6 @@ namespace Xenko.VirtualReality
             result = Xr.CreateSession(Instance, &session_create_info, &session);
             globalSession = session;
 
-            // Many runtimes support at least STAGE and LOCAL but not all do.
-            // Sophisticated apps might check with xrEnumerateReferenceSpaces() if the
-            // chosen one is supported and try another one if not.
-            // Here we will get an error from xrCreateReferenceSpace() and exit.
             ReferenceSpaceCreateInfo play_space_create_info = new ReferenceSpaceCreateInfo()
             {
                 Type = StructureType.TypeReferenceSpaceCreateInfo,
@@ -548,33 +472,6 @@ namespace Xenko.VirtualReality
 
             result = Xr.CreateReferenceSpace(session, &play_space_create_info, &play_space);
             globalPlaySpace = play_space;
-
-            // --- Create Swapchains
-            /*uint32_t swapchain_format_count;
-            result = xrEnumerateSwapchainFormats(session, 0, &swapchain_format_count, NULL);
-            if (!xr_check(instance, result, "Failed to get number of supported swapchain formats"))
-                return 1;
-
-            printf("Runtime supports %d swapchain formats\n", swapchain_format_count);
-            int64_t swapchain_formats[swapchain_format_count];
-            result = xrEnumerateSwapchainFormats(session, swapchain_format_count, &swapchain_format_count,
-                                                 swapchain_formats);
-            if (!xr_check(instance, result, "Failed to enumerate swapchain formats"))
-                return 1;
-
-            // SRGB is usually a better choice than linear
-            // a more sophisticated approach would iterate supported swapchain formats and choose from them
-            int64_t color_format = get_swapchain_format(instance, session, GL_SRGB8_ALPHA8_EXT, true);
-
-            // GL_DEPTH_COMPONENT16 is a good bet
-            // SteamVR 1.16.4 supports GL_DEPTH_COMPONENT16, GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT32
-            // but NOT GL_DEPTH_COMPONENT32F
-            int64_t depth_format = get_swapchain_format(instance, session, GL_DEPTH_COMPONENT16, false);
-            if (depth_format < 0)
-            {
-                printf("Preferred depth format GL_DEPTH_COMPONENT16 not supported, disabling depth\n");
-                depth.supported = false;
-            }*/
 
             // --- Create swapchain for main VR rendering
             {
@@ -613,19 +510,6 @@ namespace Xenko.VirtualReality
                     Usage = GraphicsResourceUsage.Default,
                     Width = renderSize.Width,
                 });
-
-                // The runtime controls how many textures we have to be able to render to
-                // (e.g. "triple buffering")
-                /*result = xrEnumerateSwapchainImages(swapchains[i], 0, &swapchain_lengths[i], NULL);
-                if (!xr_check(instance, result, "Failed to enumerate swapchains"))
-                    return 1;
-
-                images[i] = malloc(sizeof(XrSwapchainImageOpenGLKHR) * swapchain_lengths[i]);
-                for (uint32_t j = 0; j < swapchain_lengths[i]; j++)
-                {
-                    images[i][j].type = XR_TYPE_SWAPCHAIN_IMAGE_OPENGL_KHR;
-                    images[i][j].next = NULL;
-                }*/
 
                 images = new SwapchainImageVulkan2KHR[32];
                 uint img_count = 0;
@@ -732,34 +616,6 @@ namespace Xenko.VirtualReality
                 };
             }*/
 
-
-            // --- Set up input (actions)
-
-
-            /*Xr.StringToPath(Instance, "/user/hand/left/input/thumbstick/y",
-                            ref thumbstick_y_path[(int)TouchControllerHand.Left]);
-            Xr.StringToPath(Instance, "/user/hand/right/input/thumbstick/y",
-                            ref thumbstick_y_path[(int)TouchControllerHand.Right]);
-
-            /XrPath grip_pose_path[HAND_COUNT];
-            Xr.StringToPath(Instance, "/user/hand/left/input/grip/pose", &grip_pose_path[(int)TouchControllerHand.Left]);
-            Xr.StringToPath(Instance, "/user/hand/right/input/grip/pose", &grip_pose_path[(int)TouchControllerHand.Right]);
-
-            XrPath haptic_path[HAND_COUNT];
-            Xr.StringToPath(Instance, "/user/hand/left/output/haptic", &haptic_path[(int)TouchControllerHand.Left]);
-            Xr.StringToPath(Instance, "/user/hand/right/output/haptic", &haptic_path[(int)TouchControllerHand.Right]);
-
-
-            XrActionSetCreateInfo gameplay_actionset_info = {
-	                .type = XR_TYPE_ACTION_SET_CREATE_INFO, .next = NULL, .priority = 0};
-            strcpy(gameplay_actionset_info.actionSetName, "gameplay_actionset");
-            strcpy(gameplay_actionset_info.localizedActionSetName, "Gameplay Actions");
-
-            XrActionSet gameplay_actionset;
-            result = xrCreateActionSet(instance, &gameplay_actionset_info, &gameplay_actionset);
-            if (!xr_check(instance, result, "failed to create actionset"))
-                return 1;
-            */
             ActionSetCreateInfo gameplay_actionset_info = new ActionSetCreateInfo()
             {
                 Type = StructureType.TypeActionSetCreateInfo
@@ -778,112 +634,6 @@ namespace Xenko.VirtualReality
 
             leftHand = new OpenXrTouchController(this, TouchControllerHand.Left);
             rightHand = new OpenXrTouchController(this, TouchControllerHand.Right);
-
-            // TODO: need to create a system to autogenerate interaction profiles
-
-            // Grabbing objects is not actually implemented in this demo, it only gives some  haptic feebdack.
-            /*XrAction grab_action_float;
-            {
-                XrActionCreateInfo action_info = {.type = XR_TYPE_ACTION_CREATE_INFO,
-		                                              .next = NULL,
-		                                              .actionType = XR_ACTION_TYPE_FLOAT_INPUT,
-		                                              .countSubactionPaths = HAND_COUNT,
-		                                              .subactionPaths = hand_paths};
-                strcpy(action_info.actionName, "grabobjectfloat");
-                strcpy(action_info.localizedActionName, "Grab Object");
-
-                result = xrCreateAction(gameplay_actionset, &action_info, &grab_action_float);
-                if (!xr_check(instance, result, "failed to create grab action"))
-                    return 1;
-            }
-
-            XrAction haptic_action;
-            {
-                XrActionCreateInfo action_info = {.type = XR_TYPE_ACTION_CREATE_INFO,
-		                                              .next = NULL,
-		                                              .actionType = XR_ACTION_TYPE_VIBRATION_OUTPUT,
-		                                              .countSubactionPaths = HAND_COUNT,
-		                                              .subactionPaths = hand_paths};
-                strcpy(action_info.actionName, "haptic");
-                strcpy(action_info.localizedActionName, "Haptic Vibration");
-                result = xrCreateAction(gameplay_actionset, &action_info, &haptic_action);
-                if (!xr_check(instance, result, "failed to create haptic action"))
-                    return 1;
-            }
-
-
-            // suggest actions for simple controller
-            {
-                XrPath interaction_profile_path;
-                result = xrStringToPath(instance, "/interaction_profiles/khr/simple_controller",
-                                        &interaction_profile_path);
-                if (!xr_check(instance, result, "failed to get interaction profile"))
-                    return 1;
-
-                const XrActionSuggestedBinding bindings[] = {
-                        {.action = hand_pose_action, .binding = grip_pose_path[HAND_LEFT_INDEX]},
-                        {.action = hand_pose_action, .binding = grip_pose_path[HAND_RIGHT_INDEX]},
-		                // boolean input select/click will be converted to float that is either 0 or 1
-		                {.action = grab_action_float, .binding = select_click_path[HAND_LEFT_INDEX]},
-                        {.action = grab_action_float, .binding = select_click_path[HAND_RIGHT_INDEX]},
-                        {.action = haptic_action, .binding = haptic_path[HAND_LEFT_INDEX]},
-                        {.action = haptic_action, .binding = haptic_path[HAND_RIGHT_INDEX]},
-                    };
-
-                const XrInteractionProfileSuggestedBinding suggested_bindings = {
-		                .type = XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING,
-		                .next = NULL,
-		                .interactionProfile = interaction_profile_path,
-		                .countSuggestedBindings = sizeof(bindings) / sizeof(bindings[0]),
-		                .suggestedBindings = bindings};
-
-                xrSuggestInteractionProfileBindings(instance, &suggested_bindings);
-                if (!xr_check(instance, result, "failed to suggest bindings"))
-                    return 1;
-            }
-
-            // suggest actions for valve index controller
-            {
-                XrPath interaction_profile_path;
-                result = xrStringToPath(instance, "/interaction_profiles/valve/index_controller",
-                                        &interaction_profile_path);
-                if (!xr_check(instance, result, "failed to get interaction profile"))
-                    return 1;
-
-                const XrActionSuggestedBinding bindings[] = {
-                        {.action = hand_pose_action, .binding = grip_pose_path[HAND_LEFT_INDEX]},
-                        {.action = hand_pose_action, .binding = grip_pose_path[HAND_RIGHT_INDEX]},
-                        {.action = grab_action_float, .binding = trigger_value_path[HAND_LEFT_INDEX]},
-                        {.action = grab_action_float, .binding = trigger_value_path[HAND_RIGHT_INDEX]},
-                        {.action = haptic_action, .binding = haptic_path[HAND_LEFT_INDEX]},
-                        {.action = haptic_action, .binding = haptic_path[HAND_RIGHT_INDEX]},
-                    };
-
-                const XrInteractionProfileSuggestedBinding suggested_bindings = {
-		                .type = XR_TYPE_INTERACTION_PROFILE_SUGGESTED_BINDING,
-		                .next = NULL,
-		                .interactionProfile = interaction_profile_path,
-		                .countSuggestedBindings = sizeof(bindings) / sizeof(bindings[0]),
-		                .suggestedBindings = bindings};
-
-                xrSuggestInteractionProfileBindings(instance, &suggested_bindings);
-                if (!xr_check(instance, result, "failed to suggest bindings"))
-                    return 1;
-            }
-
-
-            // TODO: should not be necessary, but is for SteamVR 1.16.4 (but not 1.15.x)
-            glXMakeCurrent(graphics_binding_gl.xDisplay, graphics_binding_gl.glxDrawable,
-                           graphics_binding_gl.glxContext);
-
-            // Set up rendering (compile shaders, ...) before starting the session
-            if (init_gl(view_count, swapchain_lengths, &gl_rendering.framebuffers,
-                        &gl_rendering.shader_program_id, &gl_rendering.VAO) != 0)
-            {
-                printf("OpenGl setup failed!\n");
-                return 1;
-            }
-
 
             // --- Begin session */
             SessionBeginInfo session_begin_info = new SessionBeginInfo()
@@ -1006,79 +756,6 @@ namespace Xenko.VirtualReality
 
         public override unsafe void Update(GameTime gameTime)
         {
-            // update controller positions (should this be part of draw...?)
-            //! @todo Move this action processing to before xrWaitFrame, probably.
-
-            // query each value / location with a subaction path != XR_NULL_PATH
-            // resulting in individual values per hand/.
-            /*XrActionStateFloat grab_value[HAND_COUNT];
-            XrSpaceLocation hand_locations[HAND_COUNT];
-
-            for (int i = 0; i < HAND_COUNT; i++)
-            {
-                XrActionStatePose hand_pose_state = {.type = XR_TYPE_ACTION_STATE_POSE, .next = NULL };
-                {
-                    XrActionStateGetInfo get_info = {.type = XR_TYPE_ACTION_STATE_GET_INFO,
-				                                 .next = NULL,
-				                                 .action = hand_pose_action,
-				                                 .subactionPath = hand_paths[i]};
-                    result = xrGetActionStatePose(session, &get_info, &hand_pose_state);
-                    xr_check(instance, result, "failed to get pose value!");
-                }
-                // printf("Hand pose %d active: %d\n", i, poseState.isActive);
-
-                hand_locations[i].type = XR_TYPE_SPACE_LOCATION;
-                hand_locations[i].next = NULL;
-
-                result = xrLocateSpace(hand_pose_spaces[i], play_space, frame_state.predictedDisplayTime,
-                                       &hand_locations[i]);
-                xr_check(instance, result, "failed to locate space %d!", i);
-
-                /*
-                printf("Pose %d valid %d: %f %f %f %f, %f %f %f\n", i,
-                spaceLocationValid[i], spaceLocation[0].pose.orientation.x,
-                spaceLocation[0].pose.orientation.y, spaceLocation[0].pose.orientation.z,
-                spaceLocation[0].pose.orientation.w, spaceLocation[0].pose.position.x,
-                spaceLocation[0].pose.position.y, spaceLocation[0].pose.position.z
-                );
-
-                grab_value[i].type = XR_TYPE_ACTION_STATE_FLOAT;
-                grab_value[i].next = NULL;
-                {
-                    XrActionStateGetInfo get_info = {.type = XR_TYPE_ACTION_STATE_GET_INFO,
-				                                 .next = NULL,
-				                                 .action = grab_action_float,
-				                                 .subactionPath = hand_paths[i]};
-
-                    result = xrGetActionStateFloat(session, &get_info, &grab_value[i]);
-                    xr_check(instance, result, "failed to get grab value!");
-                }
-
-                // printf("Grab %d active %d, current %f, changed %d\n", i,
-                // grabValue[i].isActive, grabValue[i].currentState,
-                // grabValue[i].changedSinceLastSync);
-
-                if (grab_value[i].isActive && grab_value[i].currentState > 0.75)
-                {
-                    XrHapticVibration vibration = {.type = XR_TYPE_HAPTIC_VIBRATION,
-				                               .next = NULL,
-				                               .amplitude = 0.5,
-				                               .duration = XR_MIN_HAPTIC_DURATION,
-				                               .frequency = XR_FREQUENCY_UNSPECIFIED};
-
-                    XrHapticActionInfo haptic_action_info = {.type = XR_TYPE_HAPTIC_ACTION_INFO,
-				                                         .next = NULL,
-				                                         .action = haptic_action,
-				                                         .subactionPath = hand_paths[i]};
-                    result = xrApplyHapticFeedback(session, &haptic_action_info,
-                                                   (const XrHapticBaseHeader*)&vibration);
-            xr_check(instance, result, "failed to apply haptic feedback!");
-            // printf("Sent haptic output to hand %d\n", i);
-        }
-        };
-
-            */
-
         }
     }
 }
