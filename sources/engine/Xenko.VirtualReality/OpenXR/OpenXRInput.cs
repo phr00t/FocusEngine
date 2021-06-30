@@ -34,7 +34,7 @@ namespace Xenko.VirtualReality
         {
             new List<string>() { "" }, // BaseIndex 0
             new List<string>() { "/input/grip/pose" }, // Position 1
-            new List<string>() { "/input/trigger/value", "/input/trigger/click", "/input/select/click" }, // TriggerValue 2
+            new List<string>() { "/input/trigger/value", "/input/trigger/click", "/input/select/value", "/input/select/click" }, // TriggerValue 2
             new List<string>() { "/input/thumbstick/x", "/input/trackpad/x" }, // ThumbstickX 3
             new List<string>() { "/input/thumbstick/y", "/input/trackpad/y" }, // ThumbstickY 4
             new List<string>() { "/input/thumbstick/click", "/input/trackpad/click" }, // ThumbstickClick 5
