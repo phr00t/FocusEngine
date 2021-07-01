@@ -226,8 +226,8 @@ namespace Xenko.VirtualReality
             currentAngVel.Y = sv.AngularVelocity.Y;
             currentAngVel.Z = sv.AngularVelocity.Z;
 
-            currentVel *= HostDevice.BodyScaling;
-            currentPos *= HostDevice.BodyScaling;
+            currentVel *= baseHMD.BodyScaling;
+            currentPos *= baseHMD.BodyScaling;
 
             if (holdOffset.HasValue)
             {
