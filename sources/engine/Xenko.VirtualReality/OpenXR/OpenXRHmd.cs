@@ -58,7 +58,7 @@ namespace Xenko.VirtualReality
         {
             if ((int)result < 0)
             {
-                Window.GenerateGenericError(null, $"OpenXR raised an error! Code: {result} ({result:X})\n\nStack Trace: " + (new StackTrace()).ToString());
+                Window.GenerateGenericError(null, $"OpenXR raised an error! Make sure a Vulkan-enabled VR runtime is active (like SteamVR)\n\nCode: {result} ({result:X})\n\nStack Trace: " + (new StackTrace()).ToString());
             }
 
             return result;
@@ -70,11 +70,11 @@ namespace Xenko.VirtualReality
         {
             // Get the swapchain image
             var swapchainIndex = 0u;
-            var acquireInfo = new SwapchainImageAcquireInfo();
+            var acquireInfo = new SwapchainImageAcquireInfo() { Type = StructureType.TypeSwapchainImageAcquireInfo };
             CheckResult(Xr.AcquireSwapchainImage(globalSwapchain, in acquireInfo, ref swapchainIndex));
 
-            var waitInfo = new SwapchainImageWaitInfo(timeout: long.MaxValue);
-            CheckResult(Xr.WaitSwapchainImage(globalSwapchain, in waitInfo));
+            var waitInfo = new SwapchainImageWaitInfo(timeout: long.MaxValue) { Type = StructureType.TypeSwapchainImageWaitInfo };
+            swapImageCollected = Xr.WaitSwapchainImage(globalSwapchain, in waitInfo) == Result.Success;
 
             return images[swapchainIndex].Image;
         }
@@ -184,7 +184,7 @@ namespace Xenko.VirtualReality
         }
 
         public override Size2 ActualRenderFrameSize { get => renderSize; }
-        public override float RenderFrameScaling { get; set; } = 1.4f;
+        public override float RenderFrameScaling { get; set; } = 1f;
 
         public override DeviceState State
         {
@@ -219,13 +219,13 @@ namespace Xenko.VirtualReality
         public override bool CanInitialize => true;
 
         internal Texture swapTexture;
-        internal bool begunFrame;
+        internal bool begunFrame, swapImageCollected;
         internal ulong swapchainPointer;
 
         public override unsafe void Commit(CommandList commandList, Texture renderFrame)
         {
             // if we didn't wait a frame, don't commit
-            if (begunFrame == false)
+            if (begunFrame == false || swapImageCollected == false)
                 return;
 
 #if XENKO_GRAPHICS_API_VULKAN
@@ -245,7 +245,10 @@ namespace Xenko.VirtualReality
 
             begunFrame = false;
 
-            // submit textures
+            // Release the swapchain image
+            var releaseInfo = new SwapchainImageReleaseInfo() { Type = StructureType.TypeSwapchainImageReleaseInfo };
+            CheckResult(Xr.ReleaseSwapchainImage(globalSwapchain, in releaseInfo));
+
             // https://github.com/dotnet/Silk.NET/blob/b0b31779ce4db9b68922977fa11772b95f506e09/examples/CSharp/OpenGL%20Demos/OpenGL%20VR%20Demo/OpenXR/Renderer.cs#L507
             var frameEndInfo = new FrameEndInfo()
             {
@@ -253,10 +256,6 @@ namespace Xenko.VirtualReality
                 DisplayTime = globalFrameState.PredictedDisplayTime,
                 EnvironmentBlendMode = EnvironmentBlendMode.Opaque
             };
-
-            // Release the swapchain image
-            var releaseInfo = new SwapchainImageReleaseInfo() { Type = StructureType.TypeSwapchainImageReleaseInfo };
-            CheckResult(Xr.ReleaseSwapchainImage(globalSwapchain, in releaseInfo));
 
             fixed (CompositionLayerProjectionView* ptr = &projection_views[0])
             {
@@ -289,28 +288,22 @@ namespace Xenko.VirtualReality
 
         public override unsafe void UpdatePositions(GameTime gameTime)
         {
-            // wait get poses (headPos etc.)
-            // --- Wait for our turn to do head-pose dependent computation and render a frame
-            FrameWaitInfo frame_wait_info = new FrameWaitInfo()
+            ActiveActionSet active_actionsets = new ActiveActionSet()
             {
-                Type = StructureType.TypeFrameWaitInfo,
+                 ActionSet = globalActionSet
             };
 
-            CheckResult(Xr.WaitFrame(globalSession, in frame_wait_info, ref globalFrameState));
-
-            // steamvr seems to wait at BeginFrame instead, so make sure we do that before getting position information
-            if ((Bool32)globalFrameState.ShouldRender)
+            ActionsSyncInfo actions_sync_info = new ActionsSyncInfo()
             {
-                FrameBeginInfo frame_begin_info = new FrameBeginInfo()
-                {
-                    Type = StructureType.TypeFrameBeginInfo,
-                };
+                Type = StructureType.TypeActionsSyncInfo,
+                CountActiveActionSets = 1,
+                ActiveActionSets = &active_actionsets,
+            };
 
-                CheckResult(Xr.BeginFrame(globalSession, &frame_begin_info));
+            Xr.SyncAction(globalSession, &actions_sync_info);
 
-                swapchainPointer = GetSwapchainImage();
-                begunFrame = true;
-            }
+            leftHand.Update(gameTime);
+            rightHand.Update(gameTime);
 
             // --- Create projection matrices and view matrices for each eye
             ViewLocateInfo view_locate_info = new ViewLocateInfo()
@@ -328,35 +321,43 @@ namespace Xenko.VirtualReality
 
             uint view_count;
             Xr.LocateView(globalSession, &view_locate_info, &view_state, 2, &view_count, views);
-            
+
             // get head rotation
-            headRot = ConvertToFocus(ref views[0].Pose.Orientation);
-            
+            headRot.X = views[0].Pose.Orientation.X;
+            headRot.Y = views[0].Pose.Orientation.Y;
+            headRot.Z = views[0].Pose.Orientation.Z;
+            headRot.W = views[0].Pose.Orientation.W;
+
             // since we got eye positions, our head is between our eyes
-            headPos.X = (views[0].Pose.Position.X + views[1].Pose.Position.X) *  0.5f;
+            headPos.X = (views[0].Pose.Position.X + views[1].Pose.Position.X) * 0.5f;
             headPos.Y = (views[0].Pose.Position.Y + views[1].Pose.Position.Y) * -0.5f;
-            headPos.Z = (views[0].Pose.Position.Z + views[1].Pose.Position.Z) *  0.5f;
-
-            ActiveActionSet active_actionsets = new ActiveActionSet()
-            {
-                 ActionSet = globalActionSet
-            };
-
-            ActionsSyncInfo actions_sync_info = new ActionsSyncInfo()
-            {
-                Type = StructureType.TypeActionsSyncInfo,
-                CountActiveActionSets = 1,
-                ActiveActionSets = &active_actionsets,
-            };
-
-            Xr.SyncAction(globalSession, &actions_sync_info);
-
-            leftHand.Update(gameTime);
-            rightHand.Update(gameTime);
+            headPos.Z = (views[0].Pose.Position.Z + views[1].Pose.Position.Z) * 0.5f;
         }
 
         public override unsafe void Draw(GameTime gameTime)
         {
+            // wait get poses (headPos etc.)
+            // --- Wait for our turn to do head-pose dependent computation and render a frame
+            FrameWaitInfo frame_wait_info = new FrameWaitInfo()
+            {
+                Type = StructureType.TypeFrameWaitInfo,
+            };
+
+            CheckResult(Xr.WaitFrame(globalSession, in frame_wait_info, ref globalFrameState));
+
+            if ((Bool32)globalFrameState.ShouldRender)
+            {
+                FrameBeginInfo frame_begin_info = new FrameBeginInfo()
+                {
+                    Type = StructureType.TypeFrameBeginInfo,
+                };
+
+                CheckResult(Xr.BeginFrame(globalSession, &frame_begin_info));
+
+                swapchainPointer = GetSwapchainImage();
+                begunFrame = true;
+            }
+
             poseCount++;
         }
 
@@ -415,10 +416,14 @@ namespace Xenko.VirtualReality
             renderSize.Height = (int)Math.Round(viewconfig_views[0].RecommendedImageRectHeight * RenderFrameScaling);
             renderSize.Width = (int)Math.Round(viewconfig_views[0].RecommendedImageRectWidth * RenderFrameScaling) * 2; // 2 views in one frame
 
+            GraphicsRequirementsVulkan2KHR vulk = new GraphicsRequirementsVulkan2KHR()
+            {
+                Type = StructureType.TypeGraphicsRequirementsVulkan2Khr
+            };
+
 #if XENKO_GRAPHICS_API_VULKAN
             // this function pointer was loaded with xrGetInstanceProcAddr
             Silk.NET.Core.PfnVoidFunction func = new Silk.NET.Core.PfnVoidFunction();
-            GraphicsRequirementsVulkan2KHR vulk = new GraphicsRequirementsVulkan2KHR();
             result = Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsRequirements2KHR", ref func);
             Delegate vulk_req = Marshal.GetDelegateForFunctionPointer((IntPtr)func.Handle, typeof(pfnGetVulkanGraphicsRequirements2KHR));
             vulk_req.DynamicInvoke(Instance, system_id, new System.IntPtr(&vulk));

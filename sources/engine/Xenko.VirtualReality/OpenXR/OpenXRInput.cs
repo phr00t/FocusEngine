@@ -14,39 +14,43 @@ namespace Xenko.VirtualReality
             BaseIndex = 0,
             Position = 1,
             TriggerValue = 2,
-            ThumbstickX = 3,
-            ThumbstickY = 4,
-            ThumbstickClick = 5,
-            TrackpadX = 6,
-            TrackpadY = 7,
-            TrackpadClick = 8,
-            GripValue = 9,
-            ButtonXA = 10, // x on left, a on right (or either index)
-            ButtonYB = 11, // y on left, b on right (or either index)
-            Menu = 12,
-            System = 13, // may be inaccessible
-            HapticOut = 14
+            TriggerClick = 3,
+            ThumbstickX = 4,
+            ThumbstickY = 5,
+            ThumbstickClick = 6,
+            TrackpadX = 7,
+            TrackpadY = 8,
+            TrackpadClick = 9,
+            GripValue = 10,
+            GripClick = 11,
+            ButtonXA = 12, // x on left, a on right (or either index)
+            ButtonYB = 13, // y on left, b on right (or either index)
+            Menu = 14,
+            System = 15, // may be inaccessible
+            HapticOut = 16
         }
-        public const int HAND_PATH_COUNT = 15;
+        public const int HAND_PATH_COUNT = 17;
 
         // most likely matches for input types above
         private static List<string>[] PathPriorities =
         {
             new List<string>() { "" }, // BaseIndex 0
             new List<string>() { "/input/grip/pose" }, // Position 1
-            new List<string>() { "/input/trigger/value", "/input/trigger/click", "/input/select/value", "/input/select/click" }, // TriggerValue 2
-            new List<string>() { "/input/thumbstick/x", "/input/trackpad/x" }, // ThumbstickX 3
-            new List<string>() { "/input/thumbstick/y", "/input/trackpad/y" }, // ThumbstickY 4
-            new List<string>() { "/input/thumbstick/click", "/input/trackpad/click" }, // ThumbstickClick 5
-            new List<string>() { "/input/trackpad/x", "/input/thumbstick/x" }, // TrackpadX 6
-            new List<string>() { "/input/trackpad/y", "/input/thumbstick/y" }, // TrackpadY 7
-            new List<string>() { "/input/trackpad/click", "/input/thumbstick/click" }, // TrackpadClick 8
-            new List<string>() { "/input/squeeze/value", "/input/squeeze/click" }, // GripValue 9
-            new List<string>() { "/input/x/click", "/input/a/click" }, // Button1 10
-            new List<string>() { "/input/y/click", "/input/b/click" }, // Button2 11
-            new List<string>() { "/input/menu/click" }, // Menu 12
-            new List<string>() { "/input/system/click" }, // System 13
-            new List<string>() { "/output/haptic" }, // HapticOut 14
+            new List<string>() { "/input/trigger/value", "/input/select/value" }, // TriggerValue 2
+            new List<string>() { "/input/trigger/click", "/input/select/click" }, // TriggerClick 3
+            new List<string>() { "/input/thumbstick/x", "/input/trackpad/x" }, // ThumbstickX 4
+            new List<string>() { "/input/thumbstick/y", "/input/trackpad/y" }, // ThumbstickY 5
+            new List<string>() { "/input/thumbstick/click", "/input/trackpad/click" }, // ThumbstickClick 6
+            new List<string>() { "/input/trackpad/x", "/input/thumbstick/x" }, // TrackpadX 7
+            new List<string>() { "/input/trackpad/y", "/input/thumbstick/y" }, // TrackpadY 8
+            new List<string>() { "/input/trackpad/click", "/input/thumbstick/click" }, // TrackpadClick 9
+            new List<string>() { "/input/squeeze/value" }, // GripValue 10
+            new List<string>() { "/input/squeeze/click" }, // GripClick 11
+            new List<string>() { "/input/x/click", "/input/a/click" }, // Button1 12
+            new List<string>() { "/input/y/click", "/input/b/click" }, // Button2 13
+            new List<string>() { "/input/menu/click" }, // Menu 14
+            new List<string>() { "/input/system/click" }, // System 15
+            new List<string>() { "/output/haptic" }, // HapticOut 16
         };
 
         private static ActionType GetActionType(HAND_PATHS hp)
@@ -65,6 +69,12 @@ namespace Xenko.VirtualReality
                     return ActionType.FloatInput;
                 case HAND_PATHS.HapticOut:
                     return ActionType.VibrationOutput;
+                case HAND_PATHS.GripClick:
+                case HAND_PATHS.ThumbstickClick:
+                case HAND_PATHS.TriggerClick:
+                case HAND_PATHS.TrackpadClick:
+                case HAND_PATHS.Menu:
+                case HAND_PATHS.System:
                 default:
                     return ActionType.BooleanInput;
             }
@@ -103,7 +113,7 @@ namespace Xenko.VirtualReality
             return hmd.Xr.SuggestInteractionProfileBinding(hmd.Instance, &suggested_bindings) == Result.Success;
         }
 
-        public static Silk.NET.OpenXR.Action GetAction(TouchControllerHand hand, TouchControllerButton button, bool YAxis = false)
+        public static Silk.NET.OpenXR.Action GetAction(TouchControllerHand hand, TouchControllerButton button, bool YAxis = false, bool wantBoolean = false)
         {
             switch (button)
             {
@@ -112,17 +122,17 @@ namespace Xenko.VirtualReality
                 case TouchControllerButton.ButtonYB:
                     return MappedActions[(int)hand, (int)HAND_PATHS.ButtonYB];
                 case TouchControllerButton.Grip:
-                    return MappedActions[(int)hand, (int)HAND_PATHS.GripValue];
+                    return wantBoolean ? MappedActions[(int)hand, (int)HAND_PATHS.GripClick] : MappedActions[(int)hand, (int)HAND_PATHS.GripValue];
                 case TouchControllerButton.Menu:
                     return MappedActions[(int)hand, (int)HAND_PATHS.Menu];
                 case TouchControllerButton.System:
                     return MappedActions[(int)hand, (int)HAND_PATHS.System];
                 case TouchControllerButton.Trigger:
-                    return MappedActions[(int)hand, (int)HAND_PATHS.TriggerValue];
+                    return wantBoolean ? MappedActions[(int)hand, (int)HAND_PATHS.TriggerClick] : MappedActions[(int)hand, (int)HAND_PATHS.TriggerValue];
                 case TouchControllerButton.Thumbstick:
-                    return MappedActions[(int)hand, YAxis ? (int)HAND_PATHS.ThumbstickY : (int)HAND_PATHS.ThumbstickX];
+                    return wantBoolean ? MappedActions[(int)hand, (int)HAND_PATHS.ThumbstickClick] : MappedActions[(int)hand, YAxis ? (int)HAND_PATHS.ThumbstickY : (int)HAND_PATHS.ThumbstickX];
                 case TouchControllerButton.Touchpad:
-                    return MappedActions[(int)hand, YAxis ? (int)HAND_PATHS.TrackpadY : (int)HAND_PATHS.TrackpadX];
+                    return wantBoolean ? MappedActions[(int)hand, (int)HAND_PATHS.TrackpadClick] : MappedActions[(int)hand, YAxis ? (int)HAND_PATHS.TrackpadY : (int)HAND_PATHS.TrackpadX];
                 default:
                     throw new ArgumentException("Don't know button: " + button);
             }
@@ -132,7 +142,7 @@ namespace Xenko.VirtualReality
         {
             ActionStateGetInfo getbool = new ActionStateGetInfo()
             {
-                Action = GetAction(hand, button),
+                Action = GetAction(hand, button, false, true),
                 Type = StructureType.TypeActionStateGetInfo
             };
 
@@ -142,6 +152,9 @@ namespace Xenko.VirtualReality
             };
 
             baseHMD.Xr.GetActionStateBoolean(baseHMD.globalSession, in getbool, ref boolresult);
+
+            if (boolresult.IsActive == 0)
+                return GetActionFloat(hand, button, out wasChangedSinceLast) == 1f; // fallback if couldn't find boolean
 
             wasChangedSinceLast = boolresult.ChangedSinceLastSync == 1;
             return boolresult.CurrentState == 1;
@@ -161,6 +174,9 @@ namespace Xenko.VirtualReality
             };
 
             baseHMD.Xr.GetActionStateFloat(baseHMD.globalSession, in getfloat, ref floatresult);
+
+            if (floatresult.IsActive == 0)
+                return GetActionBool(hand, button, out wasChangedSinceLast) ? 1f : 0f; // fallback if couldn't find float
 
             wasChangedSinceLast = floatresult.ChangedSinceLastSync == 1;
             return floatresult.CurrentState;
