@@ -138,7 +138,7 @@ namespace Xenko.VirtualReality
             }
         }
 
-        public static bool GetActionBool(TouchControllerHand hand, TouchControllerButton button, out bool wasChangedSinceLast)
+        public static bool GetActionBool(TouchControllerHand hand, TouchControllerButton button, out bool wasChangedSinceLast, bool fallback = false)
         {
             ActionStateGetInfo getbool = new ActionStateGetInfo()
             {
@@ -154,13 +154,23 @@ namespace Xenko.VirtualReality
             baseHMD.Xr.GetActionStateBoolean(baseHMD.globalSession, in getbool, ref boolresult);
 
             if (boolresult.IsActive == 0)
-                return GetActionFloat(hand, button, out wasChangedSinceLast) == 1f; // fallback if couldn't find boolean
+            {
+                if (fallback)
+                {
+                    // couldn't find an input...
+                    wasChangedSinceLast = false;
+                    return false;
+                }
+
+                // fallback if couldn't find bool
+                return GetActionFloat(hand, button, out wasChangedSinceLast, false, true) == 1f;
+            }
 
             wasChangedSinceLast = boolresult.ChangedSinceLastSync == 1;
             return boolresult.CurrentState == 1;
         }
 
-        public static float GetActionFloat(TouchControllerHand hand, TouchControllerButton button, out bool wasChangedSinceLast, bool YAxis = false)
+        public static float GetActionFloat(TouchControllerHand hand, TouchControllerButton button, out bool wasChangedSinceLast, bool YAxis = false, bool fallback = false)
         {
             ActionStateGetInfo getfloat = new ActionStateGetInfo()
             {
@@ -176,7 +186,17 @@ namespace Xenko.VirtualReality
             baseHMD.Xr.GetActionStateFloat(baseHMD.globalSession, in getfloat, ref floatresult);
 
             if (floatresult.IsActive == 0)
-                return GetActionBool(hand, button, out wasChangedSinceLast) ? 1f : 0f; // fallback if couldn't find float
+            {
+                if (fallback)
+                {
+                    // couldn't find an input...
+                    wasChangedSinceLast = false;
+                    return 0f;
+                }
+
+                // fallback if couldn't find float
+                return GetActionBool(hand, button, out wasChangedSinceLast, true) ? 1f : 0f;
+            }
 
             wasChangedSinceLast = floatresult.ChangedSinceLastSync == 1;
             return floatresult.CurrentState;
