@@ -388,8 +388,8 @@ namespace Xenko.VirtualReality
             uint[] swapchain_lengths;
 
             // depth swapchain equivalent to the VR color swapchains (not supported yet)
-            Swapchain depth_swapchains;
-            uint[] depth_swapchain_lengths;
+            //Swapchain depth_swapchains;
+            //uint[] depth_swapchain_lengths;
 
             // reuse this variable for all our OpenXR return codes
             Result result = Result.Success;
