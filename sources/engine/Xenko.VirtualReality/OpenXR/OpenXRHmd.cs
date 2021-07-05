@@ -24,8 +24,10 @@ namespace Xenko.VirtualReality
         public Space globalPlaySpace;
         public FrameState globalFrameState;
         public ReferenceSpaceType play_space_type = ReferenceSpaceType.Stage; //XR_REFERENCE_SPACE_TYPE_LOCAL;
-        public SwapchainImageVulkan2KHR[] images;
-        public SwapchainImageVulkan2KHR[] depth_images;
+        //public SwapchainImageVulkan2KHR[] images;
+        //public SwapchainImageVulkan2KHR[] depth_images;
+        public SwapchainImageVulkanKHR[] images;
+        public SwapchainImageVulkanKHR[] depth_images;
         public ActionSet globalActionSet;
 
         // array of view_count containers for submitting swapchains with rendered VR frames
@@ -85,7 +87,8 @@ namespace Xenko.VirtualReality
             Xr = XR.GetApi();
 
             Extensions.Clear();
-            Extensions.Add("XR_KHR_vulkan_enable2");
+            //Extensions.Add("XR_KHR_vulkan_enable2");
+            Extensions.Add("XR_KHR_vulkan_enable");
             Extensions.Add("XR_EXT_hp_mixed_reality_controller");
             Extensions.Add("XR_HTC_vive_cosmos_controller_interaction");
             Extensions.Add("XR_MSFT_hand_interaction");
@@ -176,6 +179,12 @@ namespace Xenko.VirtualReality
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         private unsafe delegate Result pfnGetVulkanGraphicsDevice2KHR(Instance instance, VulkanGraphicsDeviceGetInfoKHR* getInfo, VkPhysicalDevice* vulkanPhysicalDevice);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        private unsafe delegate Result pfnGetVulkanGraphicsRequirementsKHR(Instance instance, ulong sys_id, GraphicsRequirementsVulkanKHR* req);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        private unsafe delegate Result pfnGetVulkanGraphicsDeviceKHR(Instance instance, ulong systemId, VkHandle vkInstance, VkHandle* vkPhysicalDevice);
 
         public OpenXRHmd(GameBase game)
         {
@@ -416,17 +425,18 @@ namespace Xenko.VirtualReality
             renderSize.Height = (int)Math.Round(viewconfig_views[0].RecommendedImageRectHeight * RenderFrameScaling);
             renderSize.Width = (int)Math.Round(viewconfig_views[0].RecommendedImageRectWidth * RenderFrameScaling) * 2; // 2 views in one frame
 
-            GraphicsRequirementsVulkan2KHR vulk = new GraphicsRequirementsVulkan2KHR()
+            GraphicsRequirementsVulkanKHR vulk = new GraphicsRequirementsVulkanKHR()
             {
-                Type = StructureType.TypeGraphicsRequirementsVulkan2Khr
+                Type = StructureType.TypeGraphicsRequirementsVulkanKhr
             };
 
-#if XENKO_GRAPHICS_API_VULKAN
-            // this function pointer was loaded with xrGetInstanceProcAddr
             Silk.NET.Core.PfnVoidFunction func = new Silk.NET.Core.PfnVoidFunction();
-            result = Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsRequirements2KHR", ref func);
-            Delegate vulk_req = Marshal.GetDelegateForFunctionPointer((IntPtr)func.Handle, typeof(pfnGetVulkanGraphicsRequirements2KHR));
+            result = Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsRequirementsKHR", ref func);
+            // this function pointer was loaded with xrGetInstanceProcAddr
+            Delegate vulk_req = Marshal.GetDelegateForFunctionPointer((IntPtr)func.Handle, typeof(pfnGetVulkanGraphicsRequirementsKHR));
             vulk_req.DynamicInvoke(Instance, system_id, new System.IntPtr(&vulk));
+
+#if XENKO_GRAPHICS_API_VULKAN
 
             VulkanGraphicsDeviceGetInfoKHR vgd = new VulkanGraphicsDeviceGetInfoKHR()
             {
@@ -437,12 +447,19 @@ namespace Xenko.VirtualReality
 
             VkHandle physicalDevice = new VkHandle();
 
+            // vulkan below
+            result = Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsDeviceKHR", ref func);
+            Delegate vulk_dev = Marshal.GetDelegateForFunctionPointer((IntPtr)func.Handle, typeof(pfnGetVulkanGraphicsDeviceKHR));
+            vulk_dev.DynamicInvoke(Instance, system_id, new VkHandle((nint)device.NativeInstance.Handle), new System.IntPtr(&physicalDevice));
+
+            /* // vulkan2 below
             result = Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsDevice2KHR", ref func);
             Delegate vulk_dev = Marshal.GetDelegateForFunctionPointer((IntPtr)func.Handle, typeof(pfnGetVulkanGraphicsDevice2KHR));
             vulk_dev.DynamicInvoke(Instance, new System.IntPtr(&vgd), new System.IntPtr(&physicalDevice));
+            */
 
             // --- Create session
-            var graphics_binding_vulkan = new GraphicsBindingVulkan2KHR()
+            var graphics_binding_vulkan = new GraphicsBindingVulkanKHR()
             {
                 Type = StructureType.TypeGraphicsBindingVulkanKhr,
                 Device = new VkHandle((nint)device.NativeDevice.Handle),
@@ -452,7 +469,7 @@ namespace Xenko.VirtualReality
                 QueueIndex = 0,
             };
 #else
-            GraphicsBindingVulkan2KHR graphics_binding_vulkan = new GraphicsBindingVulkan2KHR();
+            GraphicsBindingVulkanKHR graphics_binding_vulkan = new GraphicsBindingVulkanKHR();
             throw new Exception("OpenXR is only compatible with Vulkan");
 #endif
 
@@ -516,7 +533,7 @@ namespace Xenko.VirtualReality
                     Width = renderSize.Width,
                 });
 
-                images = new SwapchainImageVulkan2KHR[32];
+                images = new SwapchainImageVulkanKHR[32];
                 uint img_count = 0;
 
                 fixed (void* sibhp = &images[0]) {
