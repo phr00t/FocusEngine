@@ -44,7 +44,6 @@ namespace Xenko.Core
             OnAddReference();
 
             var newCounter = Interlocked.Increment(ref counter);
-            if (newCounter <= 1) throw new InvalidOperationException(FrameworkResources.AddReferenceError);
             return newCounter;
         }
 
@@ -54,14 +53,11 @@ namespace Xenko.Core
             OnReleaseReference();
 
             var newCounter = Interlocked.Decrement(ref counter);
-            if (newCounter == 0)
+            if (newCounter <= 0)
             {
+                newCounter = 0;
                 Destroy();
                 IsDisposed = true;
-            }
-            else if (newCounter < 0)
-            {
-                throw new InvalidOperationException(FrameworkResources.ReleaseReferenceError);
             }
             return newCounter;
         }
