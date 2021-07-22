@@ -56,11 +56,11 @@ namespace Xenko.VirtualReality
         /// <exception cref="Exception">An exception for the given result if it indicates an error.</exception>
         [DebuggerHidden]
         [DebuggerStepThrough]
-        protected internal static Result CheckResult(Result result)
+        protected internal static Result CheckResult(Result result, string forFunction)
         {
             if ((int)result < 0)
             {
-                Window.GenerateGenericError(null, $"OpenXR raised an error! Make sure a Vulkan-enabled VR runtime is active (like SteamVR)\n\nCode: {result} ({result:X})\n\nStack Trace: " + (new StackTrace()).ToString());
+                Window.GenerateGenericError(null, $"OpenXR error! Make sure a Vulkan-enabled OpenXR runtime is set & running (like SteamVR)\n\nCode: {result} ({result:X}) in " + forFunction + "\n\nStack Trace: " + (new StackTrace()).ToString());
             }
 
             return result;
@@ -73,7 +73,7 @@ namespace Xenko.VirtualReality
             // Get the swapchain image
             var swapchainIndex = 0u;
             var acquireInfo = new SwapchainImageAcquireInfo() { Type = StructureType.TypeSwapchainImageAcquireInfo };
-            CheckResult(Xr.AcquireSwapchainImage(globalSwapchain, in acquireInfo, ref swapchainIndex));
+            CheckResult(Xr.AcquireSwapchainImage(globalSwapchain, in acquireInfo, ref swapchainIndex), "AcquireSwapchainImage");
 
             var waitInfo = new SwapchainImageWaitInfo(timeout: long.MaxValue) { Type = StructureType.TypeSwapchainImageWaitInfo };
             swapImageCollected = Xr.WaitSwapchainImage(globalSwapchain, in waitInfo) == Result.Success;
@@ -142,11 +142,11 @@ namespace Xenko.VirtualReality
             );
 
             // Now we're ready to make our instance!
-            CheckResult(Xr.CreateInstance(in instanceCreateInfo, ref Instance));
+            CheckResult(Xr.CreateInstance(in instanceCreateInfo, ref Instance), "CreateInstance");
 
             // For our benefit, let's log some information about the instance we've just created.
             InstanceProperties properties = new();
-            CheckResult(Xr.GetInstanceProperties(Instance, ref properties));
+            CheckResult(Xr.GetInstanceProperties(Instance, ref properties), "GetInstanceProperties");
 
             var runtimeName = SilkMarshal.PtrToString((nint)properties.RuntimeName);
             var runtimeVersion = ((Version)(Version64)properties.RuntimeVersion).ToString(3);
@@ -156,7 +156,7 @@ namespace Xenko.VirtualReality
             // We're creating a head-mounted-display (HMD, i.e. a VR headset) example, so we ask for a runtime which
             // supports that form factor. The response we get is a ulong that is the System ID.
             var getInfo = new SystemGetInfo(formFactor: FormFactor.HeadMountedDisplay);
-            CheckResult(Xr.GetSystem(Instance, in getInfo, ref system_id));
+            CheckResult(Xr.GetSystem(Instance, in getInfo, ref system_id), "GetSystem");
         }
 
         private void ReleaseUnmanagedResources()
@@ -166,7 +166,7 @@ namespace Xenko.VirtualReality
                 return;
             }
 
-            CheckResult(Xr.DestroyInstance(Instance));
+            CheckResult(Xr.DestroyInstance(Instance), "DestroyInstance");
             _unmanagedResourcesFreed = true;
         }
 
@@ -256,7 +256,7 @@ namespace Xenko.VirtualReality
 
             // Release the swapchain image
             var releaseInfo = new SwapchainImageReleaseInfo() { Type = StructureType.TypeSwapchainImageReleaseInfo };
-            CheckResult(Xr.ReleaseSwapchainImage(globalSwapchain, in releaseInfo));
+            CheckResult(Xr.ReleaseSwapchainImage(globalSwapchain, in releaseInfo), "ReleaseSwapchainImage");
 
             // https://github.com/dotnet/Silk.NET/blob/b0b31779ce4db9b68922977fa11772b95f506e09/examples/CSharp/OpenGL%20Demos/OpenGL%20VR%20Demo/OpenXR/Renderer.cs#L507
             var frameEndInfo = new FrameEndInfo()
@@ -286,7 +286,7 @@ namespace Xenko.VirtualReality
                 frameEndInfo.LayerCount = 1;
                 frameEndInfo.Layers = &layerPointer;
 
-                CheckResult(Xr.EndFrame(globalSession, in frameEndInfo));
+                CheckResult(Xr.EndFrame(globalSession, in frameEndInfo), "EndFrame");
             }
         }
 
@@ -352,7 +352,7 @@ namespace Xenko.VirtualReality
                 Type = StructureType.TypeFrameWaitInfo,
             };
 
-            CheckResult(Xr.WaitFrame(globalSession, in frame_wait_info, ref globalFrameState));
+            CheckResult(Xr.WaitFrame(globalSession, in frame_wait_info, ref globalFrameState), "WaitFrame");
 
             if ((Bool32)globalFrameState.ShouldRender)
             {
@@ -361,7 +361,7 @@ namespace Xenko.VirtualReality
                     Type = StructureType.TypeFrameBeginInfo,
                 };
 
-                CheckResult(Xr.BeginFrame(globalSession, &frame_begin_info));
+                CheckResult(Xr.BeginFrame(globalSession, &frame_begin_info), "BeginFrame");
 
                 swapchainPointer = GetSwapchainImage();
                 begunFrame = true;
@@ -400,16 +400,13 @@ namespace Xenko.VirtualReality
             //Swapchain depth_swapchains;
             //uint[] depth_swapchain_lengths;
 
-            // reuse this variable for all our OpenXR return codes
-            Result result = Result.Success;
-
             Prepare();
 
             SystemProperties system_props = new SystemProperties() {
                 Type = StructureType.TypeSystemProperties,
             };
 
-            result = Xr.GetSystemProperties(Instance, system_id, &system_props);
+            CheckResult(Xr.GetSystemProperties(Instance, system_id, &system_props), "GetSystemProperties");
 
             ViewConfigurationView vcv = new ViewConfigurationView()
             {
@@ -418,7 +415,7 @@ namespace Xenko.VirtualReality
 
             viewconfig_views = new ViewConfigurationView[128];
             fixed (ViewConfigurationView* viewspnt = &viewconfig_views[0])
-                result = Xr.EnumerateViewConfigurationView(Instance, system_id, view_type, (uint)viewconfig_views.Length, ref view_count, viewspnt);
+                CheckResult(Xr.EnumerateViewConfigurationView(Instance, system_id, view_type, (uint)viewconfig_views.Length, ref view_count, viewspnt), "EnumerateViewConfigurationView");
             Array.Resize<ViewConfigurationView>(ref viewconfig_views, (int)view_count);
 
             // get size
@@ -431,7 +428,7 @@ namespace Xenko.VirtualReality
             };
 
             Silk.NET.Core.PfnVoidFunction func = new Silk.NET.Core.PfnVoidFunction();
-            result = Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsRequirementsKHR", ref func);
+            CheckResult(Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsRequirementsKHR", ref func), "GetInstanceProcAddr::xrGetVulkanGraphicsRequirementsKHR");
             // this function pointer was loaded with xrGetInstanceProcAddr
             Delegate vulk_req = Marshal.GetDelegateForFunctionPointer((IntPtr)func.Handle, typeof(pfnGetVulkanGraphicsRequirementsKHR));
             vulk_req.DynamicInvoke(Instance, system_id, new System.IntPtr(&vulk));
@@ -448,12 +445,12 @@ namespace Xenko.VirtualReality
             VkHandle physicalDevice = new VkHandle();
 
             // vulkan below
-            result = Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsDeviceKHR", ref func);
+            CheckResult(Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsDeviceKHR", ref func), "GetInstanceProcAddr::xrGetVulkanGraphicsDeviceKHR");
             Delegate vulk_dev = Marshal.GetDelegateForFunctionPointer((IntPtr)func.Handle, typeof(pfnGetVulkanGraphicsDeviceKHR));
             vulk_dev.DynamicInvoke(Instance, system_id, new VkHandle((nint)device.NativeInstance.Handle), new System.IntPtr(&physicalDevice));
 
             /* // vulkan2 below
-            result = Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsDevice2KHR", ref func);
+            CheckResult(Xr.GetInstanceProcAddr(Instance, "xrGetVulkanGraphicsDevice2KHR", ref func), "GetInstanceProcAddr::xrGetVulkanGraphicsDevice2KHR");
             Delegate vulk_dev = Marshal.GetDelegateForFunctionPointer((IntPtr)func.Handle, typeof(pfnGetVulkanGraphicsDevice2KHR));
             vulk_dev.DynamicInvoke(Instance, new System.IntPtr(&vgd), new System.IntPtr(&physicalDevice));
             */
@@ -482,7 +479,7 @@ namespace Xenko.VirtualReality
                 SystemId = system_id
             };
 
-            result = Xr.CreateSession(Instance, &session_create_info, &session);
+            CheckResult(Xr.CreateSession(Instance, &session_create_info, &session), "CreateSession");
             globalSession = session;
 
             ReferenceSpaceCreateInfo play_space_create_info = new ReferenceSpaceCreateInfo()
@@ -492,7 +489,7 @@ namespace Xenko.VirtualReality
                 PoseInReferenceSpace = new Posef(new Quaternionf(0f, 0f, 0f, 1f), new Vector3f(0f, 0f, 0f))
             };
 
-            result = Xr.CreateReferenceSpace(session, &play_space_create_info, &play_space);
+            CheckResult(Xr.CreateReferenceSpace(session, &play_space_create_info, &play_space), "CreateReferenceSpace");
             globalPlaySpace = play_space;
 
             // --- Create swapchain for main VR rendering
@@ -515,7 +512,7 @@ namespace Xenko.VirtualReality
                     MipCount = 1,
                 };
 
-                result = Xr.CreateSwapchain(session, &swapchain_create_info, &swapchain);
+                CheckResult(Xr.CreateSwapchain(session, &swapchain_create_info, &swapchain), "CreateSwapchain");
                 globalSwapchain = swapchain;
 
                 swapTexture = new Texture(baseGame.GraphicsDevice, new TextureDescription()
@@ -537,7 +534,7 @@ namespace Xenko.VirtualReality
                 uint img_count = 0;
 
                 fixed (void* sibhp = &images[0]) {
-                    CheckResult(Xr.EnumerateSwapchainImages(swapchain, (uint)images.Length, ref img_count, (SwapchainImageBaseHeader*)sibhp));
+                    CheckResult(Xr.EnumerateSwapchainImages(swapchain, (uint)images.Length, ref img_count, (SwapchainImageBaseHeader*)sibhp), "EnumerateSwapchainImages");
                 }
                 Array.Resize(ref images, (int)img_count);
             }
@@ -649,7 +646,7 @@ namespace Xenko.VirtualReality
             SilkMarshal.StringIntoSpan("ActionSet\0", lsname);
 
             ActionSet gameplay_actionset;
-            CheckResult(Xr.CreateActionSet(Instance, &gameplay_actionset_info, &gameplay_actionset));
+            CheckResult(Xr.CreateActionSet(Instance, &gameplay_actionset_info, &gameplay_actionset), "CreateActionSet");
             globalActionSet = gameplay_actionset;
 
             OpenXRInput.Initialize(this);
@@ -664,7 +661,7 @@ namespace Xenko.VirtualReality
                 PrimaryViewConfigurationType = view_type
             };
 
-            CheckResult(Xr.BeginSession(session, &session_begin_info));
+            CheckResult(Xr.BeginSession(session, &session_begin_info), "BeginSession");
 
             SessionActionSetsAttachInfo actionset_attach_info = new SessionActionSetsAttachInfo()
             {
@@ -673,7 +670,7 @@ namespace Xenko.VirtualReality
 	            ActionSets = &gameplay_actionset
             };
 
-            CheckResult(Xr.AttachSessionActionSets(session, &actionset_attach_info));
+            CheckResult(Xr.AttachSessionActionSets(session, &actionset_attach_info), "AttachSessionActionSets");
         }
 
         internal Matrix createViewMatrix(Vector3 translation, Quaternion rotation)

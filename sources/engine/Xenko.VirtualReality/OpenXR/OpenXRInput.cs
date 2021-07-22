@@ -282,7 +282,7 @@ namespace Xenko.VirtualReality
                             SuggestedBindings = asbptr
                         };
 
-                        OpenXRHmd.CheckResult(hmd.Xr.SuggestInteractionProfileBinding(hmd.Instance, &suggested_bindings));
+                        OpenXRHmd.CheckResult(hmd.Xr.SuggestInteractionProfileBinding(hmd.Instance, &suggested_bindings), "SuggestInteractionProfileBinding");
                     }
                 }
             }
