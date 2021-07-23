@@ -226,20 +226,12 @@ namespace Xenko.Rendering
             // Sync point: after extract, before prepare (game simulation could resume now)
 
             // Generate and execute prepare effect jobs
-            foreach (var renderFeature in RenderFeatures)
-            // We might be able to parallelize too as long as we resepect render feature dependency graph (probably very few dependencies in practice)
-            {
+            Dispatcher.For(0, RenderFeatures.Count, i => {
                 // Divide into task chunks for parallelism
+                RootRenderFeature renderFeature = RenderFeatures[i];
                 renderFeature.PrepareEffectPermutations(context);
-            }
-
-            // Generate and execute prepare jobs
-            foreach (var renderFeature in RenderFeatures)
-            // We might be able to parallelize too as long as we resepect render feature dependency graph (probably very few dependencies in practice)
-            {
-                // Divide into task chunks for parallelism
                 renderFeature.Prepare(context);
-            }
+            });
 
             // Sort
             Dispatcher.ForEach(Views, view =>
