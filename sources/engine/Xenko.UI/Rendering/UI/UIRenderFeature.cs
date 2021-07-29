@@ -68,15 +68,15 @@ namespace Xenko.Rendering.UI
         private object drawLocker = new object(), pickingLocker = new object();
 
         private void initUIElementStates(RenderDrawContext context, RenderView renderView,
-                                         RenderViewStage renderViewStage, ConcurrentCollector<UIElementState> uiElementStates,
-                                         int index, GameTime drawTime, List<PointerEvent> events)
+                                         RenderViewStage renderViewStage, ref UIElementState[] uiElementStates,
+                                         int index, int storeIndex, GameTime drawTime, List<PointerEvent> events)
         {
             var renderNodeReference = renderViewStage.SortedRenderNodes[index].RenderNode;
             var renderNode = GetRenderNode(renderNodeReference);
             var renderElement = (RenderUIElement)renderNode.RenderObject;
 
             var uiElementState = new UIElementState(renderElement);
-            uiElementStates.Add(uiElementState);
+            uiElementStates[storeIndex] = uiElementState;
 
             var renderObject = uiElementState.RenderObject;
             var rootElement = renderObject.Page?.RootElement;
@@ -196,25 +196,23 @@ namespace Xenko.Rendering.UI
             PickingPrepare(events);
 
             // build the list of the UI elements to render
-            ConcurrentCollector<UIElementState> uiElementStates = new ConcurrentCollector<UIElementState>();
-            if (GraphicsDevice.Platform == GraphicsPlatform.Vulkan)
+            UIElementState[] uiElementStates = new UIElementState[endIndex - startIndex];
+            if (uiElementStates.Length > 1 && GraphicsDevice.Platform == GraphicsPlatform.Vulkan)
             {
                 Xenko.Core.Threading.Dispatcher.For(startIndex, endIndex, (index) =>
                 {
-                    initUIElementStates(context, renderView, renderViewStage, uiElementStates, index, drawTime, events);
+                    initUIElementStates(context, renderView, renderViewStage, ref uiElementStates, index, index - startIndex, drawTime, events);
                 });
             } 
             else
             {
                 for(int i=startIndex; i<endIndex; i++)
                 {
-                    initUIElementStates(context, renderView, renderViewStage, uiElementStates, i, drawTime, events);
+                    initUIElementStates(context, renderView, renderViewStage, ref uiElementStates, i, i - startIndex, drawTime, events);
                 }
             }
 
             events.Clear();
-
-            uiElementStates.Close();
 
             lock (drawLocker)
             {
@@ -229,7 +227,7 @@ namespace Xenko.Rendering.UI
                 DepthStencilStateDescription stencilState = uiSystem.KeepStencilValueState;
 
                 // actually draw stuff
-                for (int j = 0; j < uiElementStates.Count; j++)
+                for (int j = 0; j < uiElementStates.Length; j++)
                 {
                     var uiElementState = uiElementStates[j];
 
