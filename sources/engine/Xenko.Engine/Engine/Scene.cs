@@ -122,9 +122,8 @@ namespace Xenko.Engine
             /// <inheritdoc/>
             protected override void InsertItem(int index, Entity item)
             {
-                // Root entity in another scene, or child of another entity
-                if (item.Scene != null)
-                    throw new InvalidOperationException("This entity already has a scene. Detach it first.");
+                // already in this scene, skip
+                if (item.Scene == scene) return;
 
                 item.SceneValue = scene;
                 base.InsertItem(index, item);
@@ -134,8 +133,7 @@ namespace Xenko.Engine
             protected override void RemoveItem(int index)
             {
                 var item = this[index];
-                if (item.SceneValue != scene)
-                    throw new InvalidOperationException("This entity's scene is not the expected value.");
+                if (item.SceneValue != scene) return;
 
                 item.SceneValue = null;
                 base.RemoveItem(index);

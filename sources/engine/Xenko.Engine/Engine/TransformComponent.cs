@@ -279,8 +279,8 @@ namespace Xenko.Engine
                 if (oldParent == value)
                     return;
 
-                Scene newParentScene = value?.Entity?.Scene;
                 Scene entityScene = Entity?.Scene;
+                Scene newParentScene = value == null ? entityScene : value.Entity?.Scene;
 
                 // Get to root scene
                 while (entityScene?.Parent != null)
@@ -291,16 +291,21 @@ namespace Xenko.Engine
                 // Check if root scene didn't change
                 IsMovingInsideRootScene = (newParentScene != null && newParentScene == entityScene);
 
-                // Add/Remove
-                if (oldParent == null) {
+                // remove from old spot, if needed
+                if (oldParent != null) {
+                    oldParent.Children.Remove(this);
+                } else if(!IsMovingInsideRootScene)
                     entityScene?.Entities.Remove(Entity);
-                } else oldParent.Children.Remove(this);
+
+                // add to new spot
                 if (value != null) {
-                    // normal procedure of adding to another transform
                     value.Children.Add(this);
-                } else if (entityScene != null && Entity.Scene != entityScene) {
-                    // special case where we are just going to root scene
-                    Entity.Scene = entityScene;
+                } else if (entityScene != null) {
+                    if (IsMovingInsideRootScene) {
+                        entityScene.Entities.Add(Entity);
+                        TransformProcessor.TransformationRoots.Add(this);
+                    } else if (Entity.Scene != entityScene) 
+                        Entity.Scene = entityScene;
                 }
 
                 IsMovingInsideRootScene = false;

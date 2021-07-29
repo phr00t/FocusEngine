@@ -19,7 +19,7 @@ namespace Xenko.Engine.Processors
         /// <summary>
         /// List of root entities <see cref="TransformComponent"/> of every <see cref="Entity"/> in <see cref="EntityManager"/>.
         /// </summary>
-        internal readonly HashSet<TransformComponent> TransformationRoots = new HashSet<TransformComponent>();
+        internal readonly static HashSet<TransformComponent> TransformationRoots = new HashSet<TransformComponent>();
 
         /// <summary>
         /// The list of the components that are not special roots.
