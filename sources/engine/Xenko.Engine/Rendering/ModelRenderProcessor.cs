@@ -71,7 +71,8 @@ namespace Xenko.Rendering
         protected override void OnEntityComponentAdding(Entity entity, [NotNull] ModelComponent component, [NotNull] RenderModel data)
         {
             base.OnEntityComponentAdding(entity, component, data);
-            component.NeedsModelUpdate = true;
+            if (component.ForceModelUpdateCount < 1)
+                component.ForceModelUpdateCount = 1;
         }
 
         internal List<int> checkMeshes = new List<int>();
@@ -90,7 +91,7 @@ namespace Xenko.Rendering
                 if (renderModel == null) continue;
 
                 if (modelComponent.FixedModel == false ||
-                    modelComponent.NeedsModelUpdate ||
+                    modelComponent.ForceModelUpdateCount > 0 ||
                     modelComponent.Entity.Transform.UpdateImmobilePosition)
                 {
                     checkMeshes.Add(i);
@@ -109,7 +110,8 @@ namespace Xenko.Rendering
                 var i = checkMeshes[j];
                 var modelComponent = ComponentDataKeys[i];
                 var renderModel = ComponentDataValues[i];
-                modelComponent.NeedsModelUpdate = false;
+                if (modelComponent.ForceModelUpdateCount > 0)
+                    modelComponent.ForceModelUpdateCount--;
                 CheckMeshes(modelComponent, renderModel);
             });
 
