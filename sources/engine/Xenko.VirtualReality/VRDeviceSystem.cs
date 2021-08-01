@@ -43,6 +43,11 @@ namespace Xenko.VirtualReality
         public static TouchControllerButton UIActivationButton2 = TouchControllerButton.Grip;
 
         /// <summary>
+        /// Which hand will be used to track pointer positions on UIComponents using that feature?
+        /// </summary>
+        public static TouchControllerHand UITrackingHand = TouchControllerHand.Right;
+
+        /// <summary>
         /// Shortcut to getting VR hands
         /// </summary>
         /// <param name="hand">Which hand?</param>

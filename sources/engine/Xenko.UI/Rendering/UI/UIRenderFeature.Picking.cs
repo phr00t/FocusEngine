@@ -296,7 +296,10 @@ namespace Xenko.Rendering.UI
                     if (useHand != null)
                     {
                         Ray uiRay = new Ray(useHand.WorldPosition(), useHand.Forward(true));
-                        TrackUIPointer(ref uiRay, state, true);
+                        
+                        if ((swappedIndex ^ 1) == (int)VirtualReality.VRDeviceSystem.UITrackingHand)
+                            TrackUIPointer(ref uiRay, state, true);
+                        
                         UIElementUnderMouseCursor = GetElementAtWorldPosition(rootElement, ref uiRay, ref worldViewProj, ref intersectionPoint);
                         if (UIElementUnderMouseCursor != null)
                         {
