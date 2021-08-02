@@ -336,7 +336,8 @@ namespace Xenko.Rendering.Compositing
                                 cameraRot = Matrix.Identity;
                             }
 
-                            camera.Entity.Transform.Position = VRSettings.VRDevice.HeadPosition;
+                            // make sure camera position gets body scale
+                            camera.Entity.Transform.Position = VRSettings.VRDevice.HeadPosition * VRSettings.VRDevice.BodyScaling;
                             camera.Entity.Transform.Rotation = VRSettings.VRDevice.HeadRotation;
                         }
                         else
