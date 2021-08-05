@@ -292,20 +292,20 @@ namespace Xenko.Engine
                 IsMovingInsideRootScene = (newParentScene != null && newParentScene == entityScene);
 
                 // remove from old spot, if needed
-                if (oldParent != null) {
+                if (oldParent != null)
                     oldParent.Children.Remove(this);
-                } else if(!IsMovingInsideRootScene)
-                    entityScene?.Entities.Remove(Entity);
+                else
+                    TransformProcessor.TransformationRoots.Remove(this);
 
                 // add to new spot
-                if (value != null) {
+                if (value != null)
                     value.Children.Add(this);
-                } else if (entityScene != null) {
-                    if (IsMovingInsideRootScene) {
-                        entityScene.Entities.Add(Entity);
+                else if (newParentScene != null)
+                {
+                    if (IsMovingInsideRootScene)
                         TransformProcessor.TransformationRoots.Add(this);
-                    } else if (Entity.Scene != entityScene) 
-                        Entity.Scene = entityScene;
+                    else
+                        Entity.Scene = newParentScene;
                 }
 
                 IsMovingInsideRootScene = false;
