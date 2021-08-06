@@ -489,6 +489,17 @@ namespace Xenko.Core.Mathematics
         }
 
         /// <summary>
+        /// Scales a color's RGB channels.
+        /// </summary>
+        /// <param name="value">The color to scale.</param>
+        /// <param name="scale">The amount by which to scale.</param>
+        /// <returns>The scaled color.</returns>
+        public static Color4 ScaleRGB(Color4 value, float scale)
+        {
+            return new Color4(value.R * scale, value.G * scale, value.B * scale, value.A);
+        }
+
+        /// <summary>
         /// Negates a color.
         /// </summary>
         /// <param name="value">The color to negate.</param>
