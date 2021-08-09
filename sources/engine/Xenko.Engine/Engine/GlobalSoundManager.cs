@@ -2,6 +2,7 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xenko.Audio;
@@ -193,8 +194,8 @@ namespace Xenko.Engine
             internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
         }
 
-        private Dictionary<string, Sound> Sounds = new Dictionary<string, Sound>();
-        private Dictionary<string, List<SoundInstance>> instances = new Dictionary<string, List<SoundInstance>>();
+        private ConcurrentDictionary<string, Sound> Sounds = new ConcurrentDictionary<string, Sound>();
+        private ConcurrentDictionary<string, List<SoundInstance>> instances = new ConcurrentDictionary<string, List<SoundInstance>>();
         private List<PositionalSound> currentAttached = new List<PositionalSound>();
         private System.Random rand;
         private Game internalGame;
