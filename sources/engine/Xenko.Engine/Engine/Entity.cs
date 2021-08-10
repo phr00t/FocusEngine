@@ -102,10 +102,11 @@ namespace Xenko.Engine
 
             set
             {
-                if (this.GetParent() != null) {
+                TransformComponent parent = Transform.Parent;
+                if (parent != null) {
                     if (value == null) {
                         // if we are detaching, take care of removing the parent if we had one
-                        this.Transform.Parent = null;
+                        parent.Children.Remove(Transform);
                     } else throw new InvalidOperationException("This entity is another entity's child. Detach it before changing its scene.");
                 }
 
