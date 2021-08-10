@@ -257,31 +257,6 @@ namespace Xenko.Physics.Bepu
             }
 
             /// <summary>
-            /// Provides a notification that a manifold has been created for a pair. Offers an opportunity to change the manifold's details. 
-            /// </summary>
-            /// <param name="workerIndex">Index of the worker thread that created this manifold.</param>
-            /// <param name="pair">Pair of collidables that the manifold was detected between.</param>
-            /// <param name="manifold">Set of contacts detected between the collidables.</param>
-            /// <param name="pairMaterial">Material properties of the manifold.</param>
-            /// <returns>True if a constraint should be created for the manifold, false otherwise.</returns>
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public unsafe bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : struct, IContactManifold<TManifold>
-            {
-                BepuPhysicsComponent a = getFromReference(pair.A);
-                BepuPhysicsComponent b = getFromReference(pair.B);
-                pairMaterial.FrictionCoefficient = a.FrictionCoefficient * b.FrictionCoefficient;
-                pairMaterial.MaximumRecoveryVelocity = (a.MaximumRecoveryVelocity + b.MaximumRecoveryVelocity) * 0.5f;
-                pairMaterial.SpringSettings.AngularFrequency = (a.SpringSettings.AngularFrequency + b.SpringSettings.AngularFrequency) * 0.5f;
-                pairMaterial.SpringSettings.TwiceDampingRatio = (a.SpringSettings.TwiceDampingRatio + b.SpringSettings.TwiceDampingRatio) * 0.5f;
-                if (((uint)a.CanCollideWith & (uint)b.CollisionGroup) != 0)
-                {
-                    RecordContact(a, b, ref manifold);
-                    return !a.GhostBody && !b.GhostBody;
-                }
-                return false;
-            }
-
-            /// <summary>
             /// Provides a notification that a manifold has been created between the children of two collidables in a compound-including pair.
             /// Offers an opportunity to change the manifold's details. 
             /// </summary>
@@ -309,6 +284,31 @@ namespace Xenko.Physics.Bepu
             /// </summary>
             public void Dispose()
             {
+            }
+
+            /// <summary>
+            /// Provides a notification that a manifold has been created for a pair. Offers an opportunity to change the manifold's details. 
+            /// </summary>
+            /// <param name="workerIndex">Index of the worker thread that created this manifold.</param>
+            /// <param name="pair">Pair of collidables that the manifold was detected between.</param>
+            /// <param name="manifold">Set of contacts detected between the collidables.</param>
+            /// <param name="pairMaterial">Material properties of the manifold.</param>
+            /// <returns>True if a constraint should be created for the manifold, false otherwise.</returns>
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public bool ConfigureContactManifold<TManifold>(int workerIndex, CollidablePair pair, ref TManifold manifold, out PairMaterialProperties pairMaterial) where TManifold : unmanaged, IContactManifold<TManifold>
+            {
+                BepuPhysicsComponent a = getFromReference(pair.A);
+                BepuPhysicsComponent b = getFromReference(pair.B);
+                pairMaterial.FrictionCoefficient = a.FrictionCoefficient * b.FrictionCoefficient;
+                pairMaterial.MaximumRecoveryVelocity = (a.MaximumRecoveryVelocity + b.MaximumRecoveryVelocity) * 0.5f;
+                pairMaterial.SpringSettings.AngularFrequency = (a.SpringSettings.AngularFrequency + b.SpringSettings.AngularFrequency) * 0.5f;
+                pairMaterial.SpringSettings.TwiceDampingRatio = (a.SpringSettings.TwiceDampingRatio + b.SpringSettings.TwiceDampingRatio) * 0.5f;
+                if (((uint)a.CanCollideWith & (uint)b.CollisionGroup) != 0)
+                {
+                    RecordContact(a, b, ref manifold);
+                    return !a.GhostBody && !b.GhostBody;
+                }
+                return false;
             }
         }
 
