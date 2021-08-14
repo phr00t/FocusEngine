@@ -33,7 +33,7 @@ namespace Xenko.Core.Collections
 
         public FastList()
         {
-            Items = ArrayHelper<T>.Empty;
+            Items = Array.Empty<T>();
         }
 
         public FastList([NotNull] IEnumerable<T> collection)
@@ -83,7 +83,7 @@ namespace Xenko.Core.Collections
                     }
                     else
                     {
-                        Items = ArrayHelper<T>.Empty;
+                        Items = Array.Empty<T>();
                     }
                 }
             }

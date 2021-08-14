@@ -2,9 +2,6 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Xenko.Particles.Sorters
 {
@@ -12,7 +9,7 @@ namespace Xenko.Particles.Sorters
     {
         private readonly Dictionary<int, Stack<T[]>> _pool = new Dictionary<int, Stack<T[]>>();
 
-        public readonly T[] Empty = new T[0];
+        public static readonly T[] Empty = Array.Empty<T>();
 
         public virtual void Clear()
         {
