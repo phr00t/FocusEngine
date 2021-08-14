@@ -391,12 +391,10 @@ namespace Xenko.GameStudio
                 var cpu = string.Empty; // Used only for Windows Phone so far, default to ARM (need to provide a selector or detection)
                 var extraProperties = new Dictionary<string, string>
                 {
-                    ["XenkoBuildEngineLogPipeUrl"] = BuildLog.PipeName,
                     ["XenkoBuildEngineLogVerbose"] = "true",
                 };
 
-                // pick a non-shared package to preview a build for
-                ProjectViewModel projectViewModel = Session.LocalPackages.OfType<ProjectViewModel>().FirstOrDefault(x => x.Platform != PlatformType.Shared) ?? Session.LocalPackages.FirstOrDefault() as ProjectViewModel;
+                var projectViewModel = Session.CurrentProject.Type == ProjectType.Executable ? Session.CurrentProject : null;
 
                 if (Session.CurrentProject.Platform != PlatformType.Shared)
                 {
@@ -463,6 +461,10 @@ namespace Xenko.GameStudio
                     switch (projectViewModel.Platform)
                     {
                         case PlatformType.Windows:
+                            // .NET Core: use the .exe launcher
+                            if (Path.GetExtension(assemblyPath).ToLowerInvariant() == ".dll")
+                                assemblyPath = Path.ChangeExtension(assemblyPath, ".exe");
+
                             if (string.Equals(Path.GetExtension(assemblyPath), ".exe", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 if (!File.Exists(assemblyPath))
@@ -581,7 +583,6 @@ namespace Xenko.GameStudio
                 var extraProperties = new Dictionary<string, string>
                 {
                     ["SolutionPlatform"] = "Any CPU",
-                    ["XenkoBuildEngineLogPipeUrl"] = BuildLog.PipeName,
                     ["XenkoBuildEngineLogVerbose"] = "true",
                 };
 

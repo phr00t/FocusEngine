@@ -3,8 +3,7 @@
 
 using System;
 using System.Diagnostics;
-using System.ServiceModel;
-
+using ServiceWire.NamedPipes;
 using Xenko.Core.Diagnostics;
 using Xenko.Core.VisualStudio;
 using Xenko.Debugger.Target;
@@ -16,7 +15,8 @@ namespace Xenko.GameStudio.Debugging
     /// </summary>
     class DebugHost : IDisposable
     {
-        public ServiceHost ServiceHost { get; private set; }
+        private AttachedChildProcessJob attachedChildProcessJob;
+        public NpHost ServiceHost { get; private set; }
         public GameDebuggerHost GameHost { get; private set; }
 
         public void Start(string workingDirectory, Process debuggerProcess, LoggerResult logger)
@@ -25,7 +25,7 @@ namespace Xenko.GameStudio.Debugging
 
             using (var debugger = debuggerProcess != null ? VisualStudioDebugger.GetByProcess(debuggerProcess.Id) : null)
             {
-                var address = "net.pipe://localhost/" + Guid.NewGuid();
+                var address = "Xenko/Debugger/" + Guid.NewGuid();
                 var arguments = $"--host=\"{address}\"";
 
                 // Child process should wait for a debugger to be attached
@@ -43,16 +43,19 @@ namespace Xenko.GameStudio.Debugging
                     RedirectStandardError = true,
                 };
 
-                // Start WCF pipe
+                // Start ServiceWire pipe
                 var gameDebuggerHost = new GameDebuggerHost(logger);
-                ServiceHost = new ServiceHost(gameDebuggerHost);
-                ServiceHost.AddServiceEndpoint(typeof(IGameDebuggerHost), new NetNamedPipeBinding(NetNamedPipeSecurityMode.None) { MaxReceivedMessageSize = int.MaxValue }, address);
+                ServiceHost = new NpHost(address, null, null);
+                ServiceHost.AddService<IGameDebuggerHost>(gameDebuggerHost);
                 ServiceHost.Open();
 
                 var process = new Process { StartInfo = startInfo };
                 process.Start();
                 process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
+
+                // Make sure proces will be killed if our process is finished unexpectedly
+                attachedChildProcessJob = new AttachedChildProcessJob(process);
 
                 // Attach debugger
                 debugger?.AttachToProcess(process.Id);
@@ -63,9 +66,14 @@ namespace Xenko.GameStudio.Debugging
 
         public void Stop()
         {
+            if (attachedChildProcessJob != null)
+            {
+                attachedChildProcessJob.Dispose();
+                attachedChildProcessJob = null;
+            }
             if (ServiceHost != null)
             {
-                ServiceHost.Abort();
+                ServiceHost.Close();
                 ServiceHost = null;
             }
         }

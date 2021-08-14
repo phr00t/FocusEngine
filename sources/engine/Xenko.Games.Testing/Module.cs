@@ -21,9 +21,7 @@ namespace Xenko.Games.Testing
                 await Task.Delay(20000);
                 if (!GameTestingSystem.Initialized)
                 {
-#if XENKO_PLATFORM_IOS || XENKO_PLATFORM_ANDROID || XENKO_PLATFORM_WINDOWS_DESKTOP
                     Console.WriteLine(@"FATAL: Test launch timeout. Aborting.");
-#endif
                     GameTestingSystem.Quit();
                 }
             });

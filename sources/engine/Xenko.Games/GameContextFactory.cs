@@ -14,7 +14,7 @@ namespace Xenko.Games
         {
             // Default context is Desktop
             AppContextType type = AppContextType.Desktop;
-#if XENKO_PLATFORM_WINDOWS_DESKTOP || XENKO_PLATFORM_UNIX
+#if XENKO_PLATFORM_DESKTOP
     #if XENKO_GRAPHICS_API_OPENGL
         #if XENKO_UI_SDL
             type = AppContextType.DesktopSDL;
@@ -98,7 +98,7 @@ namespace Xenko.Games
 
         public static GameContext NewGameContextDesktop()
         {
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
+#if XENKO_PLATFORM_DESKTOP
     #if XENKO_UI_OPENTK
             return new GameContextOpenTK(null);
     #else
@@ -135,7 +135,7 @@ namespace Xenko.Games
 
         public static GameContext NewGameContextOpenTK()
         {
-#if (XENKO_PLATFORM_WINDOWS_DESKTOP || XENKO_PLATFORM_UNIX) && XENKO_GRAPHICS_API_OPENGL && XENKO_UI_OPENTK
+#if XENKO_PLATFORM_DESKTOP && XENKO_GRAPHICS_API_OPENGL && XENKO_UI_OPENTK
             return new GameContextOpenTK(null);
 #else
             return null;

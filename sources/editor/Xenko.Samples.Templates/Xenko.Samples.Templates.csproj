@@ -1,18 +1,29 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
+﻿<Project>
+  <Import Project="..\..\targets\Xenko.props" />
 
   <PropertyGroup>
     <XenkoPackAssets>true</XenkoPackAssets>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <EnableDefaultItems>false</EnableDefaultItems>
     <!-- Extract PackageVersion from ThisPackageVersion.cs -->
-    <_XenkoThisPackageVersionLines>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)ThisPackageVersion.cs'))</_XenkoThisPackageVersionLines>
+    <_XenkoThisPackageVersionFile Condition="'$(XenkoPackageBuild)' == 'true'">$(MSBuildThisFileDirectory)ThisPackageVersion.PackageBuild.cs</_XenkoThisPackageVersionFile>
+    <_XenkoThisPackageVersionFile Condition="'$(XenkoPackageBuild)' != 'true'">$(MSBuildThisFileDirectory)ThisPackageVersion.DevBuild.cs</_XenkoThisPackageVersionFile>
+    <_XenkoThisPackageVersionLines>$([System.IO.File]::ReadAllText('$(_XenkoThisPackageVersionFile)'))</_XenkoThisPackageVersionLines>
     <PackageVersion>$([System.Text.RegularExpressions.Regex]::Match($(_XenkoThisPackageVersionLines), `.*Current = \"(.*)\";.*`).Groups[1].Value)</PackageVersion>
   </PropertyGroup>
 
-  <Import Project="$(XenkoPostSettingsTargets)" />
-
   <ItemGroup>
-    <Compile Include="ThisPackageVersion.cs" />
+    <ProjectReference Include="..\..\core\Xenko.Core.Tasks\Xenko.Core.Tasks.csproj">
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <GlobalPropertiesToRemove>TargetFramework</GlobalPropertiesToRemove>
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ThisPackageVersion.PackageBuild.cs" />
+    <Compile Include="ThisPackageVersion.DevBuild.cs" />
+  </ItemGroup>
+
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

@@ -1,0 +1,36 @@
+﻿<Project>
+  <Import Project="Sdk.props" Condition="'$(XenkoNuGetLoaderWindowsDesktop)' != 'true'" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="Sdk.props" Condition="'$(XenkoNuGetLoaderWindowsDesktop)' == 'true'" Sdk="Microsoft.NET.Sdk.WindowsDesktop" />
+
+  <PropertyGroup>
+    <OutputType Condition="'$(OutputType)' == ''">Exe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWpf>true</UseWpf>
+    <UseWindowsForms>true</UseWindowsForms>
+    <IntermediateOutputPath>obj\$(Configuration)\$(XenkoApplicationName)</IntermediateOutputPath>
+    <OutputPath>bin\$(Configuration)\$(XenkoApplicationName)</OutputPath>
+    <DefineConstants Condition="'$(XenkoNuGetResolverUX)' == 'true'">XENKO_NUGET_RESOLVER_UX;$(DefineConstants)</DefineConstants>
+
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <DefineConstants Condition="'$(XenkoSTAThreadOnMain)' == 'true'">XENKO_STA_THREAD_ATTRIBUTE_ON_MAIN;$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Stride.NuGet.PackageManagement" Version="5.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\shared\SharedAssemblyInfo.cs" Link="Properties\SharedAssemblyInfo.cs" />
+    <Compile Include="..\..\shared\Xenko.NuGetResolver\NuGetAssemblyResolver.cs" Link="NuGetAssemblyResolver.cs" />
+    <Compile Include="..\..\shared\Xenko.NuGetResolver\RestoreHelper.cs" Link="RestoreHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\Xenko.Core\Xenko.Core.csproj" />
+  </ItemGroup>
+
+  <Import Project="Sdk.targets" Condition="'$(XenkoNuGetLoaderWindowsDesktop)' != 'true'" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="Sdk.targets" Condition="'$(XenkoNuGetLoaderWindowsDesktop)' == 'true'" Sdk="Microsoft.NET.Sdk.WindowsDesktop" />
+</Project>

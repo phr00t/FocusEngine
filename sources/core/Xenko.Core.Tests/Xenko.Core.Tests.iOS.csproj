@@ -13,7 +13,7 @@
     <MtouchDebug>true</MtouchDebug>
     <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.Core.PreSettings.targets" />
+  <Import Project="..\..\targets\Xenko.UnitTests.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -37,8 +37,8 @@
     <Compile Include="..\..\tests\nunitlite\NUnitLiteLauncher.iPhone.cs" Label="Xenko.DoNotSync">
       <Link>NUnitLiteLauncher.iPhone.cs</Link>
     </Compile>
-    <PackageReference Include="xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
@@ -69,7 +69,7 @@
     </XenkoEmbeddedNativeLibrary>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
+  <Import Project="..\..\targets\Xenko.UnitTests.targets" Condition="Exists('..\..\targets\Xenko.UnitTests.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

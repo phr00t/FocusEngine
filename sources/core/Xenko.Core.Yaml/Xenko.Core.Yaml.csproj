@@ -1,19 +1,13 @@
 ﻿<Project>
-  <Import Project="..\..\targets\Xenko.Core.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.Core.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <XenkoAssemblyProcessor>false</XenkoAssemblyProcessor>
-    <XenkoPlatformDependent>true</XenkoPlatformDependent>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <XenkoBuildTags>WindowsTools</XenkoBuildTags>
   </PropertyGroup>
-  <Choose>
-    <When Condition=" '$(AutoIncludeSystemAssembly)' != 'true'">
-    </When>
-  </Choose>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
@@ -22,6 +16,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Xenko.Core.Reflection\Xenko.Core.Reflection.csproj" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

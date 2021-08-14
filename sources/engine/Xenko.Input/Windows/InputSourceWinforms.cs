@@ -1,12 +1,15 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP && (XENKO_UI_WINFORMS || XENKO_UI_WPF)
+#if (XENKO_UI_WINFORMS || XENKO_UI_WPF)
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+#if XENKO_INPUT_RAWINPUT
+using SharpDX.RawInput;
+#endif
 using Xenko.Games;
 using WinFormsKeys = System.Windows.Forms.Keys;
 
@@ -67,6 +70,7 @@ namespace Xenko.Input
         /// <param name="winformControl"></param>
         private void MissingInputHack(Control winformControl)
         {
+#if XENKO_INPUT_RAWINPUT
             if (winformControl.Handle == IntPtr.Zero)
             {
                 winformControl.HandleCreated += (sender, args) =>
@@ -81,6 +85,7 @@ namespace Xenko.Input
             {
                 SharpDX.RawInput.Device.RegisterDevice(SharpDX.Multimedia.UsagePage.Generic, SharpDX.Multimedia.UsageId.GenericKeyboard, SharpDX.RawInput.DeviceFlags.None, winformControl.Handle, SharpDX.RawInput.RegisterDeviceOptions.NoFiltering);
             }
+#endif
         }
 
         public override void Dispose()

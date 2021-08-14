@@ -22,7 +22,7 @@ using Xenko.Core.Threading;
 using Xenko.Animations;
 using Xenko.Assets.Presentation.CurveEditor.ViewModels;
 using Xenko.Assets.Presentation.CurveEditor.Views;
-using Xceed.Wpf.AvalonDock.Layout;
+using AvalonDock.Layout;
 
 namespace Xenko.GameStudio
 {

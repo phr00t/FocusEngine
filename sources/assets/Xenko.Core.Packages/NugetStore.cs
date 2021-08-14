@@ -41,11 +41,6 @@ namespace Xenko.Core.Packages
     /// </summary>
     public class NugetStore : INugetDownloadProgress
     {
-        public const string MainExecutables = @"lib\net48\Xenko.GameStudio.exe,Bin\Windows\Xenko.GameStudio.exe,Bin\Windows-Direct3D11\Xenko.GameStudio.exe";
-        public const string PrerequisitesInstaller = @"Bin\Prerequisites\install-prerequisites.exe";
-
-        public const string DefaultPackageSource = "https://packages.xenko.com/nuget";
-
         private IPackagesLogger logger;
         private readonly ISettings settings, localSettings;
         private ProgressReport currentProgressReport;
@@ -75,7 +70,6 @@ namespace Xenko.Core.Packages
 
             // Add dev source
             RemoveDeletedSources(settings, "Xenko");
-            CheckPackageSource("Xenko", DefaultPackageSource);
             settings.SaveToDisk();
 
             InstallPath = SettingsUtility.GetGlobalPackagesFolder(settings);
@@ -257,39 +251,6 @@ namespace Xenko.Core.Packages
             return FileLock.Wait("nuget.lock");
         }
 
-        /// <summary>
-        /// Name of main executable of current store.
-        /// </summary>
-        /// <returns>Name of the executable.</returns>
-        public string GetMainExecutables()
-        {
-            return MainExecutables;
-        }
-
-        /// <summary>
-        /// Locate the main executable from a given package installation path. It throws exceptions if not found.
-        /// </summary>
-        /// <param name="packagePath">The package installation path.</param>
-        /// <returns>The main executable.</returns>
-        public string LocateMainExecutable(string packagePath)
-        {
-            var mainExecutableList = GetMainExecutables();
-            var fullExePath = mainExecutableList.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(x => Path.Combine(packagePath, x)).FirstOrDefault(File.Exists);
-            if (fullExePath == null)
-                throw new InvalidOperationException("Unable to locate the executable for the selected version");
-
-            return fullExePath;
-        }
-
-        /// <summary>
-        /// Name of prerequisites executable of current store.
-        /// </summary>
-        /// <returns>Name of the executable.</returns>
-        public string GetPrerequisitesInstaller()
-        {
-            return PrerequisitesInstaller;
-        }
-
 #region Manager
         /// <summary>
         /// Fetch, if not already downloaded, and install the package represented by
@@ -298,7 +259,7 @@ namespace Xenko.Core.Packages
         /// <remarks>It is safe to call it concurrently be cause we operations are done using the FileLock.</remarks>
         /// <param name="packageId">Name of package to install.</param>
         /// <param name="version">Version of package to install.</param>
-        public async Task<NugetLocalPackage> InstallPackage(string packageId, PackageVersion version, ProgressReport progress)
+        public async Task<NugetLocalPackage> InstallPackage(string packageId, PackageVersion version, IEnumerable<string> targetFrameworks, ProgressReport progress)
         {
             using (GetLocalRepositoryLock())
             {
@@ -326,6 +287,10 @@ namespace Xenko.Core.Packages
                     {
                         var installPath = SettingsUtility.GetGlobalPackagesFolder(settings);
 
+                        // In case it's a package without any TFM (i.e. Visual Studio plugin), we still need to specify one
+                        if (!targetFrameworks.Any())
+                            targetFrameworks = new string[] { "net5.0" };
+
                         // Old version expects to be installed in GamePackages
                         if (packageId == "Xenko" && version < new PackageVersion(3, 0, 0, 0) && oldRootDirectory != null)
                         {
@@ -344,13 +309,6 @@ namespace Xenko.Core.Packages
                                     LibraryRange = new LibraryRange(packageId, new VersionRange(version.ToNuGetVersion()), LibraryDependencyTarget.Package),
                                 }
                             },
-                            TargetFrameworks =
-                            {
-                                new TargetFrameworkInformation
-                                {
-                                    FrameworkName = NuGetFramework.Parse("net48"),
-                                }
-                            },
                             RestoreMetadata = new ProjectRestoreMetadata
                             {
                                 ProjectPath = projectPath,
@@ -358,13 +316,17 @@ namespace Xenko.Core.Packages
                                 ProjectStyle = ProjectStyle.PackageReference,
                                 ProjectUniqueName = projectPath,
                                 OutputPath = Path.Combine(Path.GetTempPath(), $"XenkoLauncher-{packageId}-{version.ToString()}"),
-                                OriginalTargetFrameworks = new[] { "net48" },
+                                OriginalTargetFrameworks = targetFrameworks.ToList(),
                                 ConfigFilePaths = settings.GetConfigFilePaths(),
                                 PackagesPath = installPath,
                                 Sources = SettingsUtility.GetEnabledSources(settings).ToList(),
                                 FallbackFolders = SettingsUtility.GetFallbackPackageFolders(settings).ToList()
                             },
                         };
+                        foreach (var targetFramework in targetFrameworks)
+                        {
+                            spec.TargetFrameworks.Add(new TargetFrameworkInformation { FrameworkName = NuGetFramework.Parse(targetFramework) });
+                        }
 
                         using (var context = new SourceCacheContext { MaxAge = DateTimeOffset.UtcNow })
                         {

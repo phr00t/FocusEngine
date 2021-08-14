@@ -1,29 +1,17 @@
-<Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+﻿<Project>
+  <Import Project="..\..\targets\Xenko.UnitTests.props" />
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
+    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
     <XenkoAssemblyProcessorOptions>--auto-module-initializer --serialization</XenkoAssemblyProcessorOptions>
-    <XenkoCompilerTargetsEnable Condition="'$(XenkoPackageBuild)' == 'true'">false</XenkoCompilerTargetsEnable>
-    <XenkoOutputFolder>Tests\$(AssemblyName)</XenkoOutputFolder>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Xenko.Core.Assets.Tests.TestPackage</StartupObject>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
+    <StartupObject>xunit.runner.xenko.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\core\Xenko.Core.Design.Tests\TestMemberPathBase.cs">
@@ -31,49 +19,37 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\tests\xunit.runner.xenko\xunit.runner.xenko.csproj" />
     <ProjectReference Include="..\Xenko.Core.Assets\Xenko.Core.Assets.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="data\TestPackage\SubPackage\SubPackage.xkpkg">
+    <None Include="data\TestPackage\SubPackage\SubPackage.sdpkg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <Content Include="data\TestPackage\SubFolder\TestAsset.xktest">
+    <Content Include="data\TestPackage\SubFolder\TestAsset.sdtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="data\TestPackage\TestAsset.xktest">
+    <Content Include="data\TestPackage\TestAsset.sdtest">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="data\TestPackage\TestPackageLoadingWithAssets.xkpkg">
+    <None Include="data\TestPackage\TestPackageLoadingWithAssets.sdpkg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="data\TestSerializing\TestSerializing_TestMyAssetObject_Reference.xkobj">
+    <None Include="data\TestSerializing\TestSerializing_TestMyAssetObject_Reference.sdobj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Content Include="data\TestFileVersionManager\test.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="data\TestPackage\TestRaw.xkraw">
+    <None Include="data\TestPackage\TestRaw.sdraw">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\TestBasicPackageCreateSaveLoad\TestPackage_TestBasicPackageCreateSaveLoad_Reference.xkpkg">
+    <None Include="data\TestBasicPackageCreateSaveLoad\TestPackage_TestBasicPackageCreateSaveLoad_Reference.sdpkg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Projects\CircularDeps\" />
-    <Folder Include="Projects\ComplexDeps\entity\texture\" />
-    <Folder Include="Projects\ComplexDeps\material\" />
-    <Folder Include="Projects\ComplexDeps\model\animation\" />
-    <Folder Include="Projects\EntityDeps\subfolder\" />
-    <Folder Include="Projects\MaterialDeps\subfolder\" />
-    <Folder Include="Projects\TextureDeps\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
-  </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.UnitTests.targets" />
 </Project>

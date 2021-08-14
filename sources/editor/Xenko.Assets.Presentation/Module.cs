@@ -2,7 +2,6 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System.Runtime.CompilerServices;
 using Xenko.Core.Assets.Quantum;
-using Xenko.Core;
 using Xenko.Core.Reflection;
 using Xenko.Core.Translation;
 using Xenko.Core.Translation.Providers;
@@ -16,7 +15,7 @@ namespace Xenko.Assets.Presentation
 {
     internal class Module
     {
-        [ModuleInitializer]
+        [Xenko.Core.ModuleInitializer]
         public static void Initialize()
         {
             RuntimeHelpers.RunModuleConstructor(typeof(SpriteFontAsset).Module.ModuleHandle);

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
+using Xenko.Core;
 using Xenko.Core.Annotations;
 
 namespace Xenko.Video.FFmpeg
@@ -21,11 +22,7 @@ namespace Xenko.Video.FFmpeg
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool CheckPlatformSupport()
         {
-#if (XENKO_PLATFORM_WINDOWS && !XENKO_RUNTIME_CORECLR) || XENKO_PLATFORM_ANDROID
-            return true;
-#else
-            return false;
-#endif
+            return (Platform.Type == PlatformType.Windows || Platform.Type == PlatformType.Android);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -76,25 +73,29 @@ namespace Xenko.Video.FFmpeg
             //   |---- avformat
             //   |---- avcodec
             //   |---- avutil
-#if XENKO_PLATFORM_WINDOWS
-            var type = typeof(FFmpegUtils);
-            Core.NativeLibrary.PreloadLibrary("avutil-55", type);
-            Core.NativeLibrary.PreloadLibrary("swresample-2", type);
-            Core.NativeLibrary.PreloadLibrary("avcodec-57", type);
-            Core.NativeLibrary.PreloadLibrary("avformat-57", type);
-            Core.NativeLibrary.PreloadLibrary("swscale-4", type);
-            Core.NativeLibrary.PreloadLibrary("avfilter-6", type);
-            Core.NativeLibrary.PreloadLibrary("avdevice-57", type);
-#else
-            uint version;
-            version = ffmpeg.avutil_version();
-            version = ffmpeg.swresample_version();
-            version = ffmpeg.avcodec_version();
-            version = ffmpeg.avformat_version();
-            version = ffmpeg.swscale_version();
-            version = ffmpeg.avfilter_version();
-            version = ffmpeg.avdevice_version();
-#endif
+            if (Platform.Type == PlatformType.Windows)
+            {
+                var type = typeof(FFmpegUtils);
+                NativeLibraryHelper.PreloadLibrary("avutil-55", type);
+                NativeLibraryHelper.PreloadLibrary("swresample-2", type);
+                NativeLibraryHelper.PreloadLibrary("avcodec-57", type);
+                NativeLibraryHelper.PreloadLibrary("avformat-57", type);
+                NativeLibraryHelper.PreloadLibrary("swscale-4", type);
+                NativeLibraryHelper.PreloadLibrary("avfilter-6", type);
+                NativeLibraryHelper.PreloadLibrary("avdevice-57", type);
+            }
+            else
+            {
+                // This is likely there for forcing dll loading (on Android?), it will need some review.
+                uint version;
+                version = ffmpeg.avutil_version();
+                version = ffmpeg.swresample_version();
+                version = ffmpeg.avcodec_version();
+                version = ffmpeg.avformat_version();
+                version = ffmpeg.swscale_version();
+                version = ffmpeg.avfilter_version();
+                version = ffmpeg.avdevice_version();
+            }
         }
 
         /// <summary>

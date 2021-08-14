@@ -50,6 +50,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Globalization;
 
 using Xenko.Core.Mathematics;
+using Half = Xenko.Core.Mathematics.Half;
 
 namespace Xenko.Core.TypeConverters
 {

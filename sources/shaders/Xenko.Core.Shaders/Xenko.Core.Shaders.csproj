@@ -1,10 +1,8 @@
 <Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
-    <XenkoRuntimeNetStandard>true</XenkoRuntimeNetStandard>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.Core.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="..\..\targets\Xenko.Core.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -13,33 +11,6 @@
     <XenkoAssemblyProcessorOptions>--serialization</XenkoAssemblyProcessorOptions>
     <XenkoBuildTags>*</XenkoBuildTags>
   </PropertyGroup>
-  <Choose>
-    <When Condition="('$(XenkoPlatform)' == 'UWP')">
-      <ItemGroup>
-        <Reference Include="CppNet">
-          <HintPath>..\..\..\deps\CppNet\Store\CppNet.dll</HintPath>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <When Condition="'$(XenkoNETRuntime)' != ''">
-      <ItemGroup>
-        <Reference Include="CppNet">
-          <HintPath>..\..\..\deps\CppNet\$(XenkoNETRuntime)\CppNet.dll</HintPath>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <Reference Include="CppNet">
-          <HintPath>..\..\..\deps\CppNet\CppNet.dll</HintPath>
-        </Reference>
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
-  <Choose>
-    <When Condition=" '$(AutoIncludeSystemAssembly)' != 'true'">
-    </When>
-  </Choose>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
@@ -69,6 +40,9 @@
     <None Include="Analysis\Hlsl\HlslDeclarations.h" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="CppNet">
+      <HintPath>..\..\..\deps\CppNet\netstandard1.3\CppNet.dll</HintPath>
+    </Reference>
     <ProjectReference Include="..\..\core\Xenko.Core\Xenko.Core.csproj" />
     <ProjectReference Include="..\Irony\Irony.csproj" />
   </ItemGroup>
@@ -87,13 +61,13 @@
       <LastGenOutput>VisitorGenerated.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="$(XenkoSdkTargets)" />
 
   <PropertyGroup>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeExtraAssemblies</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificBuildOutput>_XenkoIncludeExtraAssemblies;$(TargetsForTfmSpecificBuildOutput)</TargetsForTfmSpecificBuildOutput>
+
   </PropertyGroup>
-  <Target Name="IncludeExtraAssemblies">
+  <Target Name="_XenkoIncludeExtraAssemblies">
     <ItemGroup>
       <BuildOutputInPackage Include="$(OutputPath)CppNet.dll" />
     </ItemGroup>

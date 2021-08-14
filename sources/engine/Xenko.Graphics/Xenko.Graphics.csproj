@@ -3,27 +3,21 @@
     <XenkoRuntime>true</XenkoRuntime>
     <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoPlatformDependent>true</XenkoPlatformDependent>
-    <XenkoProjectPlatformDependentWindows>true</XenkoProjectPlatformDependentWindows>
     <XenkoBuildTags>*</XenkoBuildTags>
     <XenkoPackAssets>true</XenkoPackAssets>
     <DefineConstants>$(DefineConstants);XENKO_GRAPHICS_NO_DESCRIPTOR_COPIES</DefineConstants>
   </PropertyGroup>
-  <Choose>
-    <When Condition=" '$(AutoIncludeSystemAssembly)' != 'true'">
-    </When>
-  </Choose>
   <Import Condition="$(XenkoUI.Contains('SDL'))" Project="..\..\targets\SDL.targets" />
   <Choose>
     <When Condition="$(XenkoUI.Contains('SDL'))">
       <ItemGroup>
-        <XenkoNativeLib Include="$(XenkoDependenciesDir)\SDL2\$(XenkoPlatform)\**\*SDL2*">
+        <XenkoNativeLib Include="..\..\..\deps\SDL2\$(XenkoPlatformDeps)\**\*SDL2*">
           <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
           <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -31,52 +25,45 @@
       </ItemGroup>
     </When>
   </Choose>
-  <ItemGroup Condition=" '$(XenkoPlatform)' == 'macOS' Or '$(XenkoGraphicsApi)' == 'Vulkan' ">
-    <XenkoNativeLib Include="$(XenkoDependenciesDir)\MoltenVK\$(XenkoPlatform)\**\*.*">
+  <ItemGroup Condition=" '$(XenkoGraphicsApi)' == 'Vulkan' ">
+    <XenkoNativeLib Include="..\..\..\deps\MoltenVK\$(XenkoPlatformDeps)\**\*.*">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
       <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </XenkoNativeLib>
   </ItemGroup>
   <ItemGroup>
-    <XenkoNativeLib Include="$(XenkoDependenciesDir)\freetype\$(XenkoPlatform)\**\*.*">
+    <XenkoNativeLib Include="..\..\..\deps\freetype\$(XenkoPlatformDeps)\**\*.*">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
       <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </XenkoNativeLib>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(XenkoPlatform)' == 'iOS' Or '$(XenkoPlatform)' == 'Linux'">
-    <Reference Include="SharpFont">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(XenkoDependenciesDir)SharpFont\$(XenkoPlatform)\SharpFont.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(XenkoPlatform)' != 'iOS' And '$(XenkoPlatform)' != 'Linux'">
-    <Reference Include="SharpFont">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(XenkoDependenciesDir)SharpFont\Portable\SharpFont.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
+    <None Include="build\**\*.targets" PackagePath="build\" Pack="true" />
+    <None Include="build\**\*.targets" PackagePath="buildTransitive\" Pack="true" />
+    <None Include="..\..\targets\Xenko.GraphicsApi.PackageReference.targets" PackagePath="build\" Pack="true" />
+    <None Include="..\..\targets\Xenko.GraphicsApi.PackageReference.targets" PackagePath="buildTransitive\" Pack="true" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\core\Xenko.Core.Tasks\Xenko.Core.Tasks.csproj">
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <GlobalPropertiesToRemove>TargetFramework;XenkoGraphicsApi</GlobalPropertiesToRemove>
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+    </ProjectReference>
     <ProjectReference Include="..\Xenko.Native\Xenko.Native.csproj" />
     <ProjectReference Include="..\Xenko.Shaders\Xenko.Shaders.csproj" />
     <ProjectReference Include="..\Xenko\Xenko.csproj" />
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'UWP'" />
+    <PackageReference Include="SharpDX.Direct3D12" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
     <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'UWP'" />
-    <PackageReference Include="Vortice.Vulkan" Version="1.2.170.2" />
-    <PackageReference Include="Vortice.Mathematics" Version="1.3.20" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Shaders\ShaderBaseStream.xksl.cs">
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-    </Compile>
+    <PackageReference Include="Vortice.Vulkan" Version="1.2.167" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'Linux' Or '$(XenkoPlatform)' == 'macOS'" />
+    <PackageReference Include="Stride.OpenTK" Version="1.0.3" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'Linux' Or '$(XenkoPlatform)' == 'iOS' Or '$(XenkoPlatform)' == 'Android'" />
+    <PackageReference Include="Stride.SharpFont" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="FrameworkResources.resx">
@@ -85,21 +72,15 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <None Update="Shaders\ShaderBaseStream.xksl">
-      <LastGenOutput>ShaderBaseStream.xksl.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
   <Import Project="..\Xenko.Shared\Refactor\Xenko.Refactor.projitems" Label="Shared" />
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 
   <PropertyGroup>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeExtraAssemblies</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificBuildOutput>_XenkoIncludeExtraAssemblies;$(TargetsForTfmSpecificBuildOutput)</TargetsForTfmSpecificBuildOutput>
+
   </PropertyGroup>
-  <Target Name="IncludeExtraAssemblies">
+  <Target Name="_XenkoIncludeExtraAssemblies">
     <ItemGroup>
-      <BuildOutputInPackage Include="$(OutputPath)SharpFont.dll" />
       <BuildOutputInPackage Include="$(OutputPath)SDL2-CS.dll" Condition="$(XenkoUI.Contains('SDL'))" />
     </ItemGroup>
   </Target>

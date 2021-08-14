@@ -32,7 +32,7 @@ namespace Xenko.VisualStudio.Shaders
                 return ".cs";
             }
 
-            return ".xksl.cs";
+            return ".sdsl.cs";
         }
 
         protected override byte[] GenerateCode(string inputFileName, string inputFileContent)
@@ -49,7 +49,7 @@ namespace Xenko.VisualStudio.Shaders
             {
                 GeneratorError(4, ex.ToString(), 0, 0);
 
-                return new byte[0];
+                return null;
             }
         }
     }

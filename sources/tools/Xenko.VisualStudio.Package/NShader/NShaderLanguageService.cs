@@ -1,4 +1,4 @@
-﻿#region Header Licence
+#region Header Licence
 //  ---------------------------------------------------------------------
 // 
 //  Copyright (c) 2009 Alexandre Mutel and Microsoft Corporation.  
@@ -39,6 +39,7 @@ using VsShell = Microsoft.VisualStudio.Shell.VsShellUtilities;
 using Task = System.Threading.Tasks.Task;
 using EnvDTE;
 using Xenko.VisualStudio;
+using Xenko.VisualStudio.Commands.Shaders;
 
 namespace NShader
 {

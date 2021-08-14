@@ -1,25 +1,17 @@
 ﻿<Project>
-  <Import Project="..\..\targets\Xenko.Core.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.Core.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <XenkoBuildTags>WindowsTools</XenkoBuildTags>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoAssemblyProcessorOptions>--auto-module-initializer</XenkoAssemblyProcessorOptions>
+    <UseWPF>true</UseWPF>
+    <EnableDefaultPageItems>false</EnableDefaultPageItems>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.WindowsAPICodePack">
-      <HintPath>..\..\..\deps\WindowsAPICodePack\Microsoft.WindowsAPICodePack.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAPICodePack.Shell">
-      <HintPath>..\..\..\deps\WindowsAPICodePack\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
-    </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="WindowsBase" />
+    <PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
@@ -29,12 +21,12 @@
   <ItemGroup>
     <ProjectReference Include="..\Xenko.Core.Presentation\Xenko.Core.Presentation.csproj" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
   <PropertyGroup>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeExtraAssemblies</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificBuildOutput>_XenkoIncludeExtraAssemblies;$(TargetsForTfmSpecificBuildOutput)</TargetsForTfmSpecificBuildOutput>
+
   </PropertyGroup>
-  <Target Name="IncludeExtraAssemblies">
+  <Target Name="_XenkoIncludeExtraAssemblies">
     <ItemGroup>
       <BuildOutputInPackage Include="$(OutputPath)Microsoft.WindowsAPICodePack*.dll" />
     </ItemGroup>

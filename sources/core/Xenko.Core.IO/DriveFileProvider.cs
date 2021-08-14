@@ -27,9 +27,7 @@ namespace Xenko.Core.IO
         /// <exception cref="System.InvalidOperationException"></exception>
         public string GetLocalPath(string filePath)
         {
-#if !NETFX_CORE
             filePath = Path.GetFullPath(filePath);
-#endif
 
             var resolveProviderResult = VirtualFileSystem.ResolveProvider(RootPath, true);
             var provider = resolveProviderResult.Provider as DriveFileProvider;

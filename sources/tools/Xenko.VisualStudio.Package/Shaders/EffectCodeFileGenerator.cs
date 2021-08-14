@@ -24,7 +24,7 @@ namespace Xenko.VisualStudio.Shaders
 
         protected override string GetDefaultExtension()
         {
-            return ".xkfx.cs";
+            return ".sdfx.cs";
         }
 
         protected override byte[] GenerateCode(string inputFileName, string inputFileContent)
@@ -42,7 +42,7 @@ namespace Xenko.VisualStudio.Shaders
             {
                 GeneratorError(4, ex.ToString(), 0, 0);
 
-                return new byte[0];
+                return null;
             }
         }
     }

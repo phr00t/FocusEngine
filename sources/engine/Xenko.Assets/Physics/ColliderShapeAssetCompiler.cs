@@ -25,7 +25,7 @@ namespace Xenko.Assets.Physics {
     [AssetCompiler(typeof(ColliderShapeAsset), typeof(AssetCompilationContext))]
     internal class ColliderShapeAssetCompiler : AssetCompilerBase {
         static ColliderShapeAssetCompiler() {
-            NativeLibrary.PreloadLibrary("VHACD.dll", typeof(ColliderShapeAssetCompiler));
+            NativeLibraryHelper.PreloadLibrary("VHACD.dll", typeof(ColliderShapeAssetCompiler));
         }
 
         public override IEnumerable<BuildDependencyInfo> GetInputTypes(AssetItem assetItem) {

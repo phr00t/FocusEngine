@@ -1,11 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
     <XenkoNativeOutputName>libxenkoaudio</XenkoNativeOutputName>
     <XenkoRuntime>true</XenkoRuntime>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -18,10 +17,6 @@
     <!-- <DefineConstants>XENKO_VIDEO_FFMPEG;$(DefineConstants)</DefineConstants> -->
     <DefineConstants>XENKO_VIDEO_MEDIACODEC;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
-  <Choose>
-    <When Condition=" '$(AutoIncludeSystemAssembly)' != 'true'">
-    </When>
-  </Choose>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
@@ -47,19 +42,9 @@
   <ItemGroup>
     <None Include="Native\OpenSLES.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Native\XAudio2.cpp" />
+  </ItemGroup>
   <ItemGroup />
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
-  <Choose>
-    <When Condition=" '$(XenkoPlatform)' == 'Windows'">
-      <ItemGroup>
-        <XenkoNativeLib Include="$(XenkoDependenciesDir)\OpenAL\Windows\*.dll">
-          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-          <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </XenkoNativeLib>
-      </ItemGroup>
-    </When>
-  </Choose>
-
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

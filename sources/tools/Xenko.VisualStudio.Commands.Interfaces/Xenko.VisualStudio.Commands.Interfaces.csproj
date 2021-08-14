@@ -1,0 +1,15 @@
+<Project>
+  <Import Project="..\..\targets\Xenko.props" />
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;net472</TargetFrameworks>
+    <RootNamespace>Xenko.VisualStudio.Commands</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="ServiceWire" Version="5.3.4" />
+  </ItemGroup>
+
+  <Import Project="$(XenkoSdkTargets)" />
+</Project>

@@ -24,7 +24,7 @@ using System.Windows.Markup;
 //the line below to match the UICulture setting in the project file.
 
 //[assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.Satellite)]
-[assembly: InternalsVisibleTo("Focus.GameStudio")]
+[assembly: InternalsVisibleTo("Xenko.GameStudio")]
 [assembly: InternalsVisibleTo("Xenko.Core.Assets.Editor.Tests")]
 
 [assembly: ThemeInfo(

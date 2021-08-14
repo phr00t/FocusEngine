@@ -1,13 +1,10 @@
 ﻿<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
-    <XenkoRuntimeNetStandard>true</XenkoRuntimeNetStandard>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
-    <XenkoPlatformDependent>true</XenkoPlatformDependent>
     <XenkoBuildTags>*</XenkoBuildTags>
     <XenkoPackAssets>true</XenkoPackAssets>
   </PropertyGroup>
@@ -27,30 +24,5 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Rendering\Core\NormalFromNormalMappingNoTangent.xksl.cs">
-      <DependentUpon>%(Filename)</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Rendering\Materials\Shaders\FogFeature.xksl.cs">
-      <DesignTime>True</DesignTime>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-    </Compile>
-    <Compile Update="Rendering\Skyboxes\SkyboxShaderTextureHorizon.xksl.cs">
-      <DependentUpon>SkyboxShaderTextureHorizon.xksl</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Rendering\Core\NormalFromNormalMappingNoTangent.xksl">
-      <LastGenOutput>NormalFromNormalMappingNoTangent.xksl.cs</LastGenOutput>
-    </None>
-    <None Update="Rendering\Materials\Shaders\FogFeature.xksl">
-      <LastGenOutput>FogFeature.xksl.cs</LastGenOutput>
-    </None>
-  </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

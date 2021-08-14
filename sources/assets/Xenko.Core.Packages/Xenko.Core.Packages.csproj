@@ -1,19 +1,15 @@
 <Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoAssemblyProcessorOptions>--auto-module-initializer --serialization</XenkoAssemblyProcessorOptions>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NuGet.Protocol" Version="5.8.0" />
-    <PackageReference Include="NuGet.PackageManagement" Version="5.8.0" />
+    <PackageReference Include="Stride.NuGet.PackageManagement" Version="5.8.0" />
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
@@ -37,6 +33,5 @@
       <LastGenOutput>TargetGenerator.cs</LastGenOutput>
     </None>
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

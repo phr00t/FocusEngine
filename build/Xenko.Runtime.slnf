@@ -1,0 +1,36 @@
+{
+  "solution": {
+    "path": "Xenko.sln",
+    "projects": [
+      "..\\sources\\core\\Xenko.Core.IO\\Xenko.Core.IO.csproj",
+      "..\\sources\\core\\Xenko.Core.Mathematics\\Xenko.Core.Mathematics.csproj",
+      "..\\sources\\core\\Xenko.Core.MicroThreading\\Xenko.Core.MicroThreading.csproj",
+      "..\\sources\\core\\Xenko.Core.Serialization\\Xenko.Core.Serialization.csproj",
+      "..\\sources\\core\\Xenko.Core.Tasks\\Xenko.Core.Tasks.csproj",
+      "..\\sources\\core\\Xenko.Core\\Xenko.Core.csproj",
+      "..\\sources\\engine\\Xenko.Audio\\Xenko.Audio.csproj",
+      "..\\sources\\engine\\Xenko.Engine\\Xenko.Engine.csproj",
+      "..\\sources\\engine\\Xenko.Games\\Xenko.Games.csproj",
+      "..\\sources\\engine\\Xenko.Graphics\\Xenko.Graphics.csproj",
+      "..\\sources\\engine\\Xenko.Input\\Xenko.Input.csproj",
+      "..\\sources\\engine\\Xenko.Native\\Xenko.Native.csproj",
+      "..\\sources\\engine\\Xenko.Navigation\\Xenko.Navigation.csproj",
+      "..\\sources\\engine\\Xenko.Particles\\Xenko.Particles.csproj",
+      "..\\sources\\engine\\Xenko.Physics\\Xenko.Physics.csproj",
+      "..\\sources\\engine\\Xenko.Rendering\\Xenko.Rendering.csproj",
+      "..\\sources\\engine\\Xenko.Shaders.Compiler\\Xenko.Shaders.Compiler.csproj",
+      "..\\sources\\engine\\Xenko.Shaders.Parser\\Xenko.Shaders.Parser.csproj",
+      "..\\sources\\engine\\Xenko.Shaders\\Xenko.Shaders.csproj",
+      "..\\sources\\engine\\Xenko.Shared\\Refactor\\Xenko.Refactor.shproj",
+      "..\\sources\\engine\\Xenko.SpriteStudio.Runtime\\Xenko.SpriteStudio.Runtime.csproj",
+      "..\\sources\\engine\\Xenko.UI\\Xenko.UI.csproj",
+      "..\\sources\\engine\\Xenko.Video\\Xenko.Video.csproj",
+      "..\\sources\\engine\\Xenko.VirtualReality\\Xenko.VirtualReality.csproj",
+      "..\\sources\\engine\\Xenko.Voxels\\Xenko.Voxels.csproj",
+      "..\\sources\\engine\\Xenko\\Xenko.csproj",
+      "..\\sources\\shaders\\Irony\\Irony.csproj",
+      "..\\sources\\shaders\\Xenko.Core.Shaders\\Xenko.Core.Shaders.csproj",
+      "..\\sources\\shared\\Xenko.Core.ShellHelper\\Xenko.Core.ShellHelper.shproj"
+    ]
+  }
+}

@@ -1,12 +1,11 @@
-<Project>
+﻿<Project>
 
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
     <XenkoRuntimeNetStandardNoRuntimeIdentifiers>true</XenkoRuntimeNetStandardNoRuntimeIdentifiers>
   </PropertyGroup>
 
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
 
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
@@ -27,11 +26,6 @@
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <None Include="runtime.json" Pack="true" PackagePath="/">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>runtime.tt</DependentUpon>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -46,14 +40,6 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="runtime.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>runtime.json</LastGenOutput>
-    </None>
-  </ItemGroup>
-
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 
 </Project>

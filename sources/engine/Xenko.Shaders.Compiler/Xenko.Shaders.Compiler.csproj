@@ -1,10 +1,8 @@
 ﻿<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
-    <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <XenkoBuildTags>*</XenkoBuildTags>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
@@ -23,26 +21,18 @@
     <ProjectReference Include="..\Xenko.Shaders.Parser\Xenko.Shaders.Parser.csproj" />
     <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'UWP'" />
   </ItemGroup>
-  <ItemGroup Condition="'$(XenkoPlatform)' == 'Windows'">
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net'))">
     <XenkoNativeLib Include="$(WindowsSdkDir_10)\Redist\D3D\**\d3dcompiler_47.dll">
-      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+      <Link>win-%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <RelativePath>win-%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </XenkoNativeLib>
-    <XenkoContent Include="..\..\..\deps\glslang\Windows\glslangValidator.exe">
-      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-      <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </XenkoContent>
-  </ItemGroup>
-  <ItemGroup Condition="('$(XenkoPlatform)' == 'Linux' Or '$(XenkoPlatform)' == 'macOS') And '$(XenkoGraphicsApi)' == 'Vulkan'">
-    <XenkoContent Include="..\..\..\deps\glslang\$(XenkoPlatform)\glslangValidator">
+    <XenkoContent Include="..\..\..\deps\glslang\**\glslangValidator*.*">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
       <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </XenkoContent>
   </ItemGroup>
   <Import Project="..\..\shared\Xenko.Core.ShellHelper\Xenko.Core.ShellHelper.projitems" Label="Shared" />
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

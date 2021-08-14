@@ -92,10 +92,10 @@ namespace Xenko.Core.Tasks
                             }
                             return 1;
                         }
-                        foreach (var generatedItem in generatedItems)
+                        /*foreach (var generatedItem in generatedItems)
                         {
                             Console.WriteLine($"{generatedItem.SourcePath}|{generatedItem.PackagePath}");
-                        }
+                        }*/
                         break;
                     }
                 }

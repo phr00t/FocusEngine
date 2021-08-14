@@ -13,7 +13,7 @@ using System.Windows;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("361bd08b-e0a3-44f3-839a-d10a7089f7d0")]
 
-[assembly: InternalsVisibleTo("Focus.GameStudio" + Xenko.PublicKeys.Default)]
+[assembly: InternalsVisibleTo("Xenko.GameStudio" + Xenko.PublicKeys.Default)]
 
 [assembly: ThemeInfo(
     ResourceDictionaryLocation.None, //where theme specific resource dictionaries are located

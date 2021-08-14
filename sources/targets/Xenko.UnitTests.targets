@@ -1,11 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" TreatAsLocalProperty="XenkoGraphicsApis">
+  <!--Import Unit Tests Local Settings for the solution being loaded -->
+  <Import Project="$(SolutionDir)$(SolutionName).UnitTests.Build.targets" Condition="Exists('$(SolutionDir)$(SolutionName).UnitTests.Build.targets')" />
+
+  <!-- Setup GraphicsApi (we do it even if XenkoGraphicsApiDependent is not set to true, so that ProjectReference works) -->
   <PropertyGroup>
-    <!-- Do not compile unit test when packaging -->
+    <IsTestProject>true</IsTestProject>
+    <!-- Check if we have override -->
+    <XenkoGraphicsApis Condition="'$(XenkoGraphicsApisTest)' != ''">$(XenkoGraphicsApisTest)</XenkoGraphicsApis>
+    
+    <!-- Build list of Graphics API for platform that supports multiple -->
+    <XenkoGraphicsApis Condition="'$(XenkoPlatform)' == 'Windows' And '$(XenkoGraphicsApiDependentBuildAll)' == 'true'">Direct3D11;Direct3D12;OpenGL;OpenGLES;Vulkan</XenkoGraphicsApis>
+    <XenkoGraphicsApis Condition="'$(XenkoPlatform)' == 'Windows' And '$(XenkoGraphicsApis)' == ''">Direct3D11</XenkoGraphicsApis>
+  
+    <!-- Setup default GraphicsApi-->
+    <XenkoGraphicsApi Condition="'$(XenkoGraphicsApi)' == '' And '$(XenkoGraphicsApis)' != ''">$(XenkoGraphicsApis.Split(';', StringSplitOptions.RemoveEmptyEntries)[0])</XenkoGraphicsApi>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(XenkoCompileAssets)' == 'true' And '$(XenkoCompilerTargetsEnable)' != 'false'">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)..\assets\Xenko.Core.Assets.CompilerApp\Xenko.Core.Assets.CompilerApp.csproj">
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <GlobalPropertiesToRemove>TargetFramework</GlobalPropertiesToRemove>
+      <SkipGetTargetFrameworkProperties>true</SkipGetTargetFrameworkProperties>
+    </ProjectReference>
+  </ItemGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)Xenko.PackageVersion.targets"/>
+
+  <PropertyGroup>
+  <!-- Do not compile unit test when packaging -->
     <XenkoCompilerTargetsEnable Condition="'$(XenkoSkipUnitTests)' == 'true'">false</XenkoCompilerTargetsEnable>
     <XenkoCompilerTargetsEnable Condition="'$(XenkoPackageBuild)' == 'true'">false</XenkoCompilerTargetsEnable>
-    
-    <XenkoUnitTest>true</XenkoUnitTest>
+
     <XenkoCommonDependenciesDir></XenkoCommonDependenciesDir>
 
     <!-- Unit tests are executables (execute asset compiler, embed native libraries, etc... -->
@@ -16,23 +43,28 @@
          However, that means that Tests dependencies must be compiled properly on Windows (should be the case usually).
     -->
     <XenkoCompileAssetOptions>--compile-property:BuildProjectReferences=false</XenkoCompileAssetOptions>
-
-    <!-- Workaround for solution dependencies with incompatible frameworks: https://github.com/Microsoft/msbuild/issues/2661#issuecomment-338808156 -->
-    <AddSyntheticProjectReferencesForSolutionDependencies>false</AddSyntheticProjectReferencesForSolutionDependencies>
-
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <XenkoCommonDependenciesDir>$(XenkoPackageXenko)\deps\</XenkoCommonDependenciesDir>
   </PropertyGroup>
 
-  <!-- Override graphics platform (no need to get it from game settings asset) -->
-  <Target Name="XenkoGetGraphicsPlatform">
-    <!-- Do nothing for XenkoGraphicsApi, keep it as set by locals target -->
-    <PropertyGroup>
-      <XenkoCompileAssetOptions>$(XenkoCompileAssetOptions) --property:XenkoGraphicsApi=$(XenkoGraphicsApi)</XenkoCompileAssetOptions>
-    </PropertyGroup>
-  </Target>
+  <PropertyGroup Condition="'$(XenkoGraphicsApiDependent)' != 'true'">
+    <OutputPath>$(MSBuildThisFileDirectory)..\..\bin\Tests\$(AssemblyName)\$(XenkoPlatform)\</OutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(XenkoPlatform)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(XenkoGraphicsApiDependent)' == 'true'">
+    <OutputPath>$(MSBuildThisFileDirectory)..\..\bin\Tests\$(AssemblyName)\$(XenkoPlatform)\$(XenkoGraphicsApi)\</OutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(XenkoPlatform)-$(XenkoGraphicsApi)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(XenkoPlatform)' == 'Windows'">
+    <StartupObject>xunit.runner.xenko.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(XenkoPlatform)' == 'Windows'">
+    <Compile Condition="'$(XenkoGraphicsApiDependent)' != 'true'" Include="$(MSBuildThisFileDirectory)..\shared\tests\xunit\LauncherSimple.Windows.cs">
+      <Link>LauncherSimple.Windows.cs</Link>
+    </Compile>
+    <Compile Condition="'$(XenkoGraphicsApiDependent)' == 'true'" Include="$(MSBuildThisFileDirectory)..\shared\tests\xunit\LauncherSimple.Windows.cs">
+      <Link>LauncherGame.Windows.cs</Link>
+    </Compile>
+  </ItemGroup>
 
   <!-- Used by Xenko.build to detect if unit tests prefer to run in 32 or 64 bits -->
   <Target Name="_XenkoAfterGetTargetPathWithTargetPlatformMoniker" AfterTargets="GetTargetPathWithTargetPlatformMoniker">
@@ -50,4 +82,22 @@
     <Compile Update="**\*.xkfx.cs" DependentUpon="%(Filename)" />
     <None Update="**\*.xkfx" Generator="XenkoEffectCodeGenerator" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TeamCity.VSTest.TestAdapter" Version="1.0.23" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+  </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+  <Import Condition="'$(IsCrossTargetingBuild)' == 'true'" Project="$(MSBuildThisFileDirectory)Xenko.UnitTests.CrossTargeting.targets"/>
+
+  <!-- Add Default targets used by Msbuild for undefined Platforms / or when skipping compilation under a platform -->
+  <Import Condition="'$(XenkoCompilerTargetsEnable)' == 'false'" Project="$(MSBuildThisFileDirectory)Xenko.UnitTests.DisableBuild.targets"/>
+
+  <!-- This needs to be after Sdk.targets -->
+  <Import Project="$(MSBuildThisFileDirectory)..\core\Xenko.Core\build\Xenko.Core.targets"/>
+  <Import Project="$(MSBuildThisFileDirectory)Xenko.GraphicsApi.PackageReference.targets"/>
+  <Import Project="$(MSBuildThisFileDirectory)Xenko.GraphicsApi.Dev.targets"/>
+  <Import Condition="'$(XenkoCompileAssets)' == 'true' And '$(XenkoCompilerTargetsEnable)' != 'false'" Project="$(MSBuildThisFileDirectory)..\assets\Xenko.Core.Assets.CompilerApp\build\Xenko.Core.Assets.CompilerApp.targets"/>
+
 </Project>

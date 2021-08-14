@@ -65,14 +65,14 @@ namespace Xenko.VisualStudio
     [ProvideLanguageExtensionAttribute(typeof(NShaderLanguageService), NShaderSupportedExtensions.Xenko_Shader)]
     [ProvideLanguageExtensionAttribute(typeof(NShaderLanguageService), NShaderSupportedExtensions.Xenko_Effect)]
     // Xenko C# Effect Code Generator
-    [CodeGeneratorRegistration(typeof(EffectCodeFileGenerator), EffectCodeFileGenerator.InternalName, GuidList.vsContextGuidVCSProject, GeneratorRegKeyName = ".xkfx")]
+    [CodeGeneratorRegistration(typeof(EffectCodeFileGenerator), EffectCodeFileGenerator.InternalName, GuidList.vsContextGuidVCSProject, GeneratorRegKeyName = ".sdfx")]
     [CodeGeneratorRegistration(typeof(EffectCodeFileGenerator), EffectCodeFileGenerator.DisplayName, GuidList.vsContextGuidVCSProject, GeneratorRegKeyName = EffectCodeFileGenerator.InternalName, GeneratesDesignTimeSource = true, GeneratesSharedDesignTimeSource = true)]
-    [CodeGeneratorRegistration(typeof(EffectCodeFileGenerator), EffectCodeFileGenerator.InternalName, GuidList.vsContextGuidVCSNewProject, GeneratorRegKeyName = ".xkfx")]
+    [CodeGeneratorRegistration(typeof(EffectCodeFileGenerator), EffectCodeFileGenerator.InternalName, GuidList.vsContextGuidVCSNewProject, GeneratorRegKeyName = ".sdfx")]
     [CodeGeneratorRegistration(typeof(EffectCodeFileGenerator), EffectCodeFileGenerator.DisplayName, GuidList.vsContextGuidVCSNewProject, GeneratorRegKeyName = EffectCodeFileGenerator.InternalName, GeneratesDesignTimeSource = true, GeneratesSharedDesignTimeSource = true)]
     // Xenko C# Shader Key Generator
-    [CodeGeneratorRegistration(typeof(ShaderKeyFileGenerator), ShaderKeyFileGenerator.InternalName, GuidList.vsContextGuidVCSProject, GeneratorRegKeyName = ".xksl")]
+    [CodeGeneratorRegistration(typeof(ShaderKeyFileGenerator), ShaderKeyFileGenerator.InternalName, GuidList.vsContextGuidVCSProject, GeneratorRegKeyName = ".sdsl")]
     [CodeGeneratorRegistration(typeof(ShaderKeyFileGenerator), ShaderKeyFileGenerator.DisplayName, GuidList.vsContextGuidVCSProject, GeneratorRegKeyName = ShaderKeyFileGenerator.InternalName, GeneratesDesignTimeSource = true, GeneratesSharedDesignTimeSource = true)]
-    [CodeGeneratorRegistration(typeof(ShaderKeyFileGenerator), ShaderKeyFileGenerator.InternalName, GuidList.vsContextGuidVCSNewProject, GeneratorRegKeyName = ".xksl")]
+    [CodeGeneratorRegistration(typeof(ShaderKeyFileGenerator), ShaderKeyFileGenerator.InternalName, GuidList.vsContextGuidVCSNewProject, GeneratorRegKeyName = ".sdsl")]
     [CodeGeneratorRegistration(typeof(ShaderKeyFileGenerator), ShaderKeyFileGenerator.DisplayName, GuidList.vsContextGuidVCSNewProject, GeneratorRegKeyName = ShaderKeyFileGenerator.InternalName, GeneratesDesignTimeSource = true, GeneratesSharedDesignTimeSource = true)]
     // Temporarily force load for easier debugging
     [ProvideMenuResource("Menus.ctmenu", 1)]
@@ -86,8 +86,6 @@ namespace Xenko.VisualStudio
         private bool configurationLock;
 
         private DTE2 dte2;
-        private AppDomain buildMonitorDomain;
-        private BuildLogPipeGenerator buildLogPipeGenerator;
         private SolutionEventsListener solutionEventsListener;
         private ErrorListProvider errorListProvider;
         private uint m_componentID;
@@ -322,6 +320,8 @@ namespace Xenko.VisualStudio
         {
             // Disable UIContext (this will hide Xenko menus)
             UpdateCommandVisibilityContext(false);
+
+            XenkoCommandsProxy.CloseSolution();
         }
 
         private async System.Threading.Tasks.Task InitializeCommandProxy()
@@ -330,84 +330,71 @@ namespace Xenko.VisualStudio
             var dte = (DTE)GetService(typeof(DTE));
             var solutionPath = dte.Solution.FullName;
 
-            var xenkoPackageInfo = await XenkoCommandsProxy.FindXenkoSdkDir(solutionPath);
-            if (xenkoPackageInfo.LoadedVersion == null)
-                return;
-            XenkoCommandsProxy.InitializeFromSolution(solutionPath, xenkoPackageInfo);
-
             // Get General Output pane (for error logging)
             var generalOutputPane = GetGeneralOutputPane();
 
-            // Enable UIContext depending on wheter it is a Xenko project. This will show or hide Xenko menus.
-            var isXenkoSolution = xenkoPackageInfo.LoadedVersion != null;
-            UpdateCommandVisibilityContext(isXenkoSolution);
-
-            // If a package is associated with the solution, check if the correct version was found
-            if (xenkoPackageInfo.ExpectedVersion != null && xenkoPackageInfo.ExpectedVersion != xenkoPackageInfo.LoadedVersion)
-            {
-                if (xenkoPackageInfo.ExpectedVersion < XenkoCommandsProxy.MinimumVersion)
-                {
-                    // The package version is deprecated
-                    generalOutputPane.OutputStringThreadSafe($"Could not initialize Xenko extension for package with version {xenkoPackageInfo.ExpectedVersion}. Versions earlier than {XenkoCommandsProxy.MinimumVersion} are not supported. Loading latest version {xenkoPackageInfo.LoadedVersion} instead.\r\n");
-                    generalOutputPane.Activate();
-                }
-                else if (xenkoPackageInfo.LoadedVersion == null)
-                {
-                    // No version found
-                    generalOutputPane.OutputStringThreadSafe("Could not find Xenko SDK directory.");
-                    generalOutputPane.Activate();
-
-                    // Don't try to create any services
-                    return;
-                }
-                else
-                {
-                    // The package version was not found
-                    generalOutputPane.OutputStringThreadSafe($"Could not find SDK directory for Xenko version {xenkoPackageInfo.ExpectedVersion}. Loading latest version {xenkoPackageInfo.LoadedVersion} instead.\r\n");
-                    generalOutputPane.Activate();
-                }
-            }
-
-            // Initialize the build monitor, that will display BuildEngine results in the Build Output pane.
-            buildLogPipeGenerator = new BuildLogPipeGenerator(this);
-
             try
             {
-                // Start PackageBuildMonitorRemote in a separate app domain
-                if (buildMonitorDomain != null)
-                    AppDomain.Unload(buildMonitorDomain);
+                XenkoCommandsProxy.SetSolution(solutionPath);
+                var xenkoPackageInfo = await XenkoCommandsProxy.FindXenkoSdkDir(solutionPath);
+                XenkoCommandsProxy.SetPackageInfo(xenkoPackageInfo);
+                if (xenkoPackageInfo.LoadedVersion == null)
+                    return;
 
-                buildMonitorDomain = XenkoCommandsProxy.CreateXenkoDomain();
-                XenkoCommandsProxy.InitializeFromSolution(solutionPath, xenkoPackageInfo, buildMonitorDomain);
-                var remoteCommands = XenkoCommandsProxy.CreateProxy(buildMonitorDomain);
-                remoteCommands.StartRemoteBuildLogServer(new BuildMonitorCallback(), buildLogPipeGenerator.LogPipeUrl);
+                // Enable UIContext depending on wheter it is a Xenko project. This will show or hide Xenko menus.
+                var isXenkoSolution = xenkoPackageInfo.LoadedVersion != null;
+                UpdateCommandVisibilityContext(isXenkoSolution);
+
+                // If a package is associated with the solution, check if the correct version was found
+                if (xenkoPackageInfo.ExpectedVersion != null && xenkoPackageInfo.ExpectedVersion != xenkoPackageInfo.LoadedVersion)
+                {
+                    if (xenkoPackageInfo.ExpectedVersion < XenkoCommandsProxy.MinimumVersion)
+                    {
+                        // The package version is deprecated
+                        generalOutputPane.OutputStringThreadSafe($"Could not initialize Xenko extension for package with version {xenkoPackageInfo.ExpectedVersion}. Versions earlier than {XenkoCommandsProxy.MinimumVersion} are not supported. Loading latest version {xenkoPackageInfo.LoadedVersion} instead.\r\n");
+                        generalOutputPane.Activate();
+                    }
+                    else if (xenkoPackageInfo.LoadedVersion == null)
+                    {
+                        // No version found
+                        generalOutputPane.OutputStringThreadSafe("Could not find Xenko SDK directory.");
+                        generalOutputPane.Activate();
+
+                        // Don't try to create any services
+                        return;
+                    }
+                    else
+                    {
+                        // The package version was not found
+                        generalOutputPane.OutputStringThreadSafe($"Could not find SDK directory for Xenko version {xenkoPackageInfo.ExpectedVersion}. Loading latest version {xenkoPackageInfo.LoadedVersion} instead.\r\n");
+                        generalOutputPane.Activate();
+                    }
+                }
+
+                // Preinitialize the parser in a separate thread
+                var thread = new System.Threading.Thread(
+                    () =>
+                    {
+                        try
+                        {
+                            XenkoCommandsProxy.GetProxy();
+                        }
+                        catch (Exception ex)
+                        {
+                            generalOutputPane.OutputStringThreadSafe($"Error Initializing Xenko Language Service: {ex.InnerException ?? ex}\r\n");
+                            generalOutputPane.Activate();
+                        }
+                    });
+                thread.Start();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                generalOutputPane.OutputStringThreadSafe($"Error loading Xenko SDK: {e}\r\n");
+                // Do not crash VS Plugin if something fails
+                generalOutputPane.OutputStringThreadSafe($"Error initializing Xenko command proxy: {ex}\r\n");
                 generalOutputPane.Activate();
 
-                // Unload domain right away
-                AppDomain.Unload(buildMonitorDomain);
-                buildMonitorDomain = null;
+                return;
             }
-
-            // Preinitialize the parser in a separate thread
-            var thread = new System.Threading.Thread(
-                () =>
-                {
-                    try
-                    {
-                        XenkoCommandsProxy.GetProxy();
-                    }
-                    catch (Exception ex)
-                    {
-                        generalOutputPane.OutputStringThreadSafe($"Error Initializing Xenko Language Service: {ex.InnerException ?? ex}\r\n");
-                        generalOutputPane.Activate();
-                        errorListProvider?.Tasks.Add(new ErrorTask(ex.InnerException ?? ex));
-                    }
-                });
-            thread.Start();
         }
 
         private void UpdateCommandVisibilityContext(bool enabled)
@@ -421,10 +408,6 @@ namespace Xenko.VisualStudio
 
         protected override void Dispose(bool disposing)
         {
-            // Unload build monitor pipe domain
-            if (buildMonitorDomain != null)
-                AppDomain.Unload(buildMonitorDomain);
-
             if (m_componentID != 0)
             {
                 IOleComponentManager mgr = GetService(typeof(SOleComponentManager))

@@ -1,11 +1,10 @@
 ﻿<Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <TargetFramework>net40</TargetFramework>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <XenkoBuildTags>WindowsTools</XenkoBuildTags>
   </PropertyGroup>
   <ItemGroup>
@@ -30,11 +29,9 @@
     <Reference Include="MonoDevelop.Ide">
       <HintPath>$(ProgramFiles)\Xamarin Studio\bin\MonoDevelop.Ide.dll</HintPath>
     </Reference>
-    <Reference Include="System.Data.DataSetExtensions" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Manifest.addin.xml" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

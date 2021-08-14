@@ -1,10 +1,9 @@
 ﻿<Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <XenkoAssemblyProcessor>false</XenkoAssemblyProcessor>
     <OutputType>Exe</OutputType>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFrameworks>$(XenkoEditorTargetFramework)</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>
@@ -17,17 +16,12 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EnvDTE" Version="8.0.2" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
+    <PackageReference Include="EnvDTE80" Version="8.0.3" />
+    <PackageReference Include="Stride.ServiceWire" Version="5.3.3" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\core\Xenko.Core\Native\NativeLibraryInternal.cs">
-      <Link>NativeLibraryInternal.cs</Link>
-    </Compile>
+    <ProjectReference Include="..\..\core\Xenko.Core\Xenko.Core.csproj" />
   </ItemGroup>
+  <Import Project="$(XenkoSdkTargets)" />
   <Import Project="..\Xenko.Core.VisualStudio\Xenko.Core.VisualStudio.projitems" Label="Shared" />
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
 </Project>

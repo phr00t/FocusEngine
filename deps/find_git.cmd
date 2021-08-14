@@ -1,4 +1,4 @@
-:: Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+:: // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 :: See LICENSE.md for full license information.
 @echo OFF
 where /q git

@@ -1,39 +1,25 @@
-<Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.UnitTests.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+﻿<Project>
+  <Import Project="..\..\targets\Xenko.UnitTests.props" />
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>Xenko.UI.Tests</RootNamespace>
+    <TargetFramework>net5.0</TargetFramework>
+    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <AssemblyName>Xenko.UI.Tests</AssemblyName>
-    <TargetFramework>net461</TargetFramework>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <RootNamespace>Xenko.UI.Tests</RootNamespace>
     <EnableDefaultItems>false</EnableDefaultItems>
     <XenkoBuildTags>*</XenkoBuildTags>
-    <XenkoPlatform>Windows</XenkoPlatform>
-    <XenkoBuildProfile>Windows</XenkoBuildProfile>
-    <XenkoPackageGuid>{b18707e8-1d26-49fc-9911-3834506d8149}</XenkoPackageGuid>
-    <XenkoGraphicsApi Condition="'$(XenkoGraphicsApi)' == ''">Direct3D11</XenkoGraphicsApi>
-    <XenkoOutputFolder>Tests\$(XenkoGraphicsApi)\$(AssemblyName)</XenkoOutputFolder>
-    <XenkoAssemblySign>true</XenkoAssemblySign>
+    <XenkoCompileAssets>true</XenkoCompileAssets>
+    <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
     <!-- Force msbuild to check to rebuild this assembly instead of letting VS IDE guess -->
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
   </PropertyGroup>
   <PropertyGroup>
-    <XenkoCurrentPackagePath>$(MSBuildThisFileDirectory)Xenko.UI.Tests.xkpkg</XenkoCurrentPackagePath>
-    <OutputPath>..\..\..\Bin\$(XenkoPlatformFullName)\$(XenkoOutputFolder)</OutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(XenkoPlatformFullName)-$(XenkoGraphicsApi)\$(Configuration)</IntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>Xenko.UI.Tests.Regression.EditTextTest</StartupObject>
+    <StartupObject>xunit.runner.xenko.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\tests\xunit.runner.xenko\xunit.runner.xenko.csproj" />
     <ProjectReference Include="..\Xenko.Engine\Xenko.Engine.csproj" />
     <ProjectReference Include="..\Xenko.UI\Xenko.UI.csproj" />
     <ProjectReference Include="..\Xenko.Graphics.Regression\Xenko.Graphics.Regression.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="XunitAttributes.cs" />
@@ -69,7 +55,6 @@
     <Compile Include="Layering\ToggleButtonTests.cs" />
     <Compile Include="Layering\UIElementLayeringTests.cs" />
     <Compile Include="Layering\UniformGridTests.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="RandomExtension.cs" />
     <Compile Include="Regression\BillboardModeTests.cs" />
     <Compile Include="Regression\BorderImageTest.cs" />
@@ -110,26 +95,26 @@
     <Compile Include="Regression\UITestGameBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\BorderButton.xktex" />
-    <None Include="Assets\BorderButtonCentered.xktex" />
-    <None Include="Assets\CourierNew12.xkfnt" />
-    <None Include="Assets\cube Model.xkm3d" />
-    <None Include="Assets\DebugSlider.xksheet" />
-    <None Include="Assets\DumbWhite.xktex" />
-    <None Include="Assets\GameSettings.xkgamesettings" />
-    <None Include="Assets\GraphicsCompositor.xkgfxcomp" />
-    <None Include="Assets\HanSans13.xkfnt" />
-    <None Include="Assets\ImageButtonNotPressed.xktex" />
-    <None Include="Assets\ImageButtonPressed.xktex" />
-    <None Include="Assets\lambert1.xkmat" />
-    <None Include="Assets\MainScene.xkscene" />
-    <None Include="Assets\MicrosoftSansSerif15.xkfnt" />
-    <None Include="Assets\RotatedImages.xksheet" />
-    <None Include="Assets\rotatedUV.xktex" />
-    <None Include="Assets\UIImages.xksheet" />
-    <None Include="Assets\Untitled.xktex" />
-    <None Include="Assets\uv.xktex" />
-    <None Include="Assets\XenkoBackground.xktex" />
+    <None Include="Assets\BorderButton.sdtex" />
+    <None Include="Assets\BorderButtonCentered.sdtex" />
+    <None Include="Assets\CourierNew12.sdfnt" />
+    <None Include="Assets\cube Model.sdm3d" />
+    <None Include="Assets\DebugSlider.sdsheet" />
+    <None Include="Assets\DumbWhite.sdtex" />
+    <None Include="Assets\GameSettings.sdgamesettings" />
+    <None Include="Assets\GraphicsCompositor.sdgfxcomp" />
+    <None Include="Assets\HanSans13.sdfnt" />
+    <None Include="Assets\ImageButtonNotPressed.sdtex" />
+    <None Include="Assets\ImageButtonPressed.sdtex" />
+    <None Include="Assets\lambert1.sdmat" />
+    <None Include="Assets\MainScene.sdscene" />
+    <None Include="Assets\MicrosoftSansSerif15.sdfnt" />
+    <None Include="Assets\RotatedImages.sdsheet" />
+    <None Include="Assets\rotatedUV.sdtex" />
+    <None Include="Assets\UIImages.sdsheet" />
+    <None Include="Assets\Untitled.sdtex" />
+    <None Include="Assets\uv.sdtex" />
+    <None Include="Assets\XenkoBackground.sdtex" />
     <None Include="Regression\ElementTestDesigns.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ElementTestDesigns.cs</LastGenOutput>
@@ -140,11 +125,7 @@
     <None Include="Resources\ButtonPressed.dds" />
     <None Include="Resources\EditTextInactive.dds" />
     <None Include="Resources\EditTextOverred.dds" />
-    <None Include="Xenko.UI.Tests.xkpkg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <None Include="Xenko.UI.Tests.sdpkg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ToggleChecked.dds" />
@@ -154,6 +135,5 @@
   <ItemGroup>
     <None Include="Resources\UIDesigns.dds" />
   </ItemGroup>
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
   <Import Project="..\..\targets\Xenko.UnitTests.targets" />
 </Project>

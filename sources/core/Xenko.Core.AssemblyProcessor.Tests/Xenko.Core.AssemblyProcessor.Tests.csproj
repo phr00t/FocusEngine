@@ -2,13 +2,14 @@
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
+    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>ASSEMBLY_PROCESSOR;XENKO_PLATFORM_WINDOWS_DESKTOP;DEBUG;TRACE</DefineConstants>
+    <DefineConstants>ASSEMBLY_PROCESSOR;XENKO_PLATFORM_DESKTOP;DEBUG;TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -16,7 +17,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>ASSEMBLY_PROCESSOR;XENKO_PLATFORM_WINDOWS_DESKTOP;TRACE</DefineConstants>
+    <DefineConstants>ASSEMBLY_PROCESSOR;XENKO_PLATFORM_DESKTOP;TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
@@ -26,7 +27,6 @@
     <Reference Include="nunit.framework">
       <HintPath>..\..\..\deps\NUnit\nunit.framework.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xenko.Core.AssemblyProcessor\Xenko.Core.AssemblyProcessor.csproj" />

@@ -52,6 +52,7 @@ using System.Globalization;
 using System.Reflection;
 using Xenko.Core.Annotations;
 using Xenko.Core.Mathematics;
+using Half = Xenko.Core.Mathematics.Half;
 
 namespace Xenko.Core.TypeConverters
 {

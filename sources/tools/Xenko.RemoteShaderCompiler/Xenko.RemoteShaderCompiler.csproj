@@ -1,15 +1,10 @@
 ﻿<Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <XenkoBuildTags>WindowsTools</XenkoBuildTags>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
@@ -17,6 +12,5 @@
     <ProjectReference Include="..\..\engine\Xenko.Engine\Xenko.Engine.csproj" />
     <ProjectReference Include="..\..\engine\Xenko.Graphics\Xenko.Graphics.csproj" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

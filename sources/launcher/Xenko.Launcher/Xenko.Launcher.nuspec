@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>Xenko.Launcher</id>
+    <version>5.0.5</version>
+    <authors>Xenko</authors>
+    <owners>Xenko</owners>
+    <licenseUrl>https://xenko3d.net/license.txt</licenseUrl>
+    <projectUrl>https://xenko3d.net/</projectUrl>
+    <copyright>&#169; Xenko contributors and Silicon Studio Corp.</copyright>
+    <description>Xenko Launcher
+
+force-reinstall: 5.0.1 https://xenko3d.net/files/XenkoSetup.exe (note: used internally by launcher, please keep this line)
+</description>
+    <tags>internal</tags>
+  </metadata>
+  <files>
+    <!-- Note: we still have Xenko.exe for backward compatibility -->
+    <file src="Xenko.Launcher.exe" target="tools" />
+    <file src="..\..\..\..\Prerequisites\launcher-prerequisites.exe" target="tools\Prerequisites" />
+  </files>
+</package>

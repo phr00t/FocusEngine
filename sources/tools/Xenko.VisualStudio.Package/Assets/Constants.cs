@@ -4,7 +4,7 @@ namespace Xenko.VisualStudio.Assets
 {
     public static class Constants
     {
-        public const string ContentType = "xkasset";
+        public const string ContentType = "sdasset";
 
         public const string EditorType = "AssetObjectEditor";
     }

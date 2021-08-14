@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Xaml.Behaviors;
 using Xenko.Core.Presentation.Extensions;
-using Xceed.Wpf.AvalonDock.Controls;
+using AvalonDock.Controls;
 
 namespace Xenko.GameStudio
 {

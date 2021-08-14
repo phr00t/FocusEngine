@@ -1,0 +1,19 @@
+{
+  "solution": {
+    "path": "Xenko.sln",
+    "projects": [
+      "..\\sources\\engine\\Xenko.Assets.Tests\\Xenko.Assets.Tests.csproj",
+      "..\\sources\\engine\\Xenko.Audio.Tests\\Xenko.Audio.Tests.Windows.csproj",
+      "..\\sources\\engine\\Xenko.Engine.NoAssets.Tests\\Xenko.Engine.NoAssets.Tests.Windows.csproj",
+      "..\\sources\\engine\\Xenko.Engine.Tests\\Xenko.Engine.Tests.Windows.csproj",
+      "..\\sources\\engine\\Xenko.Graphics.Tests.10_0\\Xenko.Graphics.Tests.10_0.Windows.csproj",
+      "..\\sources\\engine\\Xenko.Graphics.Tests.11_0\\Xenko.Graphics.Tests.11_0.Windows.csproj",
+      "..\\sources\\engine\\Xenko.Graphics.Tests\\Xenko.Graphics.Tests.Windows.csproj",
+      "..\\sources\\engine\\Xenko.Input.Tests\\Xenko.Input.Tests.Windows.csproj",
+      "..\\sources\\engine\\Xenko.Navigation.Tests\\Xenko.Navigation.Tests.Windows.csproj",
+      "..\\sources\\engine\\Xenko.Particles.Tests\\Xenko.Particles.Tests.Windows.csproj",
+      "..\\sources\\engine\\Xenko.Physics.Tests\\Xenko.Physics.Tests.Windows.csproj",
+      "..\\sources\\engine\\Xenko.UI.Tests\\Xenko.UI.Tests.Windows.csproj"
+    ]
+  }
+}

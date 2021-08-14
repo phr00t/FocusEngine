@@ -1,4 +1,4 @@
-// Copyright (c) Xenko contributors (https://xenko.com)
+// Copyright (c) .NET Foundation and Contributors (https://dotnetfoundation.org/ & https://xenko3d.net)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Collections.Generic;
@@ -6,11 +6,21 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using NuGet.Commands;
 using NuGet.Common;
 using NuGet.Configuration;
+using NuGet.Frameworks;
+using NuGet.LibraryModel;
+using NuGet.ProjectModel;
+using NuGet.Protocol;
+using NuGet.Protocol.Core.Types;
 using NuGet.Versioning;
+using Xenko.Core;
+
 
 namespace Xenko.Core.Assets
 {
@@ -25,8 +35,8 @@ namespace Xenko.Core.Assets
             assembliesResolved = true;
         }
 
-        [ModuleInitializer(-100000)]
-        internal static void __Initialize__()
+        //[Xenko.Core.ModuleInitializer(-100000)]
+        public static void SetupNuGet(string packageName, string packageVersion)
         {
             // Only perform this for entry assembly
             if (!(Assembly.GetEntryAssembly() == null // .NET FW: null during module .ctor
@@ -73,10 +83,33 @@ namespace Xenko.Core.Assets
                 {
                     if (!assembliesResolved)
                     {
+                        
+                        // Determine current TFM
+                        var framework = Assembly
+                            .GetEntryAssembly()?
+                            .GetCustomAttribute<TargetFrameworkAttribute>()?
+                            .FrameworkName ?? ".NETFramework,Version=v4.7.2";
+                        var nugetFramework = NuGetFramework.ParseFrameworkName(framework, DefaultFrameworkNameProvider.Instance);
+
+#if NETCOREAPP
+                        // Add TargetPlatform to net5.0 TFM (i.e. net5.0 to net5.0-windows7.0)
+                        var platform = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetPlatformAttribute>()?.PlatformName ?? string.Empty;
+                        if (framework.StartsWith(FrameworkConstants.FrameworkIdentifiers.NetCoreApp) && platform != string.Empty)
+                        {
+                            var platformParseResult = Regex.Match(platform, @"([a-zA-Z]+)(\d+.*)");
+                            if (platformParseResult.Success && Version.TryParse(platformParseResult.Groups[2].Value, out var platformVersion))
+                            {
+                                var platformName = platformParseResult.Groups[1].Value;
+                                nugetFramework = new NuGetFramework(nugetFramework.Framework, nugetFramework.Version, platformName, platformVersion);
+                            }
+                        }
+#endif
+                        
                         // Note: using NuGet will try to recursively resolve NuGet.*.resources.dll, so set assembliesResolved right away so that it bypasses everything
                         assembliesResolved = true;
                         var logger = new Logger();
-                        var task = RestoreHelper.Restore(logger, Assembly.GetExecutingAssembly().GetName().Name, new VersionRange(new NuGetVersion(XenkoVersion.NuGetVersion)));
+                        var versionRange = new VersionRange(new NuGetVersion(packageVersion), true, new NuGetVersion(packageVersion), true);
+                        var task = RestoreHelper.Restore(logger, nugetFramework, "win", packageName, versionRange);
                         var timeouttask = RestoreHelper.TimeoutAfter(task, new TimeSpan(0, 0, 20));
                         var (request, result) = timeouttask.Result;
                         assemblies = RestoreHelper.ListAssemblies(request, result);
@@ -94,7 +127,6 @@ namespace Xenko.Core.Assets
                         }
                     }
                 }
-
                 return null;
             };
         }

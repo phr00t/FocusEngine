@@ -543,7 +543,7 @@ namespace Xenko.Games
             }
         }
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP && XENKO_GRAPHICS_API_VULKAN
+#if XENKO_PLATFORM_WINDOWS && XENKO_GRAPHICS_API_VULKAN
         [System.Runtime.InteropServices.DllImport("shcore.dll")]
         private static extern bool SetProcessDpiAwareness(int dpimode);
 #endif
@@ -567,7 +567,7 @@ namespace Xenko.Games
                 throw new InvalidOperationException("No GraphicsDeviceManager found");
             }
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP && XENKO_GRAPHICS_API_VULKAN
+#if XENKO_PLATFORM_WINDOWS && XENKO_GRAPHICS_API_VULKAN
             try {
                 // fix scaling on Windows 8.1+
                 SetProcessDpiAwareness(2);

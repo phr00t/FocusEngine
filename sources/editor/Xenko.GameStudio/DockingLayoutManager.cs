@@ -12,9 +12,9 @@ using Xenko.Core.Assets.Editor.ViewModel;
 using Xenko.Core.Extensions;
 using Xenko.Core.Presentation.Behaviors;
 using Xenko.Core.Presentation.Extensions;
-using Xceed.Wpf.AvalonDock;
-using Xceed.Wpf.AvalonDock.Layout;
-using Xceed.Wpf.AvalonDock.Layout.Serialization;
+using AvalonDock;
+using AvalonDock.Layout;
+using AvalonDock.Layout.Serialization;
 
 namespace Xenko.GameStudio
 {

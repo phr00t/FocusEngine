@@ -1,51 +1,48 @@
 <Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
-    <XenkoRuntimeWindowsDotNet>true</XenkoRuntimeWindowsDotNet>
+    <XenkoRuntimeWindowsNet5>true</XenkoRuntimeWindowsNet5>
     <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
+    <UseWindowsForms Condition="$(XenkoUI.Contains('WINFORMS')) OR $(XenkoUI.Contains('WPF'))">true</UseWindowsForms>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
+    <UseWPF Condition="$(TargetFramework.EndsWith('-windows'))">true</UseWPF>
+    <UseWindowsForms Condition="$(TargetFramework.EndsWith('-windows'))">true</UseWindowsForms>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoAssemblyProcessorOptions>--auto-module-initializer</XenkoAssemblyProcessorOptions>
     <XenkoPlatformDependent>true</XenkoPlatformDependent>
-    <XenkoProjectPlatformDependentWindows>true</XenkoProjectPlatformDependentWindows>
     <XenkoBuildTags>*</XenkoBuildTags>
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
   </PropertyGroup>
-  <Import Condition="$(XenkoUI.Contains('SDL'))" Project="..\..\targets\SDL.targets" />
+  <ItemGroup>
+    <Compile Remove="Resources\Resource.Designer.cs" />
+  </ItemGroup>
   <Choose>
-    <When Condition="$(XenkoUI.Contains('WINFORMS')) OR $(XenkoUI.Contains('WPF'))">
+    <When Condition=" '$(XenkoPlatform)' == 'Android'">
+      <PropertyGroup>
+        <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
+      </PropertyGroup>
       <ItemGroup>
-        <Reference Include="System.Windows.Forms" />
+        <Compile Include="Resources\Resource.Designer.cs" />
+        <AndroidResource Include="Resources\Layout\Game.axml">
+          <SubType>AndroidResource</SubType>
+        </AndroidResource>
+        <Reference Include="System.Xml" />
       </ItemGroup>
     </When>
   </Choose>
+  <Import Condition="$(XenkoUI.Contains('SDL'))" Project="..\..\targets\SDL.targets" />
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Update="Resources\GameResources.Designer.cs" Condition=" '$(XenkoPlatform)' == 'Windows'">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>GameResources.resx</DependentUpon>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xenko.Graphics\Xenko.Graphics.csproj" />
+    <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="Resources\GameResources.resx" Condition=" '$(XenkoPlatform)' == 'Windows'">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>GameResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\Logo.ico" Condition=" '$(XenkoPlatform)' == 'Windows'" />
-  </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

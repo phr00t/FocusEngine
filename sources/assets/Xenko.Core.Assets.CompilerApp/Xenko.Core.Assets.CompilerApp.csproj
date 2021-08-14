@@ -8,31 +8,19 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Exe</OutputType>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
+    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <XenkoAssemblyProcessorOptions>--auto-module-initializer --serialization</XenkoAssemblyProcessorOptions>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EnvDTE" Version="8.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="3.1.6" />
-	<PackageReference Include="System.Numerics.Vectors" Version="4.4.0">
-	  <NoWarn>NU1605</NoWarn>
-	</PackageReference>
-	<PackageReference Include="Mono.Options" Version="6.6.0.161" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="Microsoft.CSharp" />
+    <PackageReference Include="Mono.Options" Version="5.3.0.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
@@ -40,6 +28,7 @@
     </Compile>
     <None Include="build\**\*.targets" PackagePath="build\" Pack="true" />
     <None Include="build\**\*.targets" PackagePath="buildTransitive\" Pack="true" />
+    <None Include="..\..\..\deps\Xenko.MSBuild.Tasks\bin\Release\**\*.*" PackagePath="tools\" Pack="true" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\engine\Xenko.Assets.Models\Xenko.Assets.Models.csproj" />
@@ -47,13 +36,10 @@
     <ProjectReference Include="..\..\engine\Xenko.Physics\Xenko.Physics.csproj" />
     <ProjectReference Include="..\..\engine\Xenko.SpriteStudio.Offline\Xenko.SpriteStudio.Offline.csproj" />
     <ProjectReference Include="..\..\engine\Xenko.UI\Xenko.UI.csproj" />
+    <PackageReference Include="EnvDTE80" Version="8.0.3" />
   </ItemGroup>
+
   <Import Project="..\..\tools\Xenko.Core.VisualStudio\Xenko.Core.VisualStudio.projitems" Label="Shared" />
   <Import Project="..\..\shared\Xenko.NuGetResolver\Xenko.NuGetResolver.projitems" Label="Shared" />
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
-
-  <PropertyGroup>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.config</AllowedOutputExtensionsInPackageBuildOutputFolder>
-  </PropertyGroup>
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

@@ -1,24 +1,20 @@
 <Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoAssemblyProcessorOptions>$(XenkoAssemblyProcessorDefaultOptions)</XenkoAssemblyProcessorOptions>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
+    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\tools\Xenko.Assimp\Xenko.Assimp.csproj" PrivateAssets="All" />
+    <ProjectReference Include="..\..\tools\Xenko.Assimp.Translation\Xenko.Assimp.Translation.vcxproj" PrivateAssets="All" />
     <ProjectReference Include="..\..\tools\Xenko.Importer.Assimp\Xenko.Importer.Assimp.vcxproj" PrivateAssets="All" />
     <ProjectReference Include="..\..\tools\Xenko.Importer.Common\Xenko.Importer.Common.vcxproj" PrivateAssets="All" />
     <ProjectReference Include="..\..\tools\Xenko.Importer.FBX\Xenko.Importer.FBX.vcxproj" PrivateAssets="All" />
@@ -27,14 +23,16 @@
   <ItemGroup>
     <Folder Include="Analysis\" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 
   <PropertyGroup>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeExtraAssemblies</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificBuildOutput>_XenkoIncludeExtraAssemblies;$(TargetsForTfmSpecificBuildOutput)</TargetsForTfmSpecificBuildOutput>
+
   </PropertyGroup>
-  <Target Name="IncludeExtraAssemblies">
+  <Target Name="_XenkoIncludeExtraAssemblies">
     <ItemGroup>
+      <!-- Needed by .NET Core runtime to be able to load C++/CLI assemblies -->
+      <BuildOutputInPackage Include="$(OutputPath)ijwhost.dll" Condition="Exists('$(OutputPath)ijwhost.dll')" />
       <BuildOutputInPackage Include="$(OutputPath)Xenko.Assimp.dll" />
       <BuildOutputInPackage Include="$(OutputPath)Xenko.Assimp.Translation.dll" />
       <BuildOutputInPackage Include="$(OutputPath)Xenko.Importer.Assimp.dll" />
@@ -42,8 +40,8 @@
       <BuildOutputInPackage Include="$(OutputPath)Xenko.Importer.FBX.dll" />
       <BuildOutputInPackage Include="$(OutputPath)Xenko.Importer.FBX.ssdeps" />
       <BuildOutputInPackage Include="$(OutputPath)Xenko.Importer.Common.dll" />
-      <TfmSpecificPackageFile Include="$(OutputPath)x64\assimp-vc140-mt.dll" PackagePath="lib\$(TargetFramework)\x64" />
-      <TfmSpecificPackageFile Include="$(OutputPath)x64\libfbxsdk.dll" PackagePath="lib\$(TargetFramework)\x64" />
+      <BuildOutputInPackage Include="$(OutputPath)x64\assimp-vc140-mt.dll" TargetPath="x64\assimp-vc140-mt.dll" />
+      <BuildOutputInPackage Include="$(OutputPath)x64\libfbxsdk.dll" TargetPath="x64\libfbxsdk.dll" />
     </ItemGroup>
   </Target>
 </Project>

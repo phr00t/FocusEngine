@@ -36,6 +36,7 @@ namespace Xenko.Core.ProjectTemplating
                     "System.Core",
                     typeof(RuntimeBinderException).Assembly.FullName,
                     "Mono.TextTemplating",
+                    typeof(System.Dynamic.ExpandoObject).Assembly.FullName,
                     typeof(PlatformType).Assembly.FullName,
                     typeof(UPath).Assembly.FullName,
                     "Xenko.Core.ProjectTemplating"

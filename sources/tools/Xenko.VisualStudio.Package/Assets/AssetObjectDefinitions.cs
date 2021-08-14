@@ -42,64 +42,64 @@ namespace Xenko.VisualStudio.Assets
         /// File extensions
         /// </summary>
 		[Export]
-		[FileExtension(".xkpkg")]
+		[FileExtension(".sdpkg")]
 		[ContentType(Constants.ContentType)]
-		internal static FileExtensionToContentTypeDefinition xkpkgFileExtensionDefinition = null;
+		internal static FileExtensionToContentTypeDefinition sdpkgFileExtensionDefinition = null;
 		
 		[Export]
-        [FileExtension(".xkfnt")]
+        [FileExtension(".sdfnt")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xkfntFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdfntFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(".xkfxlib")]
+        [FileExtension(".sdfxlib")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xkfxlibFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdfxlibFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(".xklightconf")]
+        [FileExtension(".sdlightconf")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xklightconfFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdlightconfFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(".xktex")]
+        [FileExtension(".sdtex")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xktexFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdtexFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(".xkscene")]
+        [FileExtension(".sdscene")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xksceneFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdsceneFileExtensionDefinition = null;
 
 	    [Export]
-	    [FileExtension(".xkprefab")]
+	    [FileExtension(".sdprefab")]
 	    [ContentType(Constants.ContentType)]
-	    internal static FileExtensionToContentTypeDefinition xkprefabFileExtensionDefinition = null;
+	    internal static FileExtensionToContentTypeDefinition sdprefabFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(".xkm3d")]
+        [FileExtension(".sdm3d")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xkm3dFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdm3dFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(".xkanim")]
+        [FileExtension(".sdanim")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xkanimFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdanimFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(".xksnd")]
+        [FileExtension(".sdsnd")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xksndFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdsndFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(".xkmat")]
+        [FileExtension(".sdmat")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xkmatFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdmatFileExtensionDefinition = null;
 
         [Export]
-        [FileExtension(".xksprite")]
+        [FileExtension(".sdsprite")]
         [ContentType(Constants.ContentType)]
-        internal static FileExtensionToContentTypeDefinition xksprtFileExtensionDefinition = null;
+        internal static FileExtensionToContentTypeDefinition sdsprtFileExtensionDefinition = null;
 
         /// <summary>
         /// Classification type definitions

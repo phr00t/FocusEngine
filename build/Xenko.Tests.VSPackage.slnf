@@ -1,0 +1,8 @@
+{
+  "solution": {
+    "path": "Xenko.sln",
+    "projects": [
+      "..\\sources\\tools\\Xenko.VisualStudio.Package.Tests\\Xenko.VisualStudio.Package.Tests.csproj"
+    ]
+  }
+}

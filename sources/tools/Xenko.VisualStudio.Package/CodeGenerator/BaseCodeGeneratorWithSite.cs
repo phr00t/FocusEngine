@@ -3,7 +3,7 @@
 
 /***************************************************************************
 
-Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+Copyright (c) .NET Foundation and Contributors (https://dotnetfoundation.org/ & https://xenko3d.net) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 Copyright (c) Microsoft Corporation. All rights reserved.
 This code is licensed under the Visual Studio SDK license terms.
 THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF

@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Runtime.InteropServices;
 using System.Text;
+using Xenko.Core;
 using Xenko.Core.LZ4;
 
 #if XENKO_PLATFORM_UWP
@@ -45,8 +46,8 @@ namespace Xenko.Graphics.Regression
             // TODO: Check build number in environment variables
             result.BuildNumber = -1;
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
-            result.Platform = "Windows";
+#if XENKO_PLATFORM_DESKTOP
+            result.Platform = Platform.Type.ToString();
             result.Serial = Environment.MachineName;
     #if XENKO_GRAPHICS_API_DIRECT3D12
             result.DeviceName = "Direct3D12";

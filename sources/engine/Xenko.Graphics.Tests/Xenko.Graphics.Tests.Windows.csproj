@@ -1,44 +1,30 @@
-<Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.UnitTests.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+﻿<Project>
+  <Import Project="..\..\targets\Xenko.UnitTests.props" />
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
     <AssemblyName>Xenko.Graphics.Tests</AssemblyName>
     <RootNamespace>Xenko.Graphics.Tests</RootNamespace>
-    <TargetFramework>net461</TargetFramework>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <XenkoBuildTags>*</XenkoBuildTags>
-    <XenkoPlatform>Windows</XenkoPlatform>
-    <XenkoBuildProfile>Windows</XenkoBuildProfile>
-    <XenkoAssemblySign>true</XenkoAssemblySign>
-    <XenkoGraphicsApi Condition="'$(XenkoGraphicsApi)' == ''">Direct3D11</XenkoGraphicsApi>
-    <XenkoOutputFolder>Tests\$(XenkoGraphicsApi)\$(AssemblyName)</XenkoOutputFolder>
+    <XenkoCompileAssets>true</XenkoCompileAssets>
+    <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
     <!-- Force msbuild to check to rebuild this assembly instead of letting VS IDE guess -->
     <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
-    <XenkoCurrentPackagePath>$(MSBuildThisFileDirectory)Xenko.Graphics.Tests.xkpkg</XenkoCurrentPackagePath>
-    <OutputPath>..\..\..\Bin\$(XenkoPlatformFullName)\$(XenkoOutputFolder)</OutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(XenkoPlatformFullName)-$(XenkoGraphicsApi)\$(Configuration)</IntermediateOutputPath>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>Xenko.Graphics.Tests.TestDynamicSpriteFont</StartupObject>
+    <StartupObject>xunit.runner.xenko.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Compiler\CubemapEffect.xkfx.cs" />
+    <Compile Remove="Compiler\CubemapEffect.sdfx.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Remove="Compiler\CubemapEffect.xkfx" />
+    <None Remove="Compiler\CubemapEffect.sdfx" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\tests\xunit.runner.xenko\xunit.runner.xenko.csproj" />
     <ProjectReference Include="..\Xenko.Engine\Xenko.Engine.csproj" />
     <ProjectReference Include="..\Xenko.Graphics.Regression\Xenko.Graphics.Regression.csproj" />
     <ProjectReference Include="..\Xenko.UI\Xenko.UI.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
   <Import Project="..\..\targets\Xenko.UnitTests.targets" />
 </Project>

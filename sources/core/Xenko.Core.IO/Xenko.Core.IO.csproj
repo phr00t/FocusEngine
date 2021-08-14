@@ -2,8 +2,7 @@
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.Core.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.Core.props" />
   
   <PropertyGroup>
     <Description>Xenko Core IO assembly.</Description>
@@ -17,11 +16,7 @@
     <XenkoPlatformDependent>true</XenkoPlatformDependent>
     <XenkoBuildTags>*</XenkoBuildTags>
   </PropertyGroup>
-  
-  <Choose>
-    <When Condition=" '$(AutoIncludeSystemAssembly)' != 'true'">
-    </When>
-  </Choose>
+
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
@@ -36,7 +31,6 @@
     <PackageReference Include="SharpDX" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'UWP'" />
   </ItemGroup>
   
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 
 </Project>

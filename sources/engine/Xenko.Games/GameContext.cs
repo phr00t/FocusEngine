@@ -123,7 +123,8 @@ namespace Xenko.Games
 
         // This code is for backward compatibility only where the generated games
         // would not explicitly create the context, but would just use a Winform
-#if XENKO_PLATFORM_WINDOWS_DESKTOP && (XENKO_UI_WINFORMS || XENKO_UI_WPF)        /// <summary>
+#if (XENKO_UI_WINFORMS || XENKO_UI_WPF)
+        /// <summary>
         /// Performs an implicit conversion from <see cref="Control"/> to <see cref="GameContextWinforms"/>.
         /// </summary>
         /// <param name="control">Winform control</param>
@@ -135,7 +136,7 @@ namespace Xenko.Games
         }
 #endif
 
-#if (XENKO_PLATFORM_WINDOWS_DESKTOP || XENKO_PLATFORM_UNIX) && XENKO_GRAPHICS_API_OPENGL && XENKO_UI_OPENTK
+#if XENKO_PLATFORM_DESKTOP && XENKO_GRAPHICS_API_OPENGL && XENKO_UI_OPENTK
         /// <summary>
         /// Performs an implicit conversion from <see cref="OpenTK.GameWindow"/> to <see cref="GameContextOpenTK"/>.
         /// </summary>

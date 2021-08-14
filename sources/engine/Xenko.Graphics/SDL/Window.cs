@@ -27,7 +27,7 @@ namespace Xenko.Graphics.SDL
         static Window()
         {
             // Preload proper SDL native library (depending on CPU type)
-            Core.NativeLibrary.PreloadLibrary("SDL2.dll", typeof(Window));
+            Core.NativeLibraryHelper.PreloadLibrary("SDL2.dll", typeof(Window));
 
             SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
 #if XENKO_GRAPHICS_API_OPENGL
@@ -36,11 +36,10 @@ namespace Xenko.Graphics.SDL
             int res = SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_PROFILE_MASK, (int)SDL.SDL_GLprofile.SDL_GL_CONTEXT_PROFILE_CORE);
             // 4.2 is the lowest version we support.
             res = SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-#if XENKO_PLATFORM_MACOS
-            res = SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 1);
-#else
-            res = SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 2);
-#endif
+            if (Platform.Type == PlatformType.macOS)
+                res = SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 1);
+            else
+                res = SDL.SDL_GL_SetAttribute(SDL.SDL_GLattr.SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
 #endif
         }
@@ -185,7 +184,7 @@ namespace Xenko.Graphics.SDL
                     GenerateCreationError(e);
                 }
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
+#if XENKO_PLATFORM_WINDOWS
                 Handle = info.info.win.window;
 #elif XENKO_PLATFORM_LINUX
                 Handle = info.info.x11.window;

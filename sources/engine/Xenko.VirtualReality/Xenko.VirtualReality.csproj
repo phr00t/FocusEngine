@@ -1,10 +1,10 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
     <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
+    <!--<XenkoNativeOutputName>libxenkovr</XenkoNativeOutputName>-->
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
@@ -15,9 +15,24 @@
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
   </PropertyGroup>
   <Choose>
-    <When Condition=" '$(XenkoGraphicsApi)' == 'Direct3D11' Or '$(XenkoGraphicsApi)' == 'Vulkan' ">
+    <When Condition=" '$(XenkoPlatform)' == 'Android'">
       <ItemGroup>
-        <XenkoNativeLib Include="..\..\..\deps\OpenVR\$(XenkoPlatform)\**\openvr_api.*">
+        <Reference Include="Mono.Android" />
+        <Reference Include="GoogleVRJava">
+          <HintPath>..\..\..\deps\GoogleVR\lib\Android\GoogleVRJava.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(XenkoPlatform)' == 'iOS'">
+      <ItemGroup>
+        <Reference Include="Xamarin.iOS" />
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Choose>
+    <When Condition=" '$(XenkoGraphicsApi)' == 'Direct3D11' Or '$(XenkoGraphicsApi)' == 'Direct3D12' ">
+      <ItemGroup>
+        <XenkoNativeLib Include="..\..\..\deps\OpenVR\$(XenkoPlatformDeps)\**\openvr_api.*">
           <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
           <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -44,6 +59,11 @@
     </ProjectReference>
     <PackageReference Include="Silk.NET.OpenXR" Version="2.6.0" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <ItemGroup>
+    <XenkoContent Condition="'$(XenkoPlatform)' == 'Linux'" Include="Xenko.VirtualReality.dll.config" />
+    <None Include="Xenko.Native.Libs.targets">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

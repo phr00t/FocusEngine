@@ -14,6 +14,7 @@ using Xenko.Core.Shaders.Visitor;
 using Xenko.Graphics;
 
 using StorageQualifier = Xenko.Core.Shaders.Ast.StorageQualifier;
+using Half = Xenko.Core.Mathematics.Half;
 
 namespace Xenko.Shaders.Parser
 {

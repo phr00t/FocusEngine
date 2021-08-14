@@ -45,18 +45,82 @@
     <!--asset OutputPath for other platforms. Note: this is overridden for UnitTests projects. -->
     <XenkoCompileAssetOutputPath Condition="'$(XenkoCompileAssetOutputPath)' == ''">$(TargetDir)data</XenkoCompileAssetOutputPath>
 
-    <XenkoCompileAssetCommand Condition="'$(XenkoCompileAssetCommand)' == '' And Exists('$(MSBuildThisFileDirectory)..\lib\net48\Xenko.Core.Assets.CompilerApp.exe')">$(MSBuildThisFileDirectory)..\lib\net48\Xenko.Core.Assets.CompilerApp.exe</XenkoCompileAssetCommand>
-    <XenkoCompileAssetCommand Condition="'$(XenkoCompileAssetCommand)' == '' And Exists('$(MSBuildThisFileDirectory)..\bin\$(Configuration)\net48\Xenko.Core.Assets.CompilerApp.exe')">$(MSBuildThisFileDirectory)..\bin\$(Configuration)\net48\Xenko.Core.Assets.CompilerApp.exe</XenkoCompileAssetCommand>
-
-    <!--<XenkoCompileAssetCommandProxy Condition="'$(DisableAssetCompilerExecServerProxy)' == 'true' Or '$(XenkoDisableAssetCompilerExecServerProxy)' == 'true'">&quot;$(XenkoCompileAssetCommand)&quot;</XenkoCompileAssetCommandProxy>
-    <XenkoCompileAssetCommandProxy Condition="'$(XenkoCompileAssetCommandProxy)' == ''">&quot;$(XenkoPackageXenkoSdkBin)\Xenko.Core.Assets.CompilerClient.exe&quot;</XenkoCompileAssetCommandProxy>-->
-    <XenkoCompileAssetCommandProxy>&quot;$(XenkoCompileAssetCommand)&quot;</XenkoCompileAssetCommandProxy>
+    <XenkoCompileAssetUpToDateCheckFileBase>$(ProjectDir)$(IntermediateOutputPath)xenko\assetcompiler-uptodatecheck</XenkoCompileAssetUpToDateCheckFileBase>
   </PropertyGroup>
 
-  <!--Compile assets for all XenkoPackage items and only for an executable-->
-  <Target Name="XenkoCompileAsset" Condition="'$(XenkoIsExecutable)' == 'true'">
+  <!-- Prepare path to be able to copy Task dll to temp directory (otherwise MSBuild lock the task file and we can't reinstall package in dev mode) -->
+  <PropertyGroup>
+    <XenkoMSBuildTaskTargetFramework>net5.0</XenkoMSBuildTaskTargetFramework>
+    <!-- First try NuGet layout, then git checkout -->
+    <XenkoMSBuildTaskSourcePath Condition="Exists('$(MSBuildThisFileDirectory)..\tools\$(XenkoMSBuildTaskTargetFramework)\Xenko.MSBuild.Tasks.dll')">$(MSBuildThisFileDirectory)..\tools\$(XenkoMSBuildTaskTargetFramework)\Xenko.MSBuild.Tasks.dll</XenkoMSBuildTaskSourcePath>
+    <XenkoMSBuildTaskSourcePath Condition="Exists('$(MSBuildThisFileDirectory)..\..\..\..\deps\Xenko.MSBuild.Tasks\bin\Release\$(XenkoMSBuildTaskTargetFramework)\Xenko.MSBuild.Tasks.dll')">$(MSBuildThisFileDirectory)..\..\..\..\deps\Xenko.MSBuild.Tasks\bin\Release\$(XenkoMSBuildTaskTargetFramework)\Xenko.MSBuild.Tasks.dll</XenkoMSBuildTaskSourcePath>
+    <XenkoMSBuildTaskAssemblyHash Condition="Exists('$(XenkoMSBuildTaskSourcePath)')">$([System.IO.File]::ReadAllText('$(XenkoMSBuildTaskSourcePath).hash'))</XenkoMSBuildTaskAssemblyHash>
+    <XenkoMSBuildTaskTempPath>$(TEMP)\Xenko\MSBuildTasks\$(XenkoMSBuildTaskTargetFramework)\Xenko.MSBuild.Tasks-$(XenkoMSBuildTaskAssemblyHash).dll</XenkoMSBuildTaskTempPath>
+  </PropertyGroup>
+
+  <UsingTask AssemblyFile="$(XenkoMSBuildTaskTempPath)" TaskName="Xenko.MSBuild.Tasks.SortItems"/>
+  <!-- Import up-to-date check file to skip asset build altogether if everything is still up to date
+       Details: https://github.com/dotnet/project-system/blob/16.3.1/docs/up-to-date-check.md -->
+  <Target Name="_XenkoCollectUpToDateCheckInputDesignTime" Condition="'$(XenkoIsExecutable)' == 'true'">
+    <ReadLinesFromFile File="$(XenkoCompileAssetUpToDateCheckFileBase).inputs" Condition="Exists('$(XenkoCompileAssetUpToDateCheckFileBase).inputs')">
+      <Output TaskParameter="Lines" ItemName="XenkoAssetInputRaw"/>
+    </ReadLinesFromFile>
+    <!-- Use CreateItem to force wildcard expansion -->
+    <CreateItem Include="@(XenkoAssetInputRaw)">
+      <Output TaskParameter="Include" ItemName="XenkoAssetInputUnsorted" />
+    </CreateItem>
+    <!-- Copy task to temp directory (otherwise MSBuild lock the task file and we can't reinstall package in dev mode) -->
+    <Copy SourceFiles="$(XenkoMSBuildTaskSourcePath)" DestinationFiles="$(XenkoMSBuildTaskTempPath)" Condition="!Exists('$(XenkoMSBuildTaskTempPath)')" />
+    <!-- We need to sort to make sure expanded list is written to only if there's an actual change (rather than simply non-deterministic file enumeration order) -->
+    <SortItems InputItems="@(XenkoAssetInputUnsorted)">
+      <Output TaskParameter="OutputItems" ItemName="XenkoAssetInput" />
+    </SortItems>
+      
+    <!-- Write expanded list (use WriteOnlyWhenDifferent to keep timestamp if no changes) -->
+    <WriteLinesToFile File="$(XenkoCompileAssetUpToDateCheckFileBase).inputs.expanded" Overwrite="true" Lines="@(XenkoAssetInput)" WriteOnlyWhenDifferent="true"/>
+
+    <ItemGroup>
+      <!-- If not input (yet), make sure build doesn't skip by adding a fake input file -->
+      <XenkoAssetInput Condition="'@(XenkoAssetInput)' == ''" Include="FakeInputForceBuild.file" />
+      <!-- Also include expanded list -->
+      <XenkoAssetInput Include="$(XenkoCompileAssetUpToDateCheckFileBase).inputs.expanded" Condition="Exists('$(XenkoCompileAssetUpToDateCheckFileBase).inputs')" />
+      <!-- Currently disabled, it doesn't work well with wildcards
+      <UpToDateCheckInput Include="@(XenkoAssetInput)" Set="XenkoAssets" />-->
+    </ItemGroup>
+  </Target>
+  <Target Name="_XenkoCollectUpToDateCheckOutputDesignTime" Condition="'$(XenkoIsExecutable)' == 'true'">
+    <ReadLinesFromFile File="$(XenkoCompileAssetUpToDateCheckFileBase).outputs" Condition="Exists('$(XenkoCompileAssetUpToDateCheckFileBase).outputs')">
+      <Output TaskParameter="Lines" ItemName="XenkoAssetOutputRaw" />
+    </ReadLinesFromFile>
+    <!-- Use CreateItem to force wildcard expansion -->
+    <CreateItem Include="@(XenkoAssetOutputRaw)">
+      <Output TaskParameter="Include" ItemName="XenkoAssetOutput" />
+    </CreateItem>
+
+    <ItemGroup>
+      <!-- If not output (yet), make sure build doesn't skip by adding a fake output file -->
+      <XenkoAssetOutput Condition="'@(XenkoAssetOutput)' == ''" Include="FakeBundleForceBuild.bundle" />
+      <!-- Currently disabled, it doesn't work well with wildcards
+      <UpToDateCheckOutput Include="@(XenkoAssetOutput)" Set="XenkoAssets" />-->
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="_XenkoPrepareAssetCompiler">
     <PropertyGroup>
-      <XenkoCompileAssetCommandProxy>$(XenkoCompileAssetCommandProxy) $(XenkoCompileAssetOptions) --disable-auto-compile --project-configuration &quot;$(Configuration)&quot; --platform=$(XenkoPlatform) --project-configuration=$(Configuration) --property:RuntimeIdentifier=$(RuntimeIdentifier) --output-path=&quot;$(XenkoCompileAssetOutputPath)&quot; --build-path=&quot;$(XenkoCompileAssetBuildPath)&quot; --package-file=&quot;$(MSBuildProjectFullPath)&quot; --log-pipe=&quot;$(XenkoBuildEngineLogPipeUrl)&quot;</XenkoCompileAssetCommandProxy>
+      <!-- First try NuGet layout, then git checkout -->
+      <XenkoCompileAssetCommand Condition="'$(XenkoCompileAssetCommand)' == '' And Exists('$(MSBuildThisFileDirectory)..\lib\net5.0-windows7.0\')">$(MSBuildThisFileDirectory)..\lib\net5.0-windows7.0\Xenko.Core.Assets.CompilerApp.exe</XenkoCompileAssetCommand>
+      <XenkoCompileAssetCommand Condition="'$(XenkoCompileAssetCommand)' == '' And Exists('$(MSBuildThisFileDirectory)..\Xenko.Core.Assets.CompilerApp.csproj')">$(MSBuildThisFileDirectory)..\bin\$(Configuration)\net5.0-windows\Xenko.Core.Assets.CompilerApp.exe</XenkoCompileAssetCommand>
+    </PropertyGroup>
+
+    <Error Condition="!Exists('$(XenkoCompileAssetCommand)')" Text="Xenko AssetCompiler could not be found (Command: &quot;$(XenkoCompileAssetCommand)&quot;)"/>
+  </Target>
+
+  <!--Compile assets for all XenkoPackage items and only for an executable-->
+  <Target Name="XenkoCompileAsset" Condition="'$(XenkoIsExecutable)' == 'true'" DependsOnTargets="_XenkoCollectUpToDateCheckInputDesignTime;_XenkoCollectUpToDateCheckOutputDesignTime;_XenkoPrepareAssetCompiler" Inputs="@(XenkoAssetInput)" Outputs="@(XenkoAssetOutput)">
+    <PropertyGroup>
+      <XenkoCompileAssetCommandProxy>&quot;$(XenkoCompileAssetCommand)&quot;</XenkoCompileAssetCommandProxy>
+
+      <XenkoCompileAssetCommandProxy>$(XenkoCompileAssetCommandProxy) $(XenkoCompileAssetOptions) --disable-auto-compile --project-configuration &quot;$(Configuration)&quot; --platform=$(XenkoPlatform) --project-configuration=$(Configuration) --compile-property:XenkoGraphicsApi=$(XenkoGraphicsApi) --output-path=&quot;$(XenkoCompileAssetOutputPath)&quot; --build-path=&quot;$(XenkoCompileAssetBuildPath)&quot; --package-file=&quot;$(MSBuildProjectFullPath)&quot; --msbuild-uptodatecheck-filebase=&quot;$(XenkoCompileAssetUpToDateCheckFileBase)&quot;</XenkoCompileAssetCommandProxy>
       <XenkoCompileAssetCommandProxy Condition="'$(XenkoBuildEngineLogVerbose)' != ''">$(XenkoCompileAssetCommandProxy) --verbose</XenkoCompileAssetCommandProxy>
       <XenkoCompileAssetCommandProxy Condition="'$(XenkoBuildEngineLogDebug)' != ''">$(XenkoCompileAssetCommandProxy) --debug</XenkoCompileAssetCommandProxy>
     </PropertyGroup>
@@ -129,7 +193,7 @@
 
   <!-- Pack target -->
   <!--<UsingTask TaskName="Xenko.Core.Tasks.PackAssets" AssemblyFile="$(XenkoCompileAssetCommand)" />-->
-  <Target Name="_XenkoPrepareAssetsForPack" BeforeTargets="_GetPackageFiles">
+  <Target Name="_XenkoPrepareAssetsForPack" BeforeTargets="_GetPackageFiles" DependsOnTargets="_XenkoPrepareAssetCompiler">
     <!-- We use exec version rather than task version, otherwise file will be locked during rebuild -->
     <!--<PackAssets ProjectFile="$(MSBuildProjectFile)" IntermediatePackagePath="$(IntermediateOutputPath)\xenko">
       <Output TaskParameter="GeneratedItems" ItemName="None"/>
@@ -147,6 +211,10 @@
         <PackagePath>%(PackAssetsLine.PackagePath)</PackagePath>
       </None>
     </ItemGroup>
+  </Target>
+
+  <Target Name="XenkoAssetUpdateGeneratedFiles">
+    <Exec Command="&quot;$(XenkoCompileAssetCommand)&quot; --updated-generated-files --package-file=&quot;$(MSBuildProjectFullPath)&quot;"/>
   </Target>
 
   <!-- 

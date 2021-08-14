@@ -58,28 +58,13 @@ namespace Xenko.Assets
 
             // Windows
             var windowsPlatform = new SolutionPlatform()
-                {
-                    Name = PlatformType.Windows.ToString(),
-                    IsAvailable = true,
-                    Alias = "Any CPU",
-                    TargetFramework = "net48",
-                    Type = PlatformType.Windows
-                };
-            windowsPlatform.PlatformsPart.Add(new SolutionPlatformPart("Any CPU"));
-            windowsPlatform.PlatformsPart.Add(new SolutionPlatformPart("Mixed Platforms") { Alias = "Any CPU"});
-            windowsPlatform.DefineConstants.Add("XENKO_PLATFORM_WINDOWS");
-            windowsPlatform.DefineConstants.Add("XENKO_PLATFORM_WINDOWS_DESKTOP");
-            windowsPlatform.Configurations.Add(new SolutionConfiguration("Testing"));
-            windowsPlatform.Configurations.Add(new SolutionConfiguration("AppStore"));
-
-            // Currently disabled
-            //windowsPlatform.Configurations.Add(coreClrDebug);
-            //windowsPlatform.Configurations.Add(coreClrRelease);
-            foreach (var part in windowsPlatform.PlatformsPart)
             {
-                part.Configurations.Clear();
-                part.Configurations.AddRange(windowsPlatform.Configurations);
-            }
+                Name = PlatformType.Windows.ToString(),
+                IsAvailable = true,
+                TargetFramework = "net5.0",
+                RuntimeIdentifier = "win-x64",
+                Type = PlatformType.Windows
+            };
             solutionPlatforms.Add(windowsPlatform);
 
             // Universal Windows Platform (UWP)
@@ -139,8 +124,6 @@ namespace Xenko.Assets
                 RuntimeIdentifier = "linux-x64",
                 Type = PlatformType.Linux,
             };
-            linuxPlatform.DefineConstants.Add("XENKO_PLATFORM_UNIX");
-            linuxPlatform.DefineConstants.Add("XENKO_PLATFORM_LINUX");
             solutionPlatforms.Add(linuxPlatform);
 
             // macOS
@@ -148,12 +131,10 @@ namespace Xenko.Assets
             {
                 Name = PlatformType.macOS.ToString(),
                 IsAvailable = true,
-                TargetFramework = "net5.0-macos",
+                TargetFramework = "net5.0",
                 RuntimeIdentifier = "osx-x64",
                 Type = PlatformType.macOS,
             };
-            macOSPlatform.DefineConstants.Add("XENKO_PLATFORM_UNIX");
-            macOSPlatform.DefineConstants.Add("XENKO_PLATFORM_MACOS");
             solutionPlatforms.Add(macOSPlatform);
 
             // Android

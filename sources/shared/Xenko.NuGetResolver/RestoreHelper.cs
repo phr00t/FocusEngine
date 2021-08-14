@@ -135,7 +135,7 @@ namespace Xenko.Core.Assets
             return tfmIndex * 1000 + runtimeIndex;
         }
 
-        public static async Task<(RestoreRequest, RestoreResult)> Restore(ILogger logger, string packageName, VersionRange versionRange)
+        public static async Task<(RestoreRequest, RestoreResult)> Restore(ILogger logger, NuGetFramework nugetFramework, string runtimeIdentifier, string packageName, VersionRange versionRange)
         {
             var settings = NuGet.Configuration.Settings.LoadDefaultSettings(null);
             var packageSourceProvider = new PackageSourceProvider(settings);
@@ -158,7 +158,7 @@ namespace Xenko.Core.Assets
                 {
                     new TargetFrameworkInformation
                     {
-                        FrameworkName = NuGetFramework.Parse("net48"),
+                        FrameworkName = nugetFramework,
                     }
                 },
                 RestoreMetadata = new ProjectRestoreMetadata
@@ -167,8 +167,8 @@ namespace Xenko.Core.Assets
                     ProjectName = Path.GetFileNameWithoutExtension(projectPath),
                     ProjectStyle = ProjectStyle.PackageReference,
                     ProjectUniqueName = projectPath,
-                    OutputPath = Path.Combine(Path.GetTempPath(), $"XenkoNugetResolver-{packageName}-{versionRange.MinVersion.ToString()}"),
-                    OriginalTargetFrameworks = new[] { "net48" },
+                    OutputPath = Path.Combine(Path.GetTempPath(), $"XenkoNugetResolver-{packageName}-{versionRange.MinVersion.ToString()}-{nugetFramework.GetShortFolderName()}-{runtimeIdentifier}"),
+                    OriginalTargetFrameworks = new[] { nugetFramework.GetShortFolderName() },
                     ConfigFilePaths = settings.GetConfigFilePaths(),
                     PackagesPath = SettingsUtility.GetGlobalPackagesFolder(settings),
                     Sources = SettingsUtility.GetEnabledSources(settings).ToList(),

@@ -1,11 +1,10 @@
 <Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <XenkoAssemblyProcessor>false</XenkoAssemblyProcessor>
     <OutputType>Exe</OutputType>
     <Prefer32Bit>false</Prefer32Bit>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <XenkoBuildTags>WindowsTools</XenkoBuildTags>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoAssemblyProcessorOptions>--auto-module-initializer</XenkoAssemblyProcessorOptions>
@@ -27,6 +26,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\tools\Xenko.ExecServer\Xenko.ExecServer.csproj" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

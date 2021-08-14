@@ -20,7 +20,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-#if XENKO_PLATFORM_WINDOWS_DESKTOP || XENKO_PLATFORM_UNIX
 using System;
 using System.IO;
 using System.Reflection;
@@ -31,7 +30,7 @@ namespace Xenko.Games
     {
         public GamePlatformWindows(GameBase game) : base(game)
         {
-#if XENKO_PLATFORM_WINDOWS_DESKTOP && XENKO_RUNTIME_CORECLR
+#if XENKO_PLATFORM_WINDOWS && XENKO_RUNTIME_CORECLR
                 // This is required by the Audio subsystem of SharpDX.
             Win32Native.CoInitialize(IntPtr.Zero);
 #endif
@@ -81,4 +80,3 @@ namespace Xenko.Games
         }
     }
 }
-#endif

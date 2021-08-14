@@ -29,7 +29,7 @@ namespace Xenko.Rendering
         private EffectCompilerBase compiler;
         private readonly Dictionary<string, List<CompilerResults>> earlyCompilerCache = new Dictionary<string, List<CompilerResults>>();
         private Dictionary<EffectBytecode, Effect> cachedEffects = new Dictionary<EffectBytecode, Effect>();
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
+#if XENKO_PLATFORM_DESKTOP
         private DirectoryWatcher directoryWatcher;
 #endif
         private bool isInitialized;
@@ -68,7 +68,7 @@ namespace Xenko.Rendering
             // Get graphics device service
             base.InitGraphicsDeviceService();
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
+#if XENKO_PLATFORM_DESKTOP
             Enabled = true;
             directoryWatcher = new DirectoryWatcher("*.xksl");
             directoryWatcher.Modified += FileModifiedEvent;
@@ -99,7 +99,7 @@ namespace Xenko.Rendering
                 isInitialized = false;
             }
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
+#if XENKO_PLATFORM_DESKTOP
             if (directoryWatcher != null)
             {
                 directoryWatcher.Modified -= FileModifiedEvent;
@@ -213,7 +213,7 @@ namespace Xenko.Rendering
                     effect = new Effect(GraphicsDevice, bytecode) { Name = effectName };
                     cachedEffects.Add(bytecode, effect);
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
+#if XENKO_PLATFORM_DESKTOP
                     foreach (var type in bytecode.HashSources.Keys)
                     {
                         // TODO: the "/path" is hardcoded, used in ImportStreamCommand and ShaderSourceManager. Find a place to share this correctly.

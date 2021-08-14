@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <!--Import Local Pre Settings for the solution being loaded -->
-  <Import Project="..\..\targets\Xenko.PreSettings.UnitTests.targets" />
+  <Import Project="..\..\targets\Xenko.UnitTests.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -35,7 +35,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
-    <XenkoCurrentPackagePath>$(MSBuildThisFileDirectory)Xenko.Input.Tests.xkpkg</XenkoCurrentPackagePath>
+    <XenkoCurrentPackagePath>$(MSBuildThisFileDirectory)Xenko.Input.Tests.sdpkg</XenkoCurrentPackagePath>
     <OutputPath>..\..\..\Bin\$(XenkoPlatformFullName)\$(XenkoOutputFolder)</OutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(XenkoPlatformFullName)-$(XenkoGraphicsApi)\$(Configuration)</IntermediateOutputPath>
   </PropertyGroup>
@@ -99,17 +99,17 @@
     <Compile Include="TestDirection.cs" />
     <Compile Include="TestInput.cs" />
     <Compile Include="TestInputEvents.cs" />
-    <None Include="GameAssets\Arial.xkfnt" />
-    <None Include="GameAssets\Font.xkfnt" />
-    <None Include="GameAssets\GameSettings.xkgamesettings" />
-    <None Include="GameAssets\MainScene.xkscene" />
-    <None Include="GameAssets\Material.xkmat" />
-    <None Include="GameAssets\ProceduralModel.xkpromodel" />
-    <None Include="GameAssets\round.xktex" />
-    <None Include="GameAssets\small_uv.xktex" />
-    <None Include="GameAssets\SpriteSheet.xksheet" />
-    <None Include="GameAssets\Teapot.xkpromodel" />
-    <None Include="Xenko.Input.Tests.xkpkg" />
+    <None Include="GameAssets\Arial.sdfnt" />
+    <None Include="GameAssets\Font.sdfnt" />
+    <None Include="GameAssets\GameSettings.sdgamesettings" />
+    <None Include="GameAssets\MainScene.sdscene" />
+    <None Include="GameAssets\Material.sdmat" />
+    <None Include="GameAssets\ProceduralModel.sdpromodel" />
+    <None Include="GameAssets\round.sdtex" />
+    <None Include="GameAssets\small_uv.sdtex" />
+    <None Include="GameAssets\SpriteSheet.sdsheet" />
+    <None Include="GameAssets\Teapot.sdpromodel" />
+    <None Include="Xenko.Input.Tests.sdpkg" />
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

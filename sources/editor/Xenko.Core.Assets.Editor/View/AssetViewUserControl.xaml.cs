@@ -5,7 +5,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Xceed.Wpf.Toolkit.Core;
 using Xenko.Core.Assets.Editor.View.Controls;
 using Xenko.Core.Assets.Editor.ViewModel;
 using Xenko.Core.Presentation.Collections;
@@ -308,12 +307,6 @@ namespace Xenko.Core.Assets.Editor.View
         {
             var control = (AssetViewUserControl)sender;
             e.CanExecute = control.CanBeginEdit();
-        }
-
-        private static void CanBeginEditEvent(object sender, CancelRoutedEventArgs e)
-        {
-            var control = (AssetViewUserControl)sender;
-            e.Cancel = !control.CanBeginEdit();
         }
 
         private static void BeginEdit(object sender, ExecutedRoutedEventArgs e)

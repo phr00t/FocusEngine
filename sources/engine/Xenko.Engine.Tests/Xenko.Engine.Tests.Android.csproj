@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <!--Import Local Pre Settings for the solution being loaded -->
-  <Import Project="..\..\targets\Xenko.PreSettings.UnitTests.targets" />
+  <Import Project="..\..\targets\Xenko.UnitTests.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -35,7 +35,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
-    <XenkoCurrentPackagePath>$(MSBuildThisFileDirectory)Xenko.Engine.Tests.xkpkg</XenkoCurrentPackagePath>
+    <XenkoCurrentPackagePath>$(MSBuildThisFileDirectory)Xenko.Engine.Tests.sdpkg</XenkoCurrentPackagePath>
     <OutputPath>..\..\..\Bin\$(XenkoPlatformFullName)\$(XenkoOutputFolder)</OutputPath>
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(XenkoPlatformFullName)-$(XenkoGraphicsApi)\$(Configuration)</IntermediateOutputPath>
   </PropertyGroup>
@@ -120,48 +120,48 @@
     <None Include="effects_test.xml">
       <SubType>Designer</SubType>
     </None>
-    <None Include="GameAssets\01-Default.xkmat" />
-    <None Include="GameAssets\BallSprite1.xksheet" />
-    <None Include="GameAssets\BallSprite2.xksheet" />
-    <None Include="GameAssets\BasicDisplacementMap.xktex" />
-    <None Include="GameAssets\c100_body_cm.xktex" />
-    <None Include="GameAssets\c100_body_em.xktex" />
-    <None Include="GameAssets\c100_body_nm.xktex" />
-    <None Include="GameAssets\c100_body_sp.xktex" />
-    <None Include="GameAssets\c100_chr_ch00_Knight_KINGHT.xkmat" />
-    <None Include="GameAssets\c100_chr_ch00_Knight_KINGHT_iron.xkmat" />
-    <None Include="GameAssets\c100_chr_ch00_Knight_SWORD1.xkmat" />
-    <None Include="GameAssets\c100_weapon_cm.xktex" />
-    <None Include="GameAssets\c100_weapon_nm.xktex" />
-    <None Include="GameAssets\c100_weapon_sp.xktex" />
-    <None Include="GameAssets\CobbleDisplacementMap.xktex" />
-    <None Include="GameAssets\Cube\cube Model Skeleton.xkskel" />
-    <None Include="GameAssets\Cube\cube Model.xkm3d" />
-    <None Include="GameAssets\Cube\cube_Untitled.xktex" />
-    <None Include="GameAssets\Cube\lambert1.xkmat" />
-    <None Include="GameAssets\DebugSpriteSheet.xksheet" />
-    <None Include="GameAssets\FlatTessellation.xkmat" />
-    <None Include="GameAssets\FlatTessellationDispl.xkmat" />
-    <None Include="GameAssets\FlatTessellationDisplAE.xkmat" />
-    <None Include="GameAssets\Font.xkfnt" />
-    <None Include="GameAssets\GameSettings.xkgamesettings" />
-    <None Include="GameAssets\GraphicsCompositor.xkgfxcomp" />
-    <None Include="GameAssets\GroundSprite.xksheet" />
-    <None Include="GameAssets\knight Idle.xkanim" />
-    <None Include="GameAssets\knight Model.xkm3d" />
-    <None Include="GameAssets\knight Run.xkanim" />
-    <None Include="GameAssets\knight Skeleton.xkskel" />
-    <None Include="GameAssets\MainScene.xkscene" />
-    <None Include="GameAssets\megalodon Model.xkm3d" />
-    <None Include="GameAssets\megalodon.xktex" />
-    <None Include="GameAssets\NoTessellation.xkmat" />
-    <None Include="GameAssets\PNTessellation.xkmat" />
-    <None Include="GameAssets\PNTessellationAE.xkmat" />
-    <None Include="GameAssets\PNTessellationDisplAE.xkmat" />
-    <None Include="GameAssets\RotationSheet.xksheet" />
-    <None Include="GameAssets\Sphere1.xktex" />
-    <None Include="GameAssets\Sphere2.xktex" />
-    <None Include="Xenko.Engine.Tests.xkpkg" />
+    <None Include="GameAssets\01-Default.sdmat" />
+    <None Include="GameAssets\BallSprite1.sdsheet" />
+    <None Include="GameAssets\BallSprite2.sdsheet" />
+    <None Include="GameAssets\BasicDisplacementMap.sdtex" />
+    <None Include="GameAssets\c100_body_cm.sdtex" />
+    <None Include="GameAssets\c100_body_em.sdtex" />
+    <None Include="GameAssets\c100_body_nm.sdtex" />
+    <None Include="GameAssets\c100_body_sp.sdtex" />
+    <None Include="GameAssets\c100_chr_ch00_Knight_KINGHT.sdmat" />
+    <None Include="GameAssets\c100_chr_ch00_Knight_KINGHT_iron.sdmat" />
+    <None Include="GameAssets\c100_chr_ch00_Knight_SWORD1.sdmat" />
+    <None Include="GameAssets\c100_weapon_cm.sdtex" />
+    <None Include="GameAssets\c100_weapon_nm.sdtex" />
+    <None Include="GameAssets\c100_weapon_sp.sdtex" />
+    <None Include="GameAssets\CobbleDisplacementMap.sdtex" />
+    <None Include="GameAssets\Cube\cube Model Skeleton.sdskel" />
+    <None Include="GameAssets\Cube\cube Model.sdm3d" />
+    <None Include="GameAssets\Cube\cube_Untitled.sdtex" />
+    <None Include="GameAssets\Cube\lambert1.sdmat" />
+    <None Include="GameAssets\DebugSpriteSheet.sdsheet" />
+    <None Include="GameAssets\FlatTessellation.sdmat" />
+    <None Include="GameAssets\FlatTessellationDispl.sdmat" />
+    <None Include="GameAssets\FlatTessellationDisplAE.sdmat" />
+    <None Include="GameAssets\Font.sdfnt" />
+    <None Include="GameAssets\GameSettings.sdgamesettings" />
+    <None Include="GameAssets\GraphicsCompositor.sdgfxcomp" />
+    <None Include="GameAssets\GroundSprite.sdsheet" />
+    <None Include="GameAssets\knight Idle.sdanim" />
+    <None Include="GameAssets\knight Model.sdm3d" />
+    <None Include="GameAssets\knight Run.sdanim" />
+    <None Include="GameAssets\knight Skeleton.sdskel" />
+    <None Include="GameAssets\MainScene.sdscene" />
+    <None Include="GameAssets\megalodon Model.sdm3d" />
+    <None Include="GameAssets\megalodon.sdtex" />
+    <None Include="GameAssets\NoTessellation.sdmat" />
+    <None Include="GameAssets\PNTessellation.sdmat" />
+    <None Include="GameAssets\PNTessellationAE.sdmat" />
+    <None Include="GameAssets\PNTessellationDisplAE.sdmat" />
+    <None Include="GameAssets\RotationSheet.sdsheet" />
+    <None Include="GameAssets\Sphere1.sdtex" />
+    <None Include="GameAssets\Sphere2.sdtex" />
+    <None Include="Xenko.Engine.Tests.sdpkg" />
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />

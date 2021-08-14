@@ -8,7 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
+using ServiceWire.NamedPipes;
 using Xenko.Core;
 
 namespace Xenko.ExecServer
@@ -171,7 +171,7 @@ namespace Xenko.ExecServer
         /// <param name="logger">The logger.</param>
         /// <returns>System.Int32.</returns>
         /// <exception cref="System.InvalidOperationException">Must call TryLock before calling this method</exception>
-        public int Run(string workingDirectory, Dictionary<string, string> environmentVariables, string[] args, IServerLogger logger)
+        public int Run(string workingDirectory, Dictionary<string, string> environmentVariables, string[] args, NpClient<IServerLogger> callbackChannel)
         {
             if (!isRunning)
             {
@@ -181,23 +181,21 @@ namespace Xenko.ExecServer
             try
             {
                 lastRunTime = DateTime.Now;
-                using (var appDomainRedirectLogger = new AppDomainRedirectLogger(logger))
-                {
-                    appDomainCallback.Logger = appDomainRedirectLogger;
-                    appDomainCallback.CurrentDirectory = workingDirectory;
-                    appDomainCallback.EnvironmentVariables = environmentVariables;
-                    appDomainCallback.Arguments = args;
-                    appDomain.DoCallBack(appDomainCallback.Run);
-                    var result = appDomain.GetData("Result") as int?;
+                appDomainCallback.CallbackChannel = callbackChannel;
+                appDomainCallback.CurrentDirectory = workingDirectory;
+                appDomainCallback.EnvironmentVariables = environmentVariables;
+                appDomainCallback.Arguments = args;
+                throw new NotImplementedException();
+                //appDomain.DoCallBack(appDomainCallback.Run);
+                var result = appDomain.GetData("Result") as int?;
 
-                    //var result = appDomain.ExecuteAssembly(mainAssemblyPath, args);
-                    Console.WriteLine("Return result: {0}", result);
-                    return result ?? -1;
-                }
+                //var result = appDomain.ExecuteAssembly(mainAssemblyPath, args);
+                Console.WriteLine("Return result: {0}", result);
+                return result ?? -1;
             }
             catch (Exception exception)
             {
-                logger.OnLog(string.Format("Unexpected exception: {0}", exception), ConsoleColor.Red);
+                callbackChannel.Proxy.OnLog(string.Format("Unexpected exception: {0}", exception), ConsoleColor.Red);
                 return 1;
             }
             finally
@@ -271,7 +269,8 @@ namespace Xenko.ExecServer
                     }
 
                     // Register our native path
-                    NativeLibraryInternal.SetShadowPathForNativeDll(appDomain, file.Name, Path.GetDirectoryName(shadowDllPath));
+                    throw new NotImplementedException();
+                    //NativeLibrary.SetShadowPathForNativeDll(appDomain, file.Name, Path.GetDirectoryName(shadowDllPath));
 
                     // Register this dll 
                     RegisterFileLoaded(file);
@@ -380,6 +379,8 @@ namespace Xenko.ExecServer
 
         private void CreateAppDomain()
         {
+            throw new NotImplementedException();
+            /*
             var appDomainSetup = new AppDomainSetup
             {
                 ApplicationBase = applicationPath,
@@ -407,6 +408,7 @@ namespace Xenko.ExecServer
 
             // Install the appDomainCallback to prepare the new app domain
             appDomain.DoCallBack(appDomainCallback.RegisterAssemblyLoad);
+            */
         }
 
         private struct FileLoaded
@@ -454,7 +456,7 @@ namespace Xenko.ExecServer
                 this.executablePath = executablePath;
             }
 
-            public IServerLogger Logger { get; set; }
+            public NpClient<IServerLogger> CallbackChannel { get; set; }
 
             public string CurrentDirectory { get; set; }
 
@@ -493,7 +495,7 @@ namespace Xenko.ExecServer
                 foreach (var environmentVariable in EnvironmentVariables)
                     Environment.SetEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
 
-                currentDomain.SetData(AppDomainLogToActionKey, new Action<string, ConsoleColor>((text, color) => Logger.OnLog(text, color)));
+                currentDomain.SetData(AppDomainLogToActionKey, new Action<string, ConsoleColor>((text, color) => CallbackChannel.Proxy.OnLog(text, color)));
                 var assembly = (Assembly)currentDomain.GetData(AppDomainExecServerEntryAssemblyKey);
                 AppDomain.CurrentDomain.SetData("Result", currentDomain.ExecuteAssemblyByName(assembly.FullName, Arguments));
                 //AppDomain.CurrentDomain.SetData("Result", Convert.ToInt32(assembly.EntryPoint.Invoke(null, new object[] { Arguments })));
@@ -510,30 +512,6 @@ namespace Xenko.ExecServer
                     // This method will be executed in the ExecServer application domain
                     callback(assembly.Location);
                 }
-            }
-        }
-
-        private sealed class AppDomainRedirectLogger : MarshalByRefObject, IServerLogger, IDisposable
-        {
-            private IServerLogger logger;
-
-            public AppDomainRedirectLogger(IServerLogger logger)
-            {
-                this.logger = logger;
-            }
-
-            public void OnLog(string text, ConsoleColor color)
-            {
-                var localLogger = logger;
-                if (localLogger != null)
-                {
-                    Task.Factory.StartNew(() => localLogger.OnLog(text, color));
-                }
-            }
-
-            public void Dispose()
-            {
-                logger = null;
             }
         }
 

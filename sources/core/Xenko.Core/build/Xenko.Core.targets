@@ -1,22 +1,22 @@
-<Project InitialTargets="_XenkoCheckVisualCRuntime2015" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <!-- Check if Visual C++ Runtime 2015 is properly installed -->
-  <Target Name="_XenkoCheckVisualCRuntime2015" Condition="'$(MSBuildRuntimeType)' == 'Full'">
+<Project InitialTargets="_XenkoCheckVisualCRuntime2019" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Check if Visual C++ Runtime 2019 is properly installed -->
+  <Target Name="_XenkoCheckVisualCRuntime2019" Condition="'$(MSBuildRuntimeType)' == 'Full'">
     <ItemGroup>
-      <_XenkoVisualCRuntime2015 Include="Visual C++ Redistributable for Visual Studio 2015 x86">
+      <_XenkoVisualCRuntime2019 Include="Visual C++ Redistributable for Visual Studio 2019 x86">
         <Version>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\DevDiv\VC\Servicing\14.0\RuntimeMinimum', 'Version', null, RegistryView.Registry32))</Version>
-        <ExpectedVersion>14.0.23026</ExpectedVersion>
-        <DownloadUrl>http://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x86.exe</DownloadUrl>
-      </_XenkoVisualCRuntime2015>
-      <_XenkoVisualCRuntime2015 Include="Visual C++ Redistributable for Visual Studio 2015 x64">
+        <ExpectedVersion>14.22.27821</ExpectedVersion>
+        <DownloadUrl>https://download.visualstudio.microsoft.com/download/pr/0c1cfec3-e028-4996-8bb7-0c751ba41e32/1abed1573f36075bfdfc538a2af00d37/vc_redist.x86.exe</DownloadUrl>
+      </_XenkoVisualCRuntime2019>
+      <_XenkoVisualCRuntime2019 Include="Visual C++ Redistributable for Visual Studio 2019 x64">
         <Version>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\DevDiv\VC\Servicing\14.0\RuntimeMinimum', 'Version', null, RegistryView.Registry64))</Version>
-        <ExpectedVersion>14.0.23026</ExpectedVersion>
-        <DownloadUrl>http://download.microsoft.com/download/9/3/F/93FCF1E7-E6A4-478B-96E7-D4B285925B00/vc_redist.x64.exe</DownloadUrl>
-      </_XenkoVisualCRuntime2015>
+        <ExpectedVersion>14.22.27821</ExpectedVersion>
+        <DownloadUrl>https://download.visualstudio.microsoft.com/download/pr/cc0046d4-e7b4-45a1-bd46-b1c079191224/9c4042a4c2e6d1f661f4c58cf4d129e9/vc_redist.x64.exe</DownloadUrl>
+      </_XenkoVisualCRuntime2019>
 
-      <_XenkoVisualCRuntime2015NotInstalled Include="@(_XenkoVisualCRuntime2015)" Condition="'%(_XenkoVisualCRuntime2015.Version)' == '' Or $([System.Version]::Parse('%(Version)').CompareTo($([System.Version]::Parse('%(_XenkoVisualCRuntime2015.ExpectedVersion)')))) &lt; 0" />
+      <_XenkoVisualCRuntime2019NotInstalled Include="@(_XenkoVisualCRuntime2019)" Condition="'%(_XenkoVisualCRuntime2019.Version)' == '' Or $([System.Version]::Parse('%(Version)').CompareTo($([System.Version]::Parse('%(_XenkoVisualCRuntime2019.ExpectedVersion)')))) &lt; 0" />
     </ItemGroup>
 
-    <Error Condition="'@(_XenkoVisualCRuntime2015NotInstalled)' != ''" Text="@(_XenkoVisualCRuntime2015NotInstalled->'%(Identity) is not installed. Please download from %(DownloadUrl)', '%0a')"/>
+    <Error Condition="'@(_XenkoVisualCRuntime2019NotInstalled)' != ''" Text="@(_XenkoVisualCRuntime2019NotInstalled->'%(Identity) is not installed. Please download from %(DownloadUrl)', '%0a')"/>
   </Target>
   
   <!-- 
@@ -25,21 +25,11 @@
   *****************************************************************************************************************************
   -->
   <PropertyGroup>
-    <!-- Windows10 was renammed into UWP -->
-    <XenkoPlatform Condition="'$(XenkoPlatform)' == 'Windows10'">UWP</XenkoPlatform>
     <!-- Default mappings -->
     <XenkoPlatform Condition="'$(XenkoPlatform)' == '' And '$(TargetPlatformIdentifier)' == 'UAP'">UWP</XenkoPlatform>
     <XenkoPlatform Condition="'$(XenkoPlatform)' == '' And '$(TargetFrameworkIdentifier)' == 'MonoAndroid'">Android</XenkoPlatform>
     <XenkoPlatform Condition="'$(XenkoPlatform)' == '' And '$(TargetFrameworkIdentifier)' == 'Xamarin.iOS'">iOS</XenkoPlatform>
-    <XenkoPlatform Condition="'$(XenkoPlatform)' == '' And $(RuntimeIdentifier.StartsWith('linux'))">Linux</XenkoPlatform>
-    <XenkoPlatform Condition="'$(XenkoPlatform)' == '' And $(RuntimeIdentifier.StartsWith('osx'))">macOS</XenkoPlatform>
     <XenkoPlatform Condition="'$(XenkoPlatform)' == ''">Windows</XenkoPlatform>
-  </PropertyGroup>
-
-  <!-- If not set, Android executable doesn't work properly because ResolveNuGetPackageAssets has no NuGetRuntimeIdentifier and use only the ref assemblies -->
-  <PropertyGroup Condition="'$(XenkoPlatform)' == 'Android' And '$(AndroidApplication)' == 'true'">
-    <RuntimeIdentifier>win</RuntimeIdentifier>
-    <NuGetRuntimeIdentifier>win</NuGetRuntimeIdentifier>
   </PropertyGroup>
 
   <!-- 
@@ -50,10 +40,22 @@
   <PropertyGroup>
     <!--By default, turn on assembly processor-->
     <XenkoAssemblyProcessor Condition="'$(XenkoAssemblyProcessor)' == ''">true</XenkoAssemblyProcessor>
-    <XenkoAssemblyProcessorPath Condition="Exists('$(MSBuildThisFileDirectory)..\tools\AssemblyProcessor\Xenko.Core.AssemblyProcessor.Packed2.exe')">$(MSBuildThisFileDirectory)..\tools\AssemblyProcessor\Xenko.Core.AssemblyProcessor.Packed2.exe</XenkoAssemblyProcessorPath>
-    <XenkoAssemblyProcessorPath Condition="Exists('$(MSBuildThisFileDirectory)..\..\..\..\deps\AssemblyProcessor\Xenko.Core.AssemblyProcessor.Packed2.exe')">$(MSBuildThisFileDirectory)..\..\..\..\deps\AssemblyProcessor\Xenko.Core.AssemblyProcessor.Packed2.exe</XenkoAssemblyProcessorPath>
+    <XenkoAssemblyProcessorFramework>net5.0</XenkoAssemblyProcessorFramework>
+    <XenkoAssemblyProcessorExt>.dll</XenkoAssemblyProcessorExt>
+    <XenkoAssemblyProcessorBasePath Condition="Exists('$(MSBuildThisFileDirectory)..\tools\AssemblyProcessor\$(XenkoAssemblyProcessorFramework)\Xenko.Core.AssemblyProcessor.Packed$(XenkoAssemblyProcessorExt)')">$(MSBuildThisFileDirectory)..\tools\AssemblyProcessor\$(XenkoAssemblyProcessorFramework)\</XenkoAssemblyProcessorBasePath>
+    <XenkoAssemblyProcessorBasePath Condition="Exists('$(MSBuildThisFileDirectory)..\..\..\..\deps\AssemblyProcessor\$(XenkoAssemblyProcessorFramework)\Xenko.Core.AssemblyProcessor.Packed$(XenkoAssemblyProcessorExt)')">$(MSBuildThisFileDirectory)..\..\..\..\deps\AssemblyProcessor\$(XenkoAssemblyProcessorFramework)\</XenkoAssemblyProcessorBasePath>
+    <XenkoAssemblyProcessorPath>$(XenkoAssemblyProcessorBasePath)Xenko.Core.AssemblyProcessor.Packed$(XenkoAssemblyProcessorExt)</XenkoAssemblyProcessorPath>
+    <XenkoAssemblyProcessorSerializationHashFile>$(IntermediateOutputPath)$(TargetName).sdserializationhash</XenkoAssemblyProcessorSerializationHashFile>
+
+    <TempFolder>$(TEMP)</TempFolder>
+    <TempFolder Condition="'$(TempFolder)' == ''">$(TMPDIR)</TempFolder>
+    <TempFolder Condition="'$(TempFolder)' == ''">/tmp</TempFolder>
+    
+    <XenkoAssemblyProcessorHash>$([System.IO.File]::ReadAllText('$(XenkoAssemblyProcessorPath).hash'))</XenkoAssemblyProcessorHash>
+    <XenkoAssemblyProcessorTempBasePath>$(TempFolder)\Xenko\AssemblyProcessor\$(XenkoAssemblyProcessorFramework)\$(XenkoAssemblyProcessorHash)\</XenkoAssemblyProcessorTempBasePath>
+    <XenkoAssemblyProcessorTempPath>$(XenkoAssemblyProcessorTempBasePath)Xenko.Core.AssemblyProcessor.Packed$(XenkoAssemblyProcessorExt)</XenkoAssemblyProcessorTempPath>
   </PropertyGroup>
-  <UsingTask TaskName="AssemblyProcessorTask" AssemblyFile="$(XenkoAssemblyProcessorPath)" Condition=" '$(XenkoAssemblyProcessorPath)' != '' And '$(XenkoAssemblyProcessorDev)' != 'true' "/>
+  <UsingTask TaskName="AssemblyProcessorTask" AssemblyFile="$(XenkoAssemblyProcessorTempPath)" Condition=" '$(XenkoAssemblyProcessorTempPath)' != '' And '$(XenkoAssemblyProcessorDev)' != 'true' "/>
   <Target Name="XenkoRunAssemblyProcessor" DependsOnTargets="ResolveAssemblyReferences">
     <WriteLinesToFile File="$(IntermediateOutputPath)XenkoReferences.cache" Lines="@(ReferencePath)" Overwrite="true" />
     <ItemGroup>
@@ -76,12 +78,18 @@
       <XenkoAssemblyProcessorOptions>$(XenkoAssemblyProcessorOptions) --platform=$(XenkoPlatform) --targetFramework=$(XenkoNETFrameworkVersion) "$(IntermediateOutputPath)$(TargetName)$(TargetExt)"</XenkoAssemblyProcessorOptions>
       <XenkoAssemblyProcessorOptions Condition="'$(AssemblyOriginatorKeyFile)' != ''">$(XenkoAssemblyProcessorOptions) --signkeyfile="$(AssemblyOriginatorKeyFile)" --delete-on-error</XenkoAssemblyProcessorOptions>
     </PropertyGroup>
-    
+
+    <!-- Copy task to temp directory (otherwise MSBuild lock the task file and we can't reinstall package in dev mode) -->
+    <ItemGroup>
+      <XenkoAssemblyProcessorFilesToCopy Include="$(XenkoAssemblyProcessorBasePath)*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(XenkoAssemblyProcessorFilesToCopy)" DestinationFolder="$(XenkoAssemblyProcessorTempBasePath)" Condition="!Exists('$(XenkoAssemblyProcessorTempPath)')" />
+
     <!-- Run assembly processor -->
-    <Message Condition=" '$(XenkoAssemblyProcessorDev)' != 'true' " Importance="low" Text="&quot;$(XenkoAssemblyProcessorPath)&quot; $(XenkoAssemblyProcessorOptions)"/>
+    <Message Condition=" '$(XenkoAssemblyProcessorDev)' != 'true' " Importance="low" Text="&quot;$(XenkoAssemblyProcessorTempPath)&quot; $(XenkoAssemblyProcessorOptions)"/>
     <AssemblyProcessorTask Condition=" '$(XenkoAssemblyProcessorDev)' != 'true' " Arguments="$(XenkoAssemblyProcessorOptions)"/>
     <!-- Dev mode: don't use task to avoid locking the file -->
-    <Exec Condition=" '$(XenkoAssemblyProcessorDev)' == 'true' " Command="&quot;$(XenkoAssemblyProcessorPath)&quot; $(XenkoAssemblyProcessorOptions)"/>
+    <Exec Condition=" '$(XenkoAssemblyProcessorDev)' == 'true' " Command="&quot;$(XenkoAssemblyProcessorTempPath)&quot; $(XenkoAssemblyProcessorOptions)"/>
   </Target>
   <PropertyGroup Condition=" '$(XenkoAssemblyProcessor)' == 'true'">
     <PrepareForRunDependsOn>

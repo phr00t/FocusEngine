@@ -1,23 +1,23 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">16.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\build\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <TargetVsixContainerName>Xenko.vsix</TargetVsixContainerName>
     <TargetVsixContainer>bin\$(TargetVsixContainerName)</TargetVsixContainer>
     <RootNamespace>Xenko.VisualStudio</RootNamespace>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <XenkoAssemblyProcessor>false</XenkoAssemblyProcessor>
     <XenkoBuildTags>WindowsTools</XenkoBuildTags>
     <XenkoSkipAutoPack>true</XenkoSkipAutoPack>
     <VSSDKTargetPlatformRegRootSuffix>Xenko</VSSDKTargetPlatformRegRootSuffix>
+    <DefineConstants>$(DefineConstants);XENKO_VSPACKAGE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="NShader\Common\GLSLKeywords.map" />
@@ -31,13 +31,16 @@
     <PackageReference Include="Microsoft.VisualStudio.Language.StandardClassification" Version="14.0.23205" />
     <PackageReference Include="Microsoft.VisualStudio.Package.LanguageService.14.0" Version="14.0.23205" />
     <PackageReference Include="Microsoft.VisualStudio.Shell.Interop.14.0.DesignTime" Version="14.0.25023" />
-    <PackageReference Include="VSLangProj" Version="16.7.30508.193" />
+    <PackageReference Include="VSLangProj" Version="7.0.3301" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools" Version="15.0.26201" />
+    <PackageReference Include="Microsoft.Build" Version="16.0.461" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.0.461" ExcludeAssets="runtime" />
+    <PackageReference Include="NuGet.Commands" Version="5.8.0" />
+    <PackageReference Include="System.Resources.Extensions" Version="4.6.0" />
+    
 
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Design" />
-    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="PresentationCore" />
@@ -46,19 +49,52 @@
     <Reference Include="System.Xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\assets\Xenko.Core.Assets\PackageSessionHelper.Solution.cs">
+    <!--<Compile Include="..\..\assets\Xenko.Core.Assets\PackageSessionHelper.Solution.cs">
       <Link>Assets\PackageSessionHelper.Solution.cs</Link>
     </Compile>
+    <Compile Include="..\..\core\Xenko.Core.Design\Extensions\ExceptionExtensions.cs" Link="Assets\ExceptionExtensions.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\PackageVersion.cs" Link="Core\PackageVersion.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\KeyedCollectionExtensions.cs" Link="Core\VisualStudio\KeyedCollectionExtensions.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\KnownProjectTypeGuid.cs" Link="Core\VisualStudio\KnownProjectTypeGuid.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\Project.cs" Link="Core\VisualStudio\Project.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\ProjectCollection.cs" Link="Core\VisualStudio\ProjectCollection.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\PropertyItem.cs" Link="Core\VisualStudio\PropertyItem.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\PropertyItemCollection.cs" Link="Core\VisualStudio\PropertyItemCollection.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\Section.cs" Link="Core\VisualStudio\Section.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\SectionCollection.cs" Link="Core\VisualStudio\SectionCollection.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\Solution.cs" Link="Core\VisualStudio\Solution.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\SolutionFileException.cs" Link="Core\VisualStudio\SolutionFileException.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\SolutionReader.cs" Link="Core\VisualStudio\SolutionReader.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Design\VisualStudio\SolutionWriter.cs" Link="Core\VisualStudio\SolutionWriter.cs" />
+    <Compile Include="..\..\core\Xenko.Core\ScalarStyle.cs" Link="Yaml\ScalarStyle.cs" />
+    <Compile Include="..\..\core\Xenko.Core\DataStyle.cs" Link="Yaml\DataStyle.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\*.cs" Link="Yaml\%(Filename)%(Extension).cs" />-->
+    <!--<Compile Include="..\..\core\Xenko.Core.Yaml\ILookAheadBuffer.cs" Link="Yaml\ILookAheadBuffer.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\LookAheadBuffer.cs" Link="Yaml\LookAheadBuffer.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\Mark.cs" Link="Yaml\Mark.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\Emitter.cs" Link="Yaml\Emitter.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\EmitterState.cs" Link="Yaml\EmitterState.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\IEmitter.cs" Link="Yaml\IEmitter.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\CharacterAnalyzer.cs" Link="Yaml\CharacterAnalyzer.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\SimpleKey.cs" Link="Yaml\SimpleKey.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\YamlException.cs" Link="Yaml\YamlException.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\SyntaxErrorException.cs" Link="Yaml\SyntaxErrorException.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\InsertionQueue.cs" Link="Yaml\InsertionQueue.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\TagDirectiveCollection.cs" Link="Yaml\TagDirectiveCollection.cs" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\Version.cs" Link="Yaml\Version.cs" />-->
+    <!--<Compile Include="..\..\core\Xenko.Core.Yaml\Schemas\*.cs" Link="Yaml\Schemas\%(Filename)%(Extension)" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\Tokens\*.cs" Link="Yaml\Tokens\%(Filename)%(Extension)" />
+    <Compile Include="..\..\core\Xenko.Core.Yaml\Events\*.cs" Link="Yaml\Events\%(Filename)%(Extension)" />
+    <Compile Include="..\..\core\Xenko.Core\Annotations\CanBeNullAttribute.cs" Link="Core\Annotations\CanBeNullAttribute.cs" />
+    <Compile Include="..\..\core\Xenko.Core\Annotations\ItemNotNullAttribute.cs" Link="Core\Annotations\ItemNotNullAttribute.cs" />
+    <Compile Include="..\..\core\Xenko.Core\Annotations\NotNullAttribute.cs" Link="Core\Annotations\NotNullAttribute.cs" />
+    <Compile Include="..\..\shared\AttachedChildProcessJob.cs" Link="Commands\AttachedChildProcessJob.cs" />
     <Compile Include="..\..\shared\Xenko.NuGetResolver\RestoreHelper.cs" Link="NuGet\RestoreHelper.cs" />
+    <Compile Include="..\..\core\Xenko.Core\Diagnostics\LoggerResult.cs" Link="Diagnostics\LoggerResult.cs" />-->
   </ItemGroup>
   <ItemGroup>
     <Compile Update="MyControl.xaml.cs">
       <DependentUpon>MyControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="BuildEngine\OutputClassifier.Partial.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>OutputClassifier.Partial.tt</DependentUpon>
     </Compile>
     <Compile Update="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -78,10 +114,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="BuildEngine\OutputClassifier.Partial.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>OutputClassifier.Partial.cs</LastGenOutput>
-    </None>
     <EmbeddedResource Update="NShader\Common\GLSLKeywords.map" />
     <EmbeddedResource Update="NShader\Common\HLSLKeywords.map" />
     <EmbeddedResource Update="NShader\Common\XenkoShaderKeywords.map" />
@@ -101,14 +133,13 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Images.png" />
+    <None Include="Resources\VSPackage16.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Logo.ico">
+    <Content Include="Resources\VSPackage.ico">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="NShader\Common\ShaderMPLexer.lst" />
-    <Content Include="Resources\Package.ico" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="NShader\Common\GLSLKeywords.map" />
@@ -125,29 +156,29 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Note: we need to include those manually otherwise we run into this issue: https://stackoverflow.com/questions/41832161/missing-builtprojectoutputgroupdependencies-building-vsix-depending-on-new-sim -->
-    <ProjectReference Include="..\..\core\Xenko.Core\Xenko.Core.csproj" AdditionalProperties="TargetFramework=netstandard2.0" />
-    <ProjectReference Include="..\..\core\Xenko.Core.Mathematics\Xenko.Core.Mathematics.csproj" AdditionalProperties="TargetFramework=netstandard2.0" />
-    <ProjectReference Include="..\..\core\Xenko.Core.IO\Xenko.Core.IO.csproj" AdditionalProperties="TargetFramework=netstandard2.0" />
-    <ProjectReference Include="..\..\core\Xenko.Core.MicroThreading\Xenko.Core.MicroThreading.csproj" AdditionalProperties="TargetFramework=netstandard2.0" />
-    <ProjectReference Include="..\..\core\Xenko.Core.Serialization\Xenko.Core.Serialization.csproj" AdditionalProperties="TargetFramework=netstandard2.0" />
-    <ProjectReference Include="..\..\assets\Xenko.Core.Assets\Xenko.Core.Assets.csproj" AdditionalProperties="TargetFramework=$(TargetFramework)" />
-  </ItemGroup>
-  <ItemGroup>
+    <Folder Include="Core\Annotations\" />
+    <Folder Include="Core\" />
+    <Folder Include="Yaml\" />
     <Folder Include="NuGet\" />
   </ItemGroup>
-  <Import Project="..\..\assets\Xenko.Core.Assets.Yaml\Xenko.Core.Assets.Yaml.projitems" Label="Shared" />
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\Xenko.Core.Yaml\Xenko.Core.Yaml.csproj" />
+    <ProjectReference Include="..\Xenko.VisualStudio.Commands.Interfaces\Xenko.VisualStudio.Commands.Interfaces.csproj">
+      <AdditionalProperties>TargetFramework=net472</AdditionalProperties>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <UseCodebase>true</UseCodebase>
-    <GetVsixSourceItemsDependsOn>$(GetVsixSourceItemsDependsOn);IncludeExtraAssemblies</GetVsixSourceItemsDependsOn>
+    <GetVsixSourceItemsDependsOn>$(GetVsixSourceItemsDependsOn);_XenkoIncludeExtraAssemblies</GetVsixSourceItemsDependsOn>
   </PropertyGroup>
-  <Target Name="IncludeExtraAssemblies">
+  <Target Name="_XenkoIncludeExtraAssemblies">
     <ItemGroup>
       <VSIXCopyLocalReferenceSourceItem Include="$(TargetDir)\NuGet.*.dll" />
+      <VSIXCopyLocalReferenceSourceItem Include="$(TargetDir)\ServiceWire.dll" />
+      <VSIXCopyLocalReferenceSourceItem Include="$(TargetDir)\Newtonsoft.Json.dll" />
     </ItemGroup>
   </Target>
-  <Import Project="$(XenkoPostSettingsTargets)" />
+  <Import Project="$(XenkoSdkTargets)" />
   <!-- Force NET Sdk to be included before VsSDK -->
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="Exists('$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets')" />
 </Project>

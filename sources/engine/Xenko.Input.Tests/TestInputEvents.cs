@@ -64,20 +64,16 @@ namespace Xenko.Input.Tests
                 LogEvent(evt.ToString(), GetLogColor(evt));
             }
 
-#if XENKO_PLATFORM_WINDOWS
             WriteLine($"Raw input: {Input.UseRawInput} (Ctrl+R to toggle)");
-#endif
             WriteLine($"Locked mouse position: {Input.IsMousePositionLocked} (Ctrl+E to toggle)");
 
             if ((Input.IsKeyDown(Keys.LeftCtrl) || Input.IsKeyDown(Keys.RightCtrl)))
             {
-#if XENKO_PLATFORM_WINDOWS
                 // Toggle raw input
                 if (Input.IsKeyPressed(Keys.R))
                 {
                     Input.UseRawInput = !Input.UseRawInput;
                 }
-#endif
                 // Toggle mouse lock
                 if (Input.IsKeyPressed(Keys.E))
                 {

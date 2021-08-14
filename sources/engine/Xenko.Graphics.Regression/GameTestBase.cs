@@ -354,14 +354,12 @@ namespace Xenko.Graphics.Regression
             // TODO: This doesn't work well because ImageTester.ImageTestResultConnection is static, this will need improvements
             //if (!ImageTester.ImageTestResultConnection.DeviceName.Contains("_"))
             //    ImageTester.ImageTestResultConnection.DeviceName += "_" + GraphicsDevice.Adapter.Description.Split('\0')[0].TrimEnd(' '); // Workaround for sharpDX bug: Description ends with an series trailing of '\0' characters
-
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
-            var platformSpecific = $"Windows_{GraphicsDevice.Platform}_{GraphicsDevice.Adapter.Description.Split('\0')[0].TrimEnd(' ')}";
-#else
-            var platformSpecific = string.Empty;
-            throw new NotImplementedException();
-#endif
-
+            string platformSpecific;
+            if (Platform.Type == PlatformType.Windows)
+                platformSpecific = $"Windows_{GraphicsDevice.Platform}_{GraphicsDevice.Adapter.Description.Split('\0')[0].TrimEnd(' ')}";
+            else
+                throw new NotImplementedException();
+            
             var rootFolder = FindXenkoRootFolder();
 
             var testFilename = GenerateName(Path.Combine(rootFolder, "tests"), frame, platformSpecific);
@@ -420,15 +418,16 @@ namespace Xenko.Graphics.Regression
 
         protected void SaveTexture(Texture texture, string filename)
         {
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
-            using (var image = texture.GetDataAsImage(GraphicsContext.CommandList))
+            if (Platform.Type == PlatformType.Windows)
             {
-                using (var resultFileStream = File.OpenWrite(filename))
+                using (var image = texture.GetDataAsImage(GraphicsContext.CommandList))
                 {
-                    image.Save(resultFileStream, ImageFileType.Png);
+                    using (var resultFileStream = File.OpenWrite(filename))
+                    {
+                        image.Save(resultFileStream, ImageFileType.Png);
+                    }
                 }
             }
-#endif
         }
 
         /// <summary>

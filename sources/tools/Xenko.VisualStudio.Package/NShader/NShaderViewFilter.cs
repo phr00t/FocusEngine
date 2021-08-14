@@ -10,7 +10,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.TextManager.Interop;
 
 using Xenko.VisualStudio.Commands;
-
+using Xenko.VisualStudio.Commands.Shaders;
 using Constants = Microsoft.VisualStudio.OLE.Interop.Constants;
 
 namespace NShader

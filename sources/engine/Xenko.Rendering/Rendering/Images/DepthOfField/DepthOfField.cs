@@ -8,6 +8,7 @@ using Xenko.Core;
 using Xenko.Core.Annotations;
 using Xenko.Core.Mathematics;
 using Xenko.Graphics;
+using Half = Xenko.Core.Mathematics.Half;
 
 namespace Xenko.Rendering.Images
 {

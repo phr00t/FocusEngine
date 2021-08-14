@@ -2,10 +2,25 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Collections.Generic;
-using System.ServiceModel;
 
 namespace Xenko.Core.BuildEngine
 {
+    public interface IBuildMonitorRemote
+    {
+        int Ping();
+
+        void StartBuild(Guid buildId, DateTime time);
+
+        void SendBuildStepInfo(Guid buildId, long executionId, string description, DateTime startTime);
+
+        void SendCommandLog(Guid buildId, DateTime startTime, long microthreadId, List<SerializableTimestampLogMessage> messages);
+
+        void SendMicrothreadEvents(Guid buildId, DateTime startTime, DateTime now, IEnumerable<MicrothreadNotification> microthreadJobInfo);
+
+        void SendBuildStepResult(Guid buildId, DateTime startTime, long microthreadId, ResultStatus status);
+
+        void EndBuild(Guid buildId, DateTime time);
+    }
     public class MicrothreadNotification
     {
         public enum NotificationType
@@ -30,32 +45,5 @@ namespace Xenko.Core.BuildEngine
             Time = time;
             Type = type;
         }
-    }
-
-    [ServiceContract]
-    public interface IBuildMonitorRemote
-    {
-        [OperationContract]
-        int Ping();
-
-        [OperationContract(IsOneWay = true)]
-        void StartBuild(Guid buildId, DateTime time);
-
-        [OperationContract(IsOneWay = true)]
-        [UseXenkoDataContractSerializer]
-        void SendBuildStepInfo(Guid buildId, long executionId, string description, DateTime startTime);
-
-        [OperationContract(IsOneWay = true)]
-        [UseXenkoDataContractSerializer]
-        void SendCommandLog(Guid buildId, DateTime startTime, long microthreadId, List<SerializableTimestampLogMessage> messages);
-
-        [OperationContract(IsOneWay = true)]
-        void SendMicrothreadEvents(Guid buildId, DateTime startTime, DateTime now, IEnumerable<MicrothreadNotification> microthreadJobInfo);
-
-        [OperationContract(IsOneWay = true)]
-        void SendBuildStepResult(Guid buildId, DateTime startTime, long microthreadId, ResultStatus status);
-
-        [OperationContract(IsOneWay = true)]
-        void EndBuild(Guid buildId, DateTime time);
     }
 }

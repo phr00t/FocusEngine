@@ -1,9 +1,8 @@
 <Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <XenkoBuildTags>WindowsTools</XenkoBuildTags>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
   </PropertyGroup>
@@ -11,15 +10,12 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\engine\Xenko.Games.Testing\Xenko.Games.Testing.csproj" />
     <ProjectReference Include="..\Xenko.ConnectionRouter\Xenko.ConnectionRouter.csproj" />
   </ItemGroup>
   <ItemGroup>
@@ -27,6 +23,5 @@
   </ItemGroup>
   <Import Project="..\..\shared\Xenko.Core.ShellHelper\Xenko.Core.ShellHelper.projitems" Label="Shared" />
   <Import Project="..\..\shared\Xenko.NuGetResolver\Xenko.NuGetResolver.projitems" Label="Shared" />
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

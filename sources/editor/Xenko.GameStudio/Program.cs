@@ -68,7 +68,7 @@ namespace Xenko.GameStudio
         {
             // wait, are we already running?
             int waitToClose = 16;
-            while (Process.GetProcessesByName("Focus.GameStudio").Length > 1)
+            while (Process.GetProcessesByName("Xenko.GameStudio").Length > 1)
             {
                 if (waitToClose-- <= 0)
                 {

@@ -15,11 +15,7 @@ namespace Xenko.Audio
 
         internal static void PreLoad()
         {
-#if XENKO_PLATFORM_WINDOWS
-            NativeLibrary.PreloadLibrary(Library + ".dll", typeof(NativeInvoke));
-#else
-            NativeLibrary.PreloadLibrary(Library + ".so", typeof(NativeInvoke));
-#endif
+            NativeLibraryHelper.PreloadLibrary("libxenkoaudio", typeof(NativeInvoke));
         }
 
         static NativeInvoke()

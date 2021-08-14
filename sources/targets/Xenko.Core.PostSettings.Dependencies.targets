@@ -99,18 +99,14 @@
   Dependencies generation (to .ssdeps)
   *****************************************************************************************************************************
   -->
-  <Target Name="_XenkoGenerateDependencies">
+  <Target Name="_XenkoGenerateDependenciesCore">
     <!-- Set TargetPath on XenkoContent and XenkoNativeLib -->
-    <AssignTargetPath RootFolder="$(MSBuildProjectDirectory)" Files="@(XenkoContent)">
+    <AssignTargetPath RootFolder="$(OutputPath)" Files="@(XenkoContent)">
       <Output TaskParameter="AssignedFiles" ItemName="_XenkoContentAssigned"/>
     </AssignTargetPath>
-    <AssignTargetPath RootFolder="$(MSBuildProjectDirectory)" Files="@(XenkoNativeLib)">
+    <AssignTargetPath RootFolder="$(OutputPath)" Files="@(XenkoNativeLib)">
       <Output TaskParameter="AssignedFiles" ItemName="_XenkoNativeLibAssigned"/>
     </AssignTargetPath>
-
-    <PropertyGroup>
-      <_XenkoAppendRuntimeIdentifier Condition="'$(AppendRuntimeIdentifierToOutputPath)' == 'true' and '$(RuntimeIdentifier)' != '' and '$(_UsingDefaultRuntimeIdentifier)' != 'true'">true</_XenkoAppendRuntimeIdentifier>
-    </PropertyGroup>
 
     <!-- Combine into _XenkoDependencyToCopy (and add RelativePath and Type) -->
     <ItemGroup>
@@ -127,11 +123,6 @@
       </_XenkoDependencyToCopy>
       
       <_XenkoDependencyToCopy Remove="@(_XenkoNativeLibAssigned)" Condition=" '$(XenkoPackageBuild)' == 'true' And '%(_XenkoNativeLibAssigned.Extension)' == '.pdb' "/>
-
-      <_XenkoDependencyToCopy>
-        <PackagePath Condition="'$(_XenkoAppendRuntimeIdentifier)' != 'true'">lib\$(TargetFramework)\$([System.IO.Path]::GetDirectoryName('%(TargetPath)'))</PackagePath>
-        <PackagePath Condition="'$(_XenkoAppendRuntimeIdentifier)' == 'true'">runtimes\$(RuntimeIdentifier)\lib\$(TargetFramework)\$([System.IO.Path]::GetDirectoryName('%(TargetPath)'))</PackagePath>
-      </_XenkoDependencyToCopy>
     </ItemGroup>
 
     <!-- Copy files -->
@@ -151,13 +142,12 @@
   </Target>
 
   <!-- Build -->
-  <Target Name="_XenkoGenerateDependenciesAfterBuild" Condition="'$(TargetFramework)' != '' Or '$(XenkoProjectType)' == 'Cpp'" DependsOnTargets="_XenkoGenerateDependencies" AfterTargets="Build"/>
+  <Target Name="_XenkoGenerateDependencies" Condition="'$(TargetFramework)' != '' Or '$(XenkoProjectType)' == 'Cpp'" DependsOnTargets="_XenkoGenerateDependenciesCore" AfterTargets="CopyFilesToOutputDirectory"/>
   <!-- Packaging -->
-  <Target Name="_XenkoRegisterDependenciesOutputs" Condition="'$(TargetFramework)' != ''" DependsOnTargets="_XenkoGenerateDependencies">
+  <Target Name="_XenkoRegisterDependenciesOutputs" Condition="'$(TargetFramework)' != ''" DependsOnTargets="_XenkoGenerateDependenciesCore">
     <ItemGroup Condition="'@(_XenkoDependencyToCopy)' != ''">
-      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).ssdeps" Condition="'$(_XenkoAppendRuntimeIdentifier)' != 'true'" PackagePath="lib\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="$(OutputPath)\$(AssemblyName).ssdeps" Condition="'$(_XenkoAppendRuntimeIdentifier)' == 'true'" PackagePath="runtimes\$(RuntimeIdentifier)\lib\$(TargetFramework)" />
-      <TfmSpecificPackageFile Include="@(_XenkoDependencyToCopy)" />
+      <BuildOutputInPackage Include="$(OutputPath)$(AssemblyName).ssdeps" />
+      <BuildOutputInPackage Include="@(_XenkoDependencyToCopy)" PackagePath="%(_XenkoDependencyToCopy.TargetPath)" />
     </ItemGroup>
   </Target>
 </Project>

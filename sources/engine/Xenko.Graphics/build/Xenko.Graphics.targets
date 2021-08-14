@@ -1,0 +1,16 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Choose GraphicsApi if not specified by user -->
+  <PropertyGroup>
+    <!-- Defaults for CPU and GraphicsApi based on platform-->
+    <XenkoDefaultGraphicsApi Condition="'$(XenkoPlatform)' == 'Windows'">Direct3D11</XenkoDefaultGraphicsApi>
+    <XenkoDefaultGraphicsApi Condition="'$(XenkoPlatform)' == 'UWP'">Direct3D11</XenkoDefaultGraphicsApi>
+    <XenkoDefaultGraphicsApi Condition="'$(XenkoPlatform)' == 'Android'">OpenGLES</XenkoDefaultGraphicsApi>
+    <XenkoDefaultGraphicsApi Condition="'$(XenkoPlatform)' == 'iOS'">OpenGLES</XenkoDefaultGraphicsApi>
+    <XenkoDefaultGraphicsApi Condition="'$(XenkoPlatform)' == 'Linux'">OpenGL</XenkoDefaultGraphicsApi>
+    <XenkoDefaultGraphicsApi Condition="'$(XenkoPlatform)' == 'macOS'">Vulkan</XenkoDefaultGraphicsApi>
+    <XenkoGraphicsApi Condition="'$(XenkoGraphicsApi)' == '' and '$(XenkoDefaultGraphicsApi)' != ''">$(XenkoDefaultGraphicsApi)</XenkoGraphicsApi>
+  </PropertyGroup>
+
+  <!-- Consume packages with XenkoGraphicsApi -->
+  <Import Project="$(MSBuildThisFileDirectory)Xenko.GraphicsApi.PackageReference.targets" />
+</Project>

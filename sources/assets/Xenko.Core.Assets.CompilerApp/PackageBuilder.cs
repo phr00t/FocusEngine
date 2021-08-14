@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.ServiceModel;
 
 using Xenko.Core.Assets.Compiler;
 using Xenko.Core.Assets.Diagnostics;
@@ -23,6 +22,10 @@ using Xenko;
 using Xenko.Assets;
 using Xenko.Graphics;
 using Xenko.Core.VisualStudio;
+using ServiceWire.NamedPipes;
+using System.IO;
+using Xenko.Core.Storage;
+using System.Text;
 
 namespace Xenko.Core.Assets.CompilerApp
 {
@@ -80,7 +83,6 @@ namespace Xenko.Core.Assets.CompilerApp
                     AutoCompileProjects = !builderOptions.DisableAutoCompileProjects,
                     ExtraCompileProperties = builderOptions.ExtraCompileProperties,
                     RemoveUnloadableObjects = true,
-                    RegisterPackageAssemblies = true,
                     BuildConfiguration = builderOptions.ProjectConfiguration,
                 };
 
@@ -94,8 +96,11 @@ namespace Xenko.Core.Assets.CompilerApp
 
                 projectSession = projectSessionResult.Session;
 
-                // Check build configuration
-                var package = projectSession.LocalPackages.Last();
+                // Find loaded package (either sdpkg or csproj) -- otherwise fallback to first one
+                var packageFile = (UFile)builderOptions.PackageFile;
+                var package = projectSession.Packages.FirstOrDefault(x => x.FullPath == packageFile || (x.Container is SolutionProject project && project.FullPath == packageFile))
+                    ?? projectSession.LocalPackages.FirstOrDefault()
+                    ?? projectSession.Packages.FirstOrDefault();
 
                 // Setup variables
                 var buildDirectory = builderOptions.BuildDirectory;
@@ -222,7 +227,7 @@ namespace Xenko.Core.Assets.CompilerApp
             e.Step.StepProcessed -= BuildStepProcessed;
         }
 
-        private static void RegisterRemoteLogger(IProcessBuilderRemote processBuilderRemote)
+        private static void RegisterRemoteLogger(NpClient<IProcessBuilderRemote> processBuilderRemote)
         {
             // The pipe might be broken while we try to output log, so let's try/catch the call to prevent program for crashing here (it should crash at a proper location anyway if the pipe is broken/closed)
             // ReSharper disable EmptyGeneralCatchClause
@@ -233,7 +238,7 @@ namespace Xenko.Core.Assets.CompilerApp
                     var assetMessage = logMessage as AssetLogMessage;
                     var message = assetMessage != null ? new AssetSerializableLogMessage(assetMessage) : new SerializableLogMessage((LogMessage)logMessage);
 
-                    processBuilderRemote.ForwardLog(message);
+                    processBuilderRemote.Proxy.ForwardLog(message);
                 }
                 catch
                 {
@@ -249,17 +254,14 @@ namespace Xenko.Core.Assets.CompilerApp
 
             VirtualFileSystem.CreateDirectory(VirtualFileSystem.ApplicationDatabasePath);
 
-            // Open WCF channel with master builder
-            var namedPipeBinding = new NetNamedPipeBinding(NetNamedPipeSecurityMode.None) { SendTimeout = TimeSpan.FromSeconds(300.0), MaxReceivedMessageSize = int.MaxValue };
-            var processBuilderRemote = ChannelFactory<IProcessBuilderRemote>.CreateChannel(namedPipeBinding, new EndpointAddress(builderOptions.SlavePipe));
-
-            try
+            // Open ServiceWire Client Channel
+            using (var client = new NpClient<IProcessBuilderRemote>(new NpEndPoint(builderOptions.SlavePipe), new XenkoServiceWireSerializer()))
             {
-                RegisterRemoteLogger(processBuilderRemote);
+                RegisterRemoteLogger(client);
 
                 // Make sure to laod all assemblies containing serializers
                 // TODO: Review how costly it is to do so, and possibily find a way to restrict what needs to be loaded (i.e. only app plugins?)
-                foreach (var assemblyLocation in processBuilderRemote.GetAssemblyContainerLoadedAssemblies())
+                foreach (var assemblyLocation in client.Proxy.GetAssemblyContainerLoadedAssemblies())
                 {
                     AssemblyContainer.Default.LoadAssemblyFromPath(assemblyLocation, builderOptions.Logger);
                 }
@@ -278,20 +280,20 @@ namespace Xenko.Core.Assets.CompilerApp
                 MicroThread microthread = scheduler.Add(async () =>
                 {
                     // Deserialize command and parameters
-                    Command command = processBuilderRemote.GetCommandToExecute();
+                    Command command = client.Proxy.GetCommandToExecute();
 
                     // Run command
                     var inputHashes = FileVersionTracker.GetDefault();
                     var builderContext = new BuilderContext(inputHashes, null);
 
-                    var commandContext = new RemoteCommandContext(processBuilderRemote, command, builderContext, logger);
+                    var commandContext = new RemoteCommandContext(client.Proxy, command, builderContext, logger);
                     MicrothreadLocalDatabases.MountDatabase(commandContext.GetOutputObjectsGroups());
                     command.PreCommand(commandContext);
                     status = await command.DoCommand(commandContext);
                     command.PostCommand(commandContext, status);
 
                     // Returns result to master builder
-                    processBuilderRemote.RegisterResult(commandContext.ResultEntry);
+                    client.Proxy.RegisterResult(commandContext.ResultEntry);
                 });
 
                 while (true)
@@ -319,13 +321,6 @@ namespace Xenko.Core.Assets.CompilerApp
                     return BuildResultCode.Successful;
 
                 return BuildResultCode.BuildError;
-            }
-            finally
-            {
-                // Close WCF channel
-                // ReSharper disable SuspiciousTypeConversion.Global
-                ((IClientChannel)processBuilderRemote).Close();
-                // ReSharper restore SuspiciousTypeConversion.Global
             }
         }
 
@@ -363,7 +358,7 @@ namespace Xenko.Core.Assets.CompilerApp
                 await Task.Delay(1, command.CancellationToken);
             }
 
-            var address = "net.pipe://localhost/" + Guid.NewGuid();
+            var address = "Xenko/CompilerApp/PackageBuilderApp/" + Guid.NewGuid();
             var arguments = $"--slave=\"{address}\" --build-path=\"{builderOptions.BuildDirectory}\"";
 
             using (var debugger = VisualStudioDebugger.GetAttached())
@@ -374,15 +369,15 @@ namespace Xenko.Core.Assets.CompilerApp
                 }
             }
 
-            // Start WCF pipe for communication with process
+            // Start ServiceWire pipe for communication with process
             var processBuilderRemote = new ProcessBuilderRemote(assemblyContainer, commandContext, command);
-            var host = new ServiceHost(processBuilderRemote);
-            host.AddServiceEndpoint(typeof(IProcessBuilderRemote), new NetNamedPipeBinding(NetNamedPipeSecurityMode.None) { MaxReceivedMessageSize = int.MaxValue }, address);
+            var host = new NpHost(address,null,null, new XenkoServiceWireSerializer());
+            host.AddService<IProcessBuilderRemote>(processBuilderRemote);
 
             var startInfo = new ProcessStartInfo
             {
                 // Note: try to get exec server if it exists, otherwise use CompilerApp.exe
-                FileName = (string)AppDomain.CurrentDomain.GetData("RealEntryAssemblyFile") ?? typeof(PackageBuilder).Assembly.Location,
+                FileName = Path.ChangeExtension(typeof(PackageBuilder).Assembly.Location, ".exe"),
                 Arguments = arguments,
                 WorkingDirectory = Environment.CurrentDirectory,
                 CreateNoWindow = true,

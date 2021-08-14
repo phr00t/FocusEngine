@@ -3,45 +3,26 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using NShader;
+using Xenko.Core;
 using Xenko.Core.Assets;
-using Xenko.Shaders.Parser;
-using Xenko.VisualStudio.BuildEngine;
-using Xenko.VisualStudio.Commands.Shaders;
 using Xenko.Core.Shaders.Ast;
 using Xenko.Core.Shaders.Utility;
-using Xenko.Core;
+using Xenko.Shaders.Parser;
+using Xenko.Shaders.Parser.Mixins;
+using Xenko.VisualStudio.Commands.Shaders;
 
 namespace Xenko.VisualStudio.Commands
 {
-    public class XenkoCommands : IXenkoCommands, IXenkoCommands2
+    public class XenkoCommands : IXenkoCommands
     {
-        public void Initialize(string xenkoSdkDir)
+        public XenkoCommands()
         {
-            //DirectoryHelper.PackageDirectoryOverride = xenkoSdkDir;
-            // Don't necessarely initialize the shaders
-            //XenkoShaderParser.Initialize();
-        }
-
-        public bool ShouldReload()
-        {
-            // This is implemented in the proxy only
-            throw new NotImplementedException();
-        }
-
-        public void StartRemoteBuildLogServer(IBuildMonitorCallback buildMonitorCallback, string logPipeUrl)
-        {
-            new PackageBuildMonitorRemote(buildMonitorCallback, logPipeUrl);
+            PackageSessionPublicHelper.FindAndSetMSBuildVersion();
         }
 
         public byte[] GenerateShaderKeys(string inputFileName, string inputFileContent)
         {
             return ShaderKeyFileHelper.GenerateCode(inputFileName, inputFileContent);
-        }
-
-        public RawShaderNavigationResult AnalyzeAndGoToDefinition(string sourceCode, RawSourceSpan span)
-        {
-            return AnalyzeAndGoToDefinition(null, sourceCode, span);
         }
 
         public RawShaderNavigationResult AnalyzeAndGoToDefinition(string projectPath, string sourceCode, RawSourceSpan span)

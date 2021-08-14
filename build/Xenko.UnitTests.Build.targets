@@ -1,0 +1,7 @@
+<!-- Build file pre-included by all Xenko projects -->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(XenkoPlatform)' == 'Windows'">
+    <XenkoGraphicsApis Condition="'$(XenkoGraphicsApis)' == ''">Direct3D11</XenkoGraphicsApis>
+  </PropertyGroup>
+</Project>
+

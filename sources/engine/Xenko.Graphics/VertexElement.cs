@@ -28,6 +28,7 @@ using Xenko.Core;
 using Xenko.Core.Mathematics;
 using Xenko.Core.Serialization;
 using Xenko.Core.Serialization.Serializers;
+using Half = Xenko.Core.Mathematics.Half;
 
 namespace Xenko.Graphics
 {

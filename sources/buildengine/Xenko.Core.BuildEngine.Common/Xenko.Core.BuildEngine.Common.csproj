@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <Import Project="..\..\targets\Xenko.Core.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.Core.props" />
   <PropertyGroup>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <XenkoAssemblyProcessorOptions>--auto-module-initializer --serialization</XenkoAssemblyProcessorOptions>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="EnvDTE" Version="8.0.2" />
-    <PackageReference Include="System.ServiceModel.Primitives" Version="4.5.3" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.ServiceModel" />
+    <PackageReference Include="ServiceWire" Version="5.3.4" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
@@ -26,6 +22,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\core\Xenko.Core.Design\Xenko.Core.Design.csproj" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

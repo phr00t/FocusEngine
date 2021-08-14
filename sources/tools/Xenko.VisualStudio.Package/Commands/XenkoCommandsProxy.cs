@@ -8,21 +8,26 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using EnvDTE;
+using Microsoft.VisualStudio.Text.Editor;
 using NShader;
 using NuGet.Common;
+using NuGet.Frameworks;
 using NuGet.Versioning;
+using ServiceWire.NamedPipes;
 using Xenko.Core;
 using Xenko.Core.Assets;
-using Xenko.Core.Packages;
+using Process = System.Diagnostics.Process;
+using Thread = System.Threading.Thread;
 
 namespace Xenko.VisualStudio.Commands
 {
     /// <summary>
     /// Proxies commands to real <see cref="IXenkoCommands"/> implementation.
     /// </summary>
-    public class XenkoCommandsProxy : MarshalByRefObject
+    public static class XenkoCommandsProxy
     {
-        public static readonly PackageVersion MinimumVersion = new PackageVersion(1, 4, 0, 0);
+        public static readonly PackageVersion MinimumVersion = new PackageVersion(4, 0, 0, 0);
 
         public struct PackageInfo
         {
@@ -33,84 +38,31 @@ namespace Xenko.VisualStudio.Commands
             public PackageVersion LoadedVersion;
         }
 
-        private static readonly object computedPackageInfoLock = new object();
-        private static PackageInfo computedPackageInfo;
         private static string solution;
         private static bool solutionChanged;
 
         private static readonly object commandProxyLock = new object();
-        private static XenkoCommandsProxy currentInstance;
-        private static AppDomain currentAppDomain;
 
-        private readonly IXenkoCommands remote;
-        private readonly List<Tuple<string, DateTime>> assembliesLoaded = new List<Tuple<string, DateTime>>();
+        private static AttachedChildProcessJob xenkoCommandsProcessJob;
+        private static NpClient<IXenkoCommands> xenkoCommands = null;
 
-        public static PackageInfo CurrentPackageInfo
-        {
-            get { lock (computedPackageInfoLock) { return computedPackageInfo; } }
-        }
+        public static PackageInfo CurrentPackageInfo { get; private set; }
 
         static XenkoCommandsProxy()
         {
-            // This assembly resolve is only used to resolve the GetExecutingAssembly on the Default Domain
-            // when casting to XenkoCommandsProxy in the XenkoCommandsProxy.GetProxy method
-            AppDomain.CurrentDomain.AssemblyResolve += DefaultDomainAssemblyResolve;
+            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
         }
 
-        public XenkoCommandsProxy()
+        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
-            AppDomain.CurrentDomain.AssemblyResolve += XenkoDomainAssemblyResolve;
+            var assemblyName = new AssemblyName(args.Name);
 
-            var assembly = Assembly.Load("Xenko.VisualStudio.Commands");
-            remote = (IXenkoCommands)assembly.CreateInstance("Xenko.VisualStudio.Commands.XenkoCommands");
-        }
+            // Non-signed assemblies need to be manually loaded
+            if (assemblyName.Name == "ServiceWire")
+                return Assembly.Load(assemblyName);
+            if (assemblyName.Name == "Xenko.VisualStudio.Commands.Interfaces")
+                return Assembly.Load(assemblyName);
 
-        /// <summary>
-        /// Set the solution to use, when resolving the package containing the remote commands.
-        /// </summary>
-        /// <param name="solutionPath">The full path to the solution file.</param>
-        /// <param name="domain">The AppDomain to set the solution on, or null the current AppDomain.</param>
-        public static void InitializeFromSolution(string solutionPath, PackageInfo xenkoPackageInfo, AppDomain domain = null)
-        {
-            if (domain == null)
-            {
-                lock (computedPackageInfoLock)
-                {
-                    // Set the new solution and clear the package info, so it will be recomputed
-                    solution = solutionPath;
-                    computedPackageInfo = xenkoPackageInfo;
-                }
-
-                lock (commandProxyLock)
-                {
-                    solutionChanged = true;
-                }
-            }
-            else
-            {
-                var initializationHelper = (InitializationHelper)domain.CreateInstanceFromAndUnwrap(typeof(InitializationHelper).Assembly.Location, typeof(InitializationHelper).FullName);
-                initializationHelper.Initialize(solutionPath, xenkoPackageInfo.SdkPaths, xenkoPackageInfo.ExpectedVersion?.ToString(), xenkoPackageInfo.LoadedVersion?.ToString());
-            }
-        }
-
-        private class InitializationHelper : MarshalByRefObject
-        {
-            public void Initialize(string solutionPath, List<string> sdkPaths, string expectedVersion, string loadedVersion)
-            {
-                InitializeFromSolution(solutionPath, new PackageInfo
-                {
-                    SdkPaths = sdkPaths,
-                    ExpectedVersion = expectedVersion != null ? new PackageVersion(expectedVersion) : null,
-                    LoadedVersion = loadedVersion != null ? new PackageVersion(loadedVersion) : null,
-                });
-            }
-        }
-
-        public override object InitializeLifetimeService()
-        {
-            // See http://stackoverflow.com/questions/5275839/inter-appdomain-communication-problem
-            // If this proxy is not used for 6 minutes, it is disconnected and calls to this proxy will fail
-            // We return null to allow the service to run for the full live of the appdomain.
             return null;
         }
 
@@ -118,168 +70,93 @@ namespace Xenko.VisualStudio.Commands
         /// Gets the current proxy.
         /// </summary>
         /// <returns>XenkoCommandsProxy.</returns>
-        public static XenkoCommandsProxy GetProxy()
+        public static IXenkoCommands GetProxy()
         {
             lock (commandProxyLock)
             {
                 // New instance?
-                bool shouldReload = currentInstance == null || solutionChanged;
+                bool shouldReload = xenkoCommands == null || solutionChanged || ShouldReload();
                 if (!shouldReload)
                 {
-                    // Assemblies changed?
-                    shouldReload = currentInstance.ShouldReload();
+                    // TODO: Assemblies changed?
+                    //shouldReload = ShouldReload();
                 }
 
                 // If new instance or assemblies changed, reload
                 if (shouldReload)
                 {
-                    currentInstance = null;
-                    if (currentAppDomain != null)
-                    {
-                        try
-                        {
-                            AppDomain.Unload(currentAppDomain);
-                        }
-                        catch (Exception ex)
-                        {
-                            Trace.WriteLine($"Unexpected exception when unloading AppDomain for XenkoCommandsProxy: {ex}");
-                        }
-                    }
+                    ClosePipeAndProcess();
+
+                    var address = "Xenko/VSPackageCommands/" + Guid.NewGuid();
 
                     var xenkoPackageInfo = FindXenkoSdkDir(solution).Result;
                     if (xenkoPackageInfo.LoadedVersion == null)
                         return null;
 
-                    currentAppDomain = CreateXenkoDomain();
-                    InitializeFromSolution(solution, xenkoPackageInfo, currentAppDomain);
-                    currentInstance = CreateProxy(currentAppDomain);
-                    currentInstance.Initialize();
+                    var commandAssembly = xenkoPackageInfo.SdkPaths.First(x => Path.GetFileNameWithoutExtension(x) == "Xenko.VisualStudio.Commands");
+                    var commandExecutable = Path.ChangeExtension(commandAssembly, ".exe"); // .NET Core: .dll => .exe
+
+                    var startInfo = new ProcessStartInfo
+                    {
+                        // Note: try to get exec server if it exists, otherwise use CompilerApp.exe
+                        FileName = commandExecutable,
+                        Arguments = $"--pipe=\"{address}\"",
+                        WorkingDirectory = Environment.CurrentDirectory,
+                        UseShellExecute = false,
+                    };
+
+                    var xenkoCommandsProcess = new Process { StartInfo = startInfo };
+                    xenkoCommandsProcess.Start();
+
+                    xenkoCommandsProcessJob = new AttachedChildProcessJob(xenkoCommandsProcess);
+
+                    for (int i = 0; i < 10; ++i)
+                    {
+                        try
+                        {
+                            xenkoCommands = new NpClient<IXenkoCommands>(new NpEndPoint(address + "/IXenkoCommands"));
+                            break;
+                        }
+                        catch
+                        {
+                            // Last try, forward exception
+                            if (i == 9)
+                                throw;
+                            // Wait until process is ready to accept connections
+                            Thread.Sleep(100);
+                        }
+                    }
+
                     solutionChanged = false;
                 }
 
-                return currentInstance;
+                return xenkoCommands?.Proxy;
             }
         }
 
-        /// <summary>
-        /// Creates the xenko domain.
-        /// </summary>
-        /// <returns>AppDomain.</returns>
-        public static AppDomain CreateXenkoDomain()
+        private static void ClosePipeAndProcess()
         {
-            return AppDomain.CreateDomain("xenko-domain");
-        }
-
-        /// <summary>
-        /// Gets the current proxy.
-        /// </summary>
-        /// <returns>XenkoCommandsProxy.</returns>
-        public static XenkoCommandsProxy CreateProxy(AppDomain domain)
-        {
-            if (domain == null) throw new ArgumentNullException(nameof(domain));
-            return (XenkoCommandsProxy)domain.CreateInstanceFromAndUnwrap(typeof(XenkoCommandsProxy).Assembly.Location, typeof(XenkoCommandsProxy).FullName);
-        }
-
-        public void Initialize()
-        {
-            remote.Initialize(null);
-        }
-
-        public bool ShouldReload()
-        {
-            lock (assembliesLoaded)
+            if (xenkoCommands != null)
             {
-                // Check if any assemblies have changed since loaded
-                foreach (var assemblyItem in assembliesLoaded)
+                try
                 {
-                    var assemblyPath = assemblyItem.Item1;
-                    var lastAssemblyTime = assemblyItem.Item2;
-
-                    if (File.Exists(assemblyPath))
-                    {
-                        var fileDateTime = File.GetLastWriteTime(assemblyPath);
-                        if (fileDateTime != lastAssemblyTime)
-                        {
-                            return true;
-                        }
-                    }
+                    xenkoCommands.Dispose();
                 }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine($"Unexpected exception when closing remote connection to VS Commands: {ex}");
+                }
+                xenkoCommands = null;
             }
+
+            xenkoCommandsProcessJob?.Dispose();
+            xenkoCommandsProcessJob = null;
+        }
+
+        public static bool ShouldReload()
+        {
+            // TODO: Check if assemblies/packages were regenerated
             return false;
-        }
-
-        public void StartRemoteBuildLogServer(BuildMonitorCallback buildMonitorCallback, string logPipeUrl)
-        {
-            remote.StartRemoteBuildLogServer(buildMonitorCallback, logPipeUrl);
-        }
-
-        public byte[] GenerateShaderKeys(string inputFileName, string inputFileContent)
-        {
-            return remote.GenerateShaderKeys(inputFileName, inputFileContent);
-        }
-
-        public RawShaderNavigationResult AnalyzeAndGoToDefinition(string projectPath, string sourceCode, RawSourceSpan span)
-        {
-
-            // TODO: We need to know which package is currently selected in order to query all valid shaders
-            if (remote is IXenkoCommands2 remote2)
-                return remote2.AnalyzeAndGoToDefinition(projectPath, sourceCode, span);
-            return remote.AnalyzeAndGoToDefinition(sourceCode, span);
-        }
-
-        private static Assembly DefaultDomainAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            // This assembly resolve is only used to resolve the GetExecutingAssembly on the Default Domain
-            // when casting to XenkoCommandsProxy in the XenkoCommandsProxy.GetProxy method
-            var executingAssembly = Assembly.GetExecutingAssembly();
-
-            // Redirect requests for earlier package versions to the current one
-            var assemblyName = new AssemblyName(args.Name);
-            if (assemblyName.Name == executingAssembly.GetName().Name)
-                return executingAssembly;
-
-            return null;
-        }
-
-        private Assembly XenkoDomainAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            var assemblyName = new AssemblyName(args.Name);
-
-            // Necessary to avoid conflicts with Visual Studio NuGet
-            if (args.Name.StartsWith("NuGet", StringComparison.InvariantCultureIgnoreCase))
-                return Assembly.Load(assemblyName);
-
-            var assemblyPath = computedPackageInfo.SdkPaths.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == assemblyName.Name);
-            if (assemblyPath != null)
-            {
-                return LoadAssembly(assemblyPath);
-            }
-
-            // PCL System assemblies are using version 2.0.5.0 while we have a 4.0
-            // Redirect the PCL to use the 4.0 from the current app domain.
-            if (assemblyName.Name.StartsWith("System") && (assemblyName.Flags & AssemblyNameFlags.Retargetable) != 0)
-            {
-                var systemCoreAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(assembly => assembly.GetName().Name == assemblyName.Name);
-                return systemCoreAssembly;
-            }
-
-            return null;
-        }
-
-        private Assembly LoadAssembly(string assemblyFile)
-        {
-            lock (assembliesLoaded)
-            {
-                assembliesLoaded.Add(new Tuple<string, DateTime>(assemblyFile, File.GetLastWriteTime(assemblyFile)));
-            }
-
-            // Check if .pdb exists as well
-            var pdbFile = Path.ChangeExtension(assemblyFile, "pdb");
-            if (File.Exists(pdbFile))
-                return Assembly.Load(File.ReadAllBytes(assemblyFile), File.ReadAllBytes(pdbFile));
-
-            // Otherwise load assembly without PDB
-            return Assembly.Load(File.ReadAllBytes(assemblyFile));
         }
 
         /// <summary>
@@ -291,57 +168,27 @@ namespace Xenko.VisualStudio.Commands
             // Resolve the sdk version to load from the solution's package
             var packageInfo = new PackageInfo { ExpectedVersion = await PackageSessionHelper.GetPackageVersion(solution), SdkPaths = new List<string>() };
 
-            // Check if we are in a root directory with store/packages facilities
-            var store = new NugetStore(null);
-            NugetLocalPackage xenkoPackage = null;
-
             // Try to find the package with the expected version
             if (packageInfo.ExpectedVersion != null && packageInfo.ExpectedVersion >= MinimumVersion)
             {
-                // Xenko up to 3.0
-                if (packageInfo.ExpectedVersion < new PackageVersion(3, 1, 0, 0))
-                {
-                    xenkoPackage = store.GetPackagesInstalled(new[] { "Xenko" }).FirstOrDefault(package => package.Version == packageInfo.ExpectedVersion);
-                    if (xenkoPackage != null)
-                    {
-                        var xenkoSdkDir = store.GetRealPath(xenkoPackage);
-
-                        packageInfo.LoadedVersion = xenkoPackage.Version;
-
-                        foreach (var path in new[]
-                        {
-                            // Xenko 2.x and 3.0
-                            @"Bin\Windows\Direct3D11",
-                            @"Bin\Windows",
-                            // Xenko 1.x
-                            @"Bin\Windows-Direct3D11"
-                        })
-                        {
-                            var fullPath = Path.Combine(xenkoSdkDir, path);
-                            if (Directory.Exists(fullPath))
-                            {
-                                packageInfo.SdkPaths.AddRange(Directory.EnumerateFiles(fullPath, "*.dll", SearchOption.TopDirectoryOnly));
-                                packageInfo.SdkPaths.AddRange(Directory.EnumerateFiles(fullPath, "*.exe", SearchOption.TopDirectoryOnly));
-                            }
-                        }
-                    }
-                }
-                // Xenko 3.1+
-                else
+                // Try both net5.0 and net472
+                var success = false;
+                foreach (var framework in new[] { ".NET,Version=v5.0", ".NETFramework,Version=v4.7.2" })
                 {
                     var logger = new Logger();
-                    var (request, result) = await RestoreHelper.Restore(logger, packageName, new VersionRange(packageInfo.ExpectedVersion.ToNuGetVersion()));
+                    var solutionRoot = Path.GetDirectoryName(solution);
+                    var (request, result) = await Task.Run(() => RestoreHelper.Restore(logger, NuGetFramework.ParseFrameworkName(framework, DefaultFrameworkNameProvider.Instance), "win", packageName, new VersionRange(packageInfo.ExpectedVersion.ToNuGetVersion()), solutionRoot));
                     if (result.Success)
                     {
-                        packageInfo.SdkPaths.AddRange(RestoreHelper.ListAssemblies(request, result));
+                        packageInfo.SdkPaths.AddRange(RestoreHelper.ListAssemblies(result.LockFile));
                         packageInfo.LoadedVersion = packageInfo.ExpectedVersion;
+                        success = true;
+                        break;
                     }
-                    else
-                    {
-                        MessageBox.Show( $"Could not restore {packageName} {packageInfo.ExpectedVersion}, this visual studio extension may fail to work properly without it."
-                                         + $"To fix this you can either build {packageName} or pull the right version from nugget manually" );
-                        throw new InvalidOperationException( $"Could not restore {packageName} {packageInfo.ExpectedVersion}." );
-                    }
+                }
+                if (!success)
+                {
+                    throw new InvalidOperationException($"Could not restore {packageName} {packageInfo.ExpectedVersion}, this visual studio extension may fail to work properly without it. To fix this you can either build {packageName} or pull the right version from nugget manually");
                 }
             }
 
@@ -418,6 +265,34 @@ namespace Xenko.VisualStudio.Commands
                 Log(message);
                 return Task.CompletedTask;
             }
+        }
+
+        /// <summary>
+        /// Converts a <see cref="PackageVersion"/> into a <see cref="NuGetVersion"/>.
+        /// </summary>
+        /// <param name="version">The source of conversion.</param>
+        /// <returns>A new instance of <see cref="NuGetVersion"/> corresponding to <paramref name="version"/>.</returns>
+        public static NuGetVersion ToNuGetVersion(this PackageVersion version)
+        {
+            if (version == null) throw new ArgumentNullException(nameof(version));
+
+            return new NuGetVersion(version.Version, version.SpecialVersion);
+        }
+
+        internal static void SetSolution(string solutionPath)
+        {
+            solution = solutionPath;
+        }
+
+
+        internal static void SetPackageInfo(PackageInfo xenkoPackageInfo)
+        {
+            CurrentPackageInfo = xenkoPackageInfo;
+        }
+
+        internal static void CloseSolution()
+        {
+            ClosePipeAndProcess();
         }
     }
 }

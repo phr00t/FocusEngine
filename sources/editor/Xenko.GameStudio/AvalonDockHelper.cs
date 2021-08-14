@@ -7,9 +7,9 @@ using System.Windows;
 using Xenko.Core.Extensions;
 using Xenko.Core.Presentation.Commands;
 using Xenko.Core.Presentation.ViewModel;
-using Xceed.Wpf.AvalonDock;
-using Xceed.Wpf.AvalonDock.Controls;
-using Xceed.Wpf.AvalonDock.Layout;
+using AvalonDock;
+using AvalonDock.Controls;
+using AvalonDock.Layout;
 
 namespace Xenko.GameStudio
 {

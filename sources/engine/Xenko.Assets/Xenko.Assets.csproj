@@ -1,9 +1,8 @@
 <Project>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
-  <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <TargetFramework>$(TargetFrameworkTool)</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoAssemblyProcessorOptions>$(XenkoAssemblyProcessorDefaultOptions)</XenkoAssemblyProcessorOptions>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -14,19 +13,16 @@
     <DefineConstants>XENKO_VIDEO_FFMPEG;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Build" Version="16.8.0" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.8.0" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build" Version="16.0.461" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="16.0.461" ExcludeAssets="runtime" />
     <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
     <!--PackageReference Include="Esent.Interop" Version="1.9.4" /-->
-    <PackageReference Include="FFmpeg.AutoGen" Version="3.4.0.6" />
+    <PackageReference Include="FFmpeg.AutoGen" Version="3.4.0.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="3.4.0" />
-    <Reference Include="Renci.SshNet">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\deps\SSH.NET\Renci.SshNet.dll</HintPath>
-    </Reference>
+    <PackageReference Include="SSH.NET" Version="2016.1.0" />
     <PackageReference Include="System.AppContext" Version="4.3.0" />
-    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="1.6.0" />
     <PackageReference Include="System.Console" Version="4.3.1" />
     <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.StackTrace" Version="4.3.0" />
@@ -35,7 +31,7 @@
     <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Reflection" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Metadata" Version="1.8.1" />
+    <PackageReference Include="System.Reflection.Metadata" Version="1.7.0" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
     <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
@@ -73,23 +69,23 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="AssetPackage\Assets\Shared\DefaultGraphicsCompositorLevel10.xkgfxcomp" />
-    <None Include="AssetPackage\Assets\Shared\DefaultGraphicsCompositorLevel9.xkgfxcomp" />
-    <None Include="AssetPackage\Assets\Shared\XenkoClearCoatMetalFlakesNM.xktex" />
-    <None Include="AssetPackage\Assets\Shared\XenkoClearCoatOrangePeelNM.xktex" />
-    <None Include="AssetPackage\Assets\Shared\XenkoDebugSpriteFont.xktex" />
-    <None Include="AssetPackage\Assets\Shared\XenkoDefaultFont.xkfnt" />
-    <None Include="AssetPackage\Assets\Shared\XenkoDefaultSplashScreen.xktex" />
-    <None Include="AssetPackage\Assets\Shared\XenkoEnvironmentLightingDFGLUT16.xktex" />
-    <None Include="AssetPackage\Assets\Shared\XenkoEnvironmentLightingDFGLUT8.xktex" />
-    <None Include="AssetPackage\Assets\Shared\XenkoUIDesigns.xksheet" />
-    <None Include="AssetPackage\Assets\Shared\XenkoUILibrary.xkuilib" />
+    <None Include="AssetPackage\Assets\Shared\DefaultGraphicsCompositorLevel10.sdgfxcomp" />
+    <None Include="AssetPackage\Assets\Shared\DefaultGraphicsCompositorLevel9.sdgfxcomp" />
+    <None Include="AssetPackage\Assets\Shared\XenkoClearCoatMetalFlakesNM.sdtex" />
+    <None Include="AssetPackage\Assets\Shared\XenkoClearCoatOrangePeelNM.sdtex" />
+    <None Include="AssetPackage\Assets\Shared\XenkoDebugSpriteFont.sdtex" />
+    <None Include="AssetPackage\Assets\Shared\XenkoDefaultFont.sdfnt" />
+    <None Include="AssetPackage\Assets\Shared\XenkoDefaultSplashScreen.sdtex" />
+    <None Include="AssetPackage\Assets\Shared\XenkoEnvironmentLightingDFGLUT16.sdtex" />
+    <None Include="AssetPackage\Assets\Shared\XenkoEnvironmentLightingDFGLUT8.sdtex" />
+    <None Include="AssetPackage\Assets\Shared\XenkoUIDesigns.sdsheet" />
+    <None Include="AssetPackage\Assets\Shared\XenkoUILibrary.sduilib" />
     <None Include="AssetPackage\Workfiles\UIDesigns.pdn" />
-    <None Include="AssetPackage\XenkoAssetPackage.xkpkg" />
+    <None Include="AssetPackage\XenkoAssetPackage.sdpkg" />
     <None Include="UI\Resources\UIDesigns.dds" />
     <None Include="UI\Resources\UIDesigns.pdn" />
-    <None Include="UI\XenkoUIDesigns.xksheet" />
-    <None Include="UI\XenkoUILibrary.xkuilib" />
+    <None Include="UI\XenkoUIDesigns.sdsheet" />
+    <None Include="UI\XenkoUILibrary.sduilib" />
   </ItemGroup>
   <!--ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="1.1.0" />
@@ -117,13 +113,13 @@
     <None Include="AssetPackage\Resources\XenkoDefaultSplashScreen.png" />
   </ItemGroup>
   <Import Project="..\..\shared\Xenko.Core.ShellHelper\Xenko.Core.ShellHelper.projitems" Label="Shared" />
-  <Import Project="$(XenkoPostSettingsTargets)" />
-  <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <Import Project="$(XenkoSdkTargets)" />
 
   <PropertyGroup>
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeExtraAssemblies</TargetsForTfmSpecificBuildOutput>
+    <TargetsForTfmSpecificBuildOutput>_XenkoIncludeExtraAssemblies;$(TargetsForTfmSpecificBuildOutput)</TargetsForTfmSpecificBuildOutput>
+
   </PropertyGroup>
-  <Target Name="IncludeExtraAssemblies">
+  <Target Name="_XenkoIncludeExtraAssemblies">
     <ItemGroup>
       <BuildOutputInPackage Include="$(OutputPath)VHACDSharp.dll" />
     </ItemGroup>

@@ -1,11 +1,11 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
-using System.Collections.Generic;
-using Xenko.Core.Annotations;
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
+#if XENKO_PLATFORM_DESKTOP
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Xenko.Core.Annotations;
 
 namespace Xenko.Core.Diagnostics
 {
@@ -45,7 +45,7 @@ namespace Xenko.Core.Diagnostics
             }
         }
 
-        public static readonly bool IsAvailable = NativeLibrary.LoadLibrary(VTune2015DllName) != IntPtr.Zero;
+        public static readonly bool IsAvailable = NativeLibrary.Load(VTune2015DllName) != IntPtr.Zero;
 
         public static Event CreateEvent([NotNull] string eventName)
         {

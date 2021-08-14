@@ -120,9 +120,7 @@ namespace Xenko.Rendering.LightProbes
         static BowyerWatsonTetrahedralization()
         {
             // TODO: Add native to Xenko.Engine?
-#if XENKO_PLATFORM_WINDOWS
-            NativeLibrary.PreloadLibrary(NativeInvoke.Library + ".dll", typeof(BowyerWatsonTetrahedralization));
-#endif
+            NativeLibraryHelper.PreloadLibrary(NativeInvoke.Library, typeof(NativeInvoke));
             exactinit();
         }
 

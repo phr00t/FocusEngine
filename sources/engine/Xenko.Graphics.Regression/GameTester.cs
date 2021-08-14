@@ -23,7 +23,7 @@ namespace Xenko.Graphics.Regression
 
         public static void RunGameTest(Game game)
         {
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
+#if XENKO_PLATFORM_DESKTOP
 
             using (game)
             {

@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\targets\Xenko.props" />
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>$(XenkoEditorTargetFramework)</TargetFramework>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>A Toolkit for the Xenko game engine.</Description>
@@ -11,7 +12,6 @@
     <XenkoAssemblySign>true</XenkoAssemblySign>
     <XenkoRuntime>true</XenkoRuntime>
   </PropertyGroup>
-  <Import Project="..\..\targets\Xenko.PreSettings.targets" />
   <PropertyGroup>
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoPlatformDependent>true</XenkoPlatformDependent>
@@ -25,7 +25,6 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <Import Project="$(XenkoPostSettingsTargets)" />
   <ItemGroup>
     <None Include="Engine\EntityExtensions.GetComponents.cs">
       <DesignTime>True</DesignTime>
@@ -54,4 +53,5 @@
       <DependentUpon>EntityExtensions.GetComponents.tt</DependentUpon>
     </Compile>
   </ItemGroup>
+  <Import Project="$(XenkoSdkTargets)" />
 </Project>

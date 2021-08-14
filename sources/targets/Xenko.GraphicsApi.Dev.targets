@@ -1,0 +1,214 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <!--
+  Various development tools to build project/packages with graphics API dependent parts
+  
+  Packages will be built with following layout:
+     lib/netstandard2.0/Direct3D11/MyAssembly.dll
+     lib/netstandard2.0/MyAssembly.dll (placeholder so that we can piggyback on "RuntimeCopyLocalItems" from NET.Sdk)
+  -->
+  
+  <!-- ==================================================================
+       Targets used for Build to enumerate each XenkoGraphicsApi for each TargetFramework
+  -->
+  <Target Name="_XenkoQueryGraphicsApis" Returns="@(_XenkoGraphicsApisItemsInternal)" Condition="'$(XenkoProjectType)' != 'Cpp'">
+    <!-- Use a fake runtime identifier to transmit XenkoGraphicsApiDependent -->
+    <ItemGroup Condition="'$(XenkoGraphicsApis)' != ''">
+      <_XenkoGraphicsApisItemsInternal Include="$(XenkoGraphicsApis)" TargetFramework="$(TargetFramework)" XenkoGraphicsApiDependent="$(XenkoGraphicsApiDependent)" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(XenkoGraphicsApis)' == ''">
+      <_XenkoGraphicsApisItemsInternal Include="$(XenkoGraphicsApi)" TargetFramework="$(TargetFramework)" XenkoGraphicsApiDependent="$(XenkoGraphicsApiDependent)" />
+    </ItemGroup>
+  </Target>
+  <Target Name="_ComputeTargetFrameworkItems" Returns="@(InnerOutput)">
+    <ItemGroup>
+      <_TargetFramework Condition="'$(TargetFrameworks)' != ''" Include="$(TargetFrameworks)" />
+      <_TargetFramework Condition="'$(TargetFrameworks)' == ''" Include="$(TargetFramework)" />
+      <!-- Make normalization explicit: Trim; Deduplicate by keeping first occurrence, case insensitive -->
+      <_TargetFrameworkNormalized Include="@(_TargetFramework-&gt;Trim()-&gt;Distinct())" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(XenkoGraphicsApiDependent)' != 'true'">
+      <_InnerBuildProjects Include="$(MSBuildProjectFile)">
+        <AdditionalProperties>TargetFramework=%(_TargetFrameworkNormalized.Identity)</AdditionalProperties>
+      </_InnerBuildProjects>
+    </ItemGroup>
+    <MSBuild Projects="$(MSBuildProjectFile)"
+             Condition="'$(XenkoGraphicsApiDependent)' == 'true'"
+             BuildInParallel="$(BuildInParallel)"
+             Properties="TargetFramework=%(_TargetFrameworkNormalized.Identity)"
+             RemoveProperties="XenkoGraphicsApi"
+             Targets="_XenkoQueryGraphicsApis">
+      <Output ItemName="_XenkoGraphicsApisItems" TaskParameter="TargetOutputs"  />
+    </MSBuild>
+    <ItemGroup Condition="'$(XenkoGraphicsApiDependent)' == 'true'">
+      <_TargetFrameworkWithXenkoGraphicsApi Include="@(_XenkoGraphicsApisItems->'%(OriginalItemSpec)')" XenkoGraphicsApi="%(_XenkoGraphicsApisItems.Identity)" />
+      <_InnerBuildProjects Include="$(MSBuildProjectFile)">
+        <AdditionalProperties Condition="'%(_TargetFrameworkWithXenkoGraphicsApi.XenkoGraphicsApiDependent)' != 'true'">TargetFramework=%(_TargetFrameworkWithXenkoGraphicsApi.TargetFramework)</AdditionalProperties>
+        <AdditionalProperties Condition="'%(_TargetFrameworkWithXenkoGraphicsApi.XenkoGraphicsApiDependent)' == 'true'">TargetFramework=%(_TargetFrameworkWithXenkoGraphicsApi.TargetFramework);XenkoGraphicsApi=%(_TargetFrameworkWithXenkoGraphicsApi.XenkoGraphicsApi)</AdditionalProperties>
+      </_InnerBuildProjects>
+    </ItemGroup>
+  </Target>
+
+  <!-- ==================================================================
+       Targets to detect if a project reference (_MSBuildProjectReferenceExistent) is XenkoGraphicsApiDependent -->
+  <Target Name="_XenkoQueryGraphicsApiDependent" Returns="@(_XenkoGraphicsApiDependentItemsInternal)" Condition="'$(XenkoProjectType)' != 'Cpp'">
+    <!-- Use a fake runtime identifier to transmit XenkoGraphicsApiDependent -->
+    <ItemGroup>
+      <_XenkoGraphicsApiDependentItemsInternal Include="xenko_fake_graphics_api" XenkoGraphicsApiDependent="$(XenkoGraphicsApiDependent)" />
+    </ItemGroup>
+  </Target>
+  <Target Name="_XenkoProjectReferenceGraphicsApiDependent" BeforeTargets="PrepareProjectReferences">
+    <MSBuild Projects="@(_MSBuildProjectReferenceExistent)"
+             BuildInParallel="$(BuildInParallel)"
+             Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework);"
+             RemoveProperties="XenkoGraphicsApi"
+             Targets="_XenkoQueryGraphicsApiDependent"
+             SkipNonexistentTargets="true">
+      <Output ItemName="_XenkoGraphicsApiDependentItems" TaskParameter="TargetOutputs"  />
+    </MSBuild>
+    <PropertyGroup>
+      <!-- Transmit current graphics API. This is useful in case we have transitions such as: Direct3D12->ProjectWithoutGraphicsApi->Direct3D12
+           otherwise it would try to build 3rd project twice (due to the reference from ProjectWithoutGraphicsApi). -->
+      <_XenkoGraphicsApiCurrent>$(XenkoGraphicsApi)</_XenkoGraphicsApiCurrent>
+      <!-- We use a fallback in case the project without graphics API is the project initiating the build. -->
+      <_XenkoGraphicsApiCurrent Condition="'$(_XenkoGraphicsApiCurrent)' == '' And '$(XenkoGraphicsApis)' != ''">$(XenkoGraphicsApis.Split(';', StringSplitOptions.RemoveEmptyEntries)[0])</_XenkoGraphicsApiCurrent>
+      <_XenkoGraphicsApiCurrent Condition="'$(_XenkoGraphicsApiCurrent)' == ''">$(XenkoDefaultGraphicsApi)</_XenkoGraphicsApiCurrent>
+      <_XenkoGraphicsApiCurrent Condition="'$(_XenkoGraphicsApiCurrent)' == ''">Direct3D11</_XenkoGraphicsApiCurrent>
+    </PropertyGroup>
+    <ItemGroup>
+      <_MSBuildProjectReferenceExistent Remove="@(_XenkoGraphicsApiDependentItems->'%(OriginalItemSpec)')" />
+      <_MSBuildProjectReferenceExistent Include="@(_XenkoGraphicsApiDependentItems->'%(OriginalItemSpec)')" Condition="'%(_XenkoGraphicsApiDependentItems.XenkoGraphicsApiDependent)' != 'true'" />
+      <_MSBuildProjectReferenceExistent Include="@(_XenkoGraphicsApiDependentItems->'%(OriginalItemSpec)')" Condition="'%(_XenkoGraphicsApiDependentItems.XenkoGraphicsApiDependent)' == 'true'">
+        <XenkoGraphicsApiDependent>%(_XenkoGraphicsApiDependentItems.XenkoGraphicsApiDependent)</XenkoGraphicsApiDependent>
+        <XenkoGraphicsApi>$(_XenkoGraphicsApiCurrent)</XenkoGraphicsApi>
+        <SetTargetFramework>%(_XenkoGraphicsApiDependentItems.SetTargetFramework);XenkoGraphicsApi=$(_XenkoGraphicsApiCurrent)</SetTargetFramework>
+      </_MSBuildProjectReferenceExistent>
+      <_MSBuildProjectReferenceExistent Condition="'%(_MSBuildProjectReferenceExistent.XenkoGraphicsApiDependent)' != 'true'">
+        <GlobalPropertiesToRemove>%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove);XenkoGraphicsApi</GlobalPropertiesToRemove>
+      </_MSBuildProjectReferenceExistent>
+    </ItemGroup>
+  </Target>
+
+  <!-- ==================================================================
+       Target to generate Package with proper layout
+  -->
+  <Target Name="_XenkoPackUpdateOutputTargetPath">
+    <!-- For default graphics API, we do a copy rather than a move,
+         so that top-level folder contains default libraries and "RuntimeCopyLocalItems" target works properly -->
+    <ItemGroup Condition="'$(XenkoGraphicsApi)' == '$(XenkoDefaultGraphicsApi)'">
+      <SatelliteDllsProjectOutputGroupOutput Include="@(SatelliteDllsProjectOutputGroupOutput)">
+        <TargetPath Condition="'%(SatelliteDllsProjectOutputGroupOutput.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(SatelliteDllsProjectOutputGroupOutput.TargetPath)</TargetPath>
+      </SatelliteDllsProjectOutputGroupOutput>
+      <BuiltProjectOutputGroupOutput Include="@(BuiltProjectOutputGroupOutput)">
+        <TargetPath Condition="'%(BuiltProjectOutputGroupOutput.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(BuiltProjectOutputGroupOutput.TargetPath)</TargetPath>
+      </BuiltProjectOutputGroupOutput>
+      <DocumentationProjectOutputGroupOutput Include="@(DocumentationProjectOutputGroupOutput)">
+        <TargetPath Condition="'%(DocumentationProjectOutputGroupOutput.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(DocumentationProjectOutputGroupOutput.TargetPath)</TargetPath>
+      </DocumentationProjectOutputGroupOutput>
+      <_PathToPriFile Include="@(_PathToPriFile)">
+        <TargetPath Condition="'%(_PathToPriFile.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(_PathToPriFile.TargetPath)</TargetPath>
+      </_PathToPriFile>
+      <BuildOutputInPackage Include="@(BuildOutputInPackage)">
+        <TargetPath Condition="'%(BuildOutputInPackage.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(BuildOutputInPackage.TargetPath)</TargetPath>
+      </BuildOutputInPackage>
+    </ItemGroup>
+    <ItemGroup Condition="'$(XenkoGraphicsApi)' != '$(XenkoDefaultGraphicsApi)'">
+      <SatelliteDllsProjectOutputGroupOutput Update="@(SatelliteDllsProjectOutputGroupOutput)">
+        <TargetPath Condition="'%(SatelliteDllsProjectOutputGroupOutput.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(SatelliteDllsProjectOutputGroupOutput.TargetPath)</TargetPath>
+      </SatelliteDllsProjectOutputGroupOutput>
+      <BuiltProjectOutputGroupOutput Update="@(BuiltProjectOutputGroupOutput)">
+        <TargetPath Condition="'%(BuiltProjectOutputGroupOutput.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(BuiltProjectOutputGroupOutput.TargetPath)</TargetPath>
+      </BuiltProjectOutputGroupOutput>
+      <DocumentationProjectOutputGroupOutput Update="@(DocumentationProjectOutputGroupOutput)">
+        <TargetPath Condition="'%(DocumentationProjectOutputGroupOutput.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(DocumentationProjectOutputGroupOutput.TargetPath)</TargetPath>
+      </DocumentationProjectOutputGroupOutput>
+      <_PathToPriFile Update="@(_PathToPriFile)">
+        <TargetPath Condition="'%(_PathToPriFile.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(_PathToPriFile.TargetPath)</TargetPath>
+      </_PathToPriFile>
+      <BuildOutputInPackage Update="@(BuildOutputInPackage)">
+        <TargetPath Condition="'%(BuildOutputInPackage.TargetPath)' == ''">%(FileName)%(Extension)</TargetPath>
+        <TargetPath>$(XenkoGraphicsApi)\%(BuildOutputInPackage.TargetPath)</TargetPath>
+      </BuildOutputInPackage>
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup Condition="'$(XenkoGraphicsApiDependent)' == 'true'">
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);_XenkoPackUpdateOutputTargetPath</TargetsForTfmSpecificBuildOutput>
+  </PropertyGroup>
+
+  <!-- ==================================================================
+       Rewrote _WalkEachTargetPerFramework using @(_InnerBuildProjects)
+  -->
+  <Target Name="_WalkEachTargetPerFramework" DependsOnTargets="_ComputeTargetFrameworkItems">
+    <MSBuild
+      Condition="'$(IncludeBuildOutput)' == 'true'"
+      Projects="@(_InnerBuildProjects)"
+      Targets="_GetBuildOutputFilesWithTfm">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_BuildOutputInPackage" />
+    </MSBuild>
+
+    <MSBuild
+      Condition="'$(TargetsForTfmSpecificContentInPackage)' != ''"
+      Projects="@(_InnerBuildProjects)"
+      Targets="_GetTfmSpecificContentForPackage">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_PackageFiles"/>
+    </MSBuild>
+
+    <MSBuild
+      Condition="'$(IncludeBuildOutput)' == 'true'"
+      Projects="@(_InnerBuildProjects)"
+      Targets="_GetDebugSymbolsWithTfm">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_TargetPathsToSymbols" />
+    </MSBuild>
+
+    <MSBuild
+      Condition="'$(IncludeSource)' == 'true'"
+      Projects="@(_InnerBuildProjects)"
+      Targets="SourceFilesProjectOutputGroup"
+      Properties="BuildProjectReferences=false;">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_SourceFiles" />
+    </MSBuild>
+
+    <MSBuild
+      Projects="@(_InnerBuildProjects)"
+      Targets="_GetFrameworkAssemblyReferences"
+      Properties="BuildProjectReferences=false;">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_FrameworkAssemblyReferences" />
+    </MSBuild>
+
+    <MSBuild
+      Projects="@(_InnerBuildProjects)"
+      Targets="_GetFrameworksWithSuppressedDependencies"
+      Properties="BuildProjectReferences=false;">
+
+      <Output
+          TaskParameter="TargetOutputs"
+          ItemName="_FrameworksWithSuppressedDependencies" />
+    </MSBuild>
+  </Target>
+
+</Project>

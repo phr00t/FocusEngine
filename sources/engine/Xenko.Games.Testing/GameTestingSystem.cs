@@ -103,9 +103,7 @@ namespace Xenko.Games.Testing
 
             Initialized = true;
 
-#if XENKO_PLATFORM_IOS || XENKO_PLATFORM_ANDROID || XENKO_PLATFORM_WINDOWS_DESKTOP
             Console.WriteLine(@"Test initialized, waiting to start...");
-#endif
         }
 
         public override void Draw(GameTime gameTime)

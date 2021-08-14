@@ -1,0 +1,19 @@
+{
+  "solution": {
+    "path": "Xenko.sln",
+    "projects": [
+      "..\\sources\\assets\\Xenko.Core.Assets.Quantum.Tests\\Xenko.Core.Assets.Quantum.Tests.csproj",
+      "..\\sources\\assets\\Xenko.Core.Assets.Tests\\Xenko.Core.Assets.Tests.csproj",
+      "..\\sources\\buildengine\\Xenko.Core.BuildEngine.Tests\\Xenko.Core.BuildEngine.Tests.csproj",
+      "..\\sources\\core\\Xenko.Core.Design.Tests\\Xenko.Core.Design.Tests.csproj",
+      "..\\sources\\core\\Xenko.Core.Tests\\Xenko.Core.Tests.csproj",
+      "..\\sources\\core\\Xenko.Core.Yaml.Tests\\Xenko.Core.Yaml.Tests.csproj",
+      "..\\sources\\editor\\Xenko.Core.Assets.Editor.Tests\\Xenko.Core.Assets.Editor.Tests.csproj",
+      "..\\sources\\editor\\Xenko.GameStudio.Tests\\Xenko.GameStudio.Tests.csproj",
+      "..\\sources\\engine\\Xenko.Shaders.Tests\\Xenko.Shaders.Tests.Windows.csproj",
+      "..\\sources\\presentation\\Xenko.Core.Presentation.Quantum.Tests\\Xenko.Core.Presentation.Quantum.Tests.csproj",
+      "..\\sources\\presentation\\Xenko.Core.Presentation.Tests\\Xenko.Core.Presentation.Tests.csproj",
+      "..\\sources\\presentation\\Xenko.Core.Quantum.Tests\\Xenko.Core.Quantum.Tests.csproj"
+    ]
+  }
+}
