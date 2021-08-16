@@ -162,7 +162,7 @@ namespace Xenko.Assets.Presentation.AssetEditors.UIEditor.Game
                     }
                     // calculate delta
                     var delta = position - currentPosition;
-                    const float magnetDistance = 10; // FIXME: expose this value in settings
+                    float magnetDistance = Game.Input.IsKeyDown(Keys.LeftShift) || Game.Input.IsKeyDown(Keys.RightShift) ? 0 : 10;
                     if (delta.LengthSquared() > float.Epsilon)
                     {
                         var resolution = Controller.GetEntityByName(UIEditorController.UIEntityName).Get<UIComponent>().Resolution;
