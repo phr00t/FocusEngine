@@ -295,7 +295,12 @@ namespace Xenko.Engine
                 if (oldParent != null)
                     oldParent.Children.Remove(this);
                 else
-                    TransformProcessor.TransformationRoots.Remove(this);
+                {
+                    lock (TransformProcessor.TransformationRoots)
+                    {
+                        TransformProcessor.TransformationRoots.Remove(this);
+                    }
+                }
 
                 // add to new spot
                 if (value != null)
@@ -303,7 +308,12 @@ namespace Xenko.Engine
                 else if (newParentScene != null)
                 {
                     if (IsMovingInsideRootScene)
-                        TransformProcessor.TransformationRoots.Add(this);
+                    {
+                        lock (TransformProcessor.TransformationRoots)
+                        {
+                            TransformProcessor.TransformationRoots.Add(this);
+                        }
+                    }
                     else
                         Entity.Scene = newParentScene;
                 }

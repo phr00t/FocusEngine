@@ -64,7 +64,10 @@ namespace Xenko.Engine.Processors
         {
             if (component.Parent == null)
             {
-                TransformationRoots.Add(component);
+                lock (TransformationRoots)
+                {
+                    TransformationRoots.Add(component);
+                }
             }
 
             foreach (var child in data.Children)
@@ -89,7 +92,10 @@ namespace Xenko.Engine.Processors
 
             if (component.Parent == null)
             {
-                TransformationRoots.Remove(component);
+                lock (TransformationRoots)
+                {
+                    TransformationRoots.Remove(component);
+                }
             }
         }
 
@@ -163,10 +169,14 @@ namespace Xenko.Engine.Processors
         public override void Draw(RenderContext context)
         {
             notSpecialRootComponents.Clear();
-            foreach (var t in TransformationRoots)
+            
+            lock (TransformationRoots)
             {
-                if (t.UpdateImmobilePosition || t.Immobile != IMMOBILITY.EverythingImmobile)
-                    notSpecialRootComponents.Add(t);
+                foreach (var t in TransformationRoots)
+                {
+                    if (t.UpdateImmobilePosition || t.Immobile != IMMOBILITY.EverythingImmobile)
+                        notSpecialRootComponents.Add(t);
+                }
             }
 
             // Update scene transforms
@@ -199,13 +209,16 @@ namespace Xenko.Engine.Processors
                 // Still need to update transformation roots
                 if (transformComponent.Parent == null)
                 {
-                    if(added)
+                    lock (TransformationRoots)
                     {
-                        TransformationRoots.Add(transformComponent);
-                    }
-                    else
-                    {
-                        TransformationRoots.Remove(transformComponent);
+                        if (added)
+                        {
+                            TransformationRoots.Add(transformComponent);
+                        }
+                        else
+                        {
+                            TransformationRoots.Remove(transformComponent);
+                        }
                     }
                 }
             }
