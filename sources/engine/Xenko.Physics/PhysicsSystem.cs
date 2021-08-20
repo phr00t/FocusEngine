@@ -211,10 +211,22 @@ namespace Xenko.Physics
 
                         switch (a.Action)
                         {
-                            case BepuRigidbodyComponent.RB_ACTION.IsActive:
-                                using (physicsScene.BepuSimulation.simulationLocker.WriteLock())
+                            case BepuRigidbodyComponent.RB_ACTION.Awake:
+                                if (!a.Body.InternalBody.Awake)
                                 {
-                                    a.Body.InternalBody.Awake = a.Body.wasAwake;
+                                    using (physicsScene.BepuSimulation.simulationLocker.WriteLock())
+                                    {
+                                        a.Body.InternalBody.Awake = true;
+                                    }
+                                }
+                                break;
+                            case BepuRigidbodyComponent.RB_ACTION.Sleep:
+                                if (a.Body.InternalBody.Awake)
+                                {
+                                    using (physicsScene.BepuSimulation.simulationLocker.WriteLock())
+                                    {
+                                        a.Body.InternalBody.Awake = false;
+                                    }
                                 }
                                 break;
                             case BepuRigidbodyComponent.RB_ACTION.ColliderShape:

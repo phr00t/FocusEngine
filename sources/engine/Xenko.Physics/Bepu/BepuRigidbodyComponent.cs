@@ -60,7 +60,8 @@ namespace Xenko.Physics.Bepu
 
         internal enum RB_ACTION
         {
-            IsActive,
+            Awake,
+            Sleep,
             CcdMotionThreshold,
             SleepThreshold,
             UpdateInertia,
@@ -208,7 +209,7 @@ namespace Xenko.Physics.Bepu
                 {
                     BepuSimulation.instance.CriticalActions.Enqueue(new BepuSimulation.RBCriticalAction()
                     {
-                        Action = RB_ACTION.IsActive,
+                        Action = value ? RB_ACTION.Awake : RB_ACTION.Sleep,
                         Body = this
                     });
                 }
