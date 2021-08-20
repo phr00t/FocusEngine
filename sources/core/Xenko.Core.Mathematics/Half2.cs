@@ -36,28 +36,28 @@ namespace Xenko.Core.Mathematics
     public struct Half2 : IEquatable<Half2>
     {
         /// <summary>
-        /// The size of the <see cref="Stride.Core.Mathematics.Half2"/> type, in bytes.
+        /// The size of the <see cref="Xenko.Core.Mathematics.Half2"/> type, in bytes.
         /// </summary>
         public static readonly int SizeInBytes = Utilities.SizeOf<Half2>();
 
 
         /// <summary>
-        /// A <see cref="Stride.Core.Mathematics.Half2"/> with all of its components set to zero.
+        /// A <see cref="Xenko.Core.Mathematics.Half2"/> with all of its components set to zero.
         /// </summary>
         public static readonly Half2 Zero = new Half2();
 
         /// <summary>
-        /// The X unit <see cref="Stride.Core.Mathematics.Half2"/> (1, 0).
+        /// The X unit <see cref="Xenko.Core.Mathematics.Half2"/> (1, 0).
         /// </summary>
         public static readonly Half2 UnitX = new Half2(1.0f, 0.0f);
 
         /// <summary>
-        /// The Y unit <see cref="Stride.Core.Mathematics.Half2"/> (0, 1).
+        /// The Y unit <see cref="Xenko.Core.Mathematics.Half2"/> (0, 1).
         /// </summary>
         public static readonly Half2 UnitY = new Half2(0.0f, 1.0f);
 
         /// <summary>
-        /// A <see cref="Stride.Core.Mathematics.Half2"/> with all of its components set to one.
+        /// A <see cref="Xenko.Core.Mathematics.Half2"/> with all of its components set to one.
         /// </summary>
         public static readonly Half2 One = new Half2(1.0f, 1.0f);
 
@@ -95,7 +95,7 @@ namespace Xenko.Core.Mathematics
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Stride.Core.Mathematics.Half2"/> struct.
+        /// Initializes a new instance of the <see cref="Xenko.Core.Mathematics.Half2"/> struct.
         /// </summary>
         /// <param name="values">The values to assign to the X and Y components of the vector. This must be an array with two elements.</param>
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="values"/> is <c>null</c>.</exception>
