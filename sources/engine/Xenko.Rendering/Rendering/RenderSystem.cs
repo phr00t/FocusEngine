@@ -225,11 +225,17 @@ namespace Xenko.Rendering
         {
             // Sync point: after extract, before prepare (game simulation could resume now)
 
-            // Generate and execute prepare effect jobs
+            // Split up Prepare Effects
             Dispatcher.For(0, RenderFeatures.Count, i => {
                 // Divide into task chunks for parallelism
                 RootRenderFeature renderFeature = RenderFeatures[i];
                 renderFeature.PrepareEffectPermutations(context);
+            });
+
+            // split up Prepares
+            Dispatcher.For(0, RenderFeatures.Count, i => {
+                // Divide into task chunks for parallelism
+                RootRenderFeature renderFeature = RenderFeatures[i];
                 renderFeature.Prepare(context);
             });
 
