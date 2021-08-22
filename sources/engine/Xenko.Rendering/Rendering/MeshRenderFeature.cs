@@ -221,7 +221,7 @@ namespace Xenko.Rendering
                 }
 
                 commandList.SetPipelineState(renderEffect.PipelineState);
-                commandList.SetDescriptorSets(0, descriptorSetsLocal);
+                commandList.SetDescriptorSets(descriptorSetsLocal);
 
                 // Draw
                 if (drawData.IndexBuffer == null)

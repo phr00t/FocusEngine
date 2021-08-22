@@ -394,7 +394,7 @@ namespace Xenko.Graphics
             // Nothing to do
         }
 
-        public void SetDescriptorSets(int index, DescriptorSet[] descriptorSets)
+        public void SetDescriptorSets(DescriptorSet[] descriptorSets)
         {
             // Bind resources
             currentPipelineState?.ResourceBinder.BindResources(this, descriptorSets);

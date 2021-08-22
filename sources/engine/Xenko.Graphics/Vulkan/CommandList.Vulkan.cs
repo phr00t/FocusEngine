@@ -481,11 +481,8 @@ namespace Xenko.Graphics
 
         private readonly FastList<DescriptorSet> boundDescriptorSets = new FastList<DescriptorSet>();
 
-        public void SetDescriptorSets(int index, DescriptorSet[] descriptorSets)
+        public void SetDescriptorSets(DescriptorSet[] descriptorSets)
         {
-            if (index != 0)
-                throw new NotImplementedException();
-
             boundDescriptorSets.Clear(true);
             for (int i = 0; i < descriptorSets.Length; i++)
             {

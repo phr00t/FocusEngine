@@ -110,7 +110,7 @@ namespace Xenko.Rendering
             for (int i = 0; i < descriptorSets.Length; ++i)
                 descriptorSets[i] = resourceGroups[i].DescriptorSet;
 
-            commandList.SetDescriptorSets(0, descriptorSets);
+            commandList.SetDescriptorSets(descriptorSets);
         }
     }
 }

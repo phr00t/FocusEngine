@@ -372,7 +372,7 @@ namespace Xenko.Particles.Rendering
                 }
 
                 commandList.SetPipelineState(renderEffect.PipelineState);
-                commandList.SetDescriptorSets(0, descriptorSetsLocal);
+                commandList.SetDescriptorSets(descriptorSetsLocal);
 
                 // Bind the buffers and draw
                 commandList.SetVertexBuffer(0, nodeData.VertexBuffer, nodeData.VertexBufferOffset, nodeData.VertexBufferStride);
