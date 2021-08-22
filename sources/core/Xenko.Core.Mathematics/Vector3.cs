@@ -1461,18 +1461,6 @@ namespace Xenko.Core.Mathematics
             Quaternion.RotationYawPitchRoll(ref quaternion, out yawPitchRoll.X, out yawPitchRoll.Y, out yawPitchRoll.Z);
         }
 
-        /// <summary>
-        /// Rotates the source around the target by the rotation angle around the supplied axis. 
-        /// </summary>
-        /// <param name="source">The position to rotate.</param>
-        /// <param name="target">The point to rotate around.</param>
-        /// <param name="axis">The axis of rotation.</param>
-        /// <param name="angle">The angle to rotate by in radians.</param>
-        /// <returns>The rotated vector.</returns>
-        public static Vector3 RotateAround(Vector3 source, Vector3 target, Vector3 axis, float angle)
-        {
-            return RotateAround(ref source, ref target, ref axis, angle);
-        }
 
         /// <summary>
         /// Rotates the source around the target by the rotation angle around the supplied axis. 
@@ -1482,7 +1470,7 @@ namespace Xenko.Core.Mathematics
         /// <param name="axis">The axis of rotation.</param>
         /// <param name="angle">The angle to rotate by in radians.</param>
         /// <returns>The rotated vector.</returns>
-        public static Vector3 RotateAround(ref Vector3 source, ref Vector3 target, ref Vector3 axis, float angle)
+        public static Vector3 RotateAround(in Vector3 source, in Vector3 target, in Vector3 axis, float angle)
         {
             Vector3 local = source - target;
             Quaternion q = Quaternion.RotationAxis(axis, angle);
