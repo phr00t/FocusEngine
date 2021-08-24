@@ -35,7 +35,7 @@ namespace Xenko.VirtualReality
         private static List<string>[] PathPriorities =
         {
             new List<string>() { "" }, // BaseIndex 0
-            new List<string>() { "/input/grip/pose" }, // Position 1
+            new List<string>() { "/input/aim/pose", "/input/grip/pose" }, // Position 1
             new List<string>() { "/input/trigger/value", "/input/select/value" }, // TriggerValue 2
             new List<string>() { "/input/trigger/click", "/input/select/click" }, // TriggerClick 3
             new List<string>() { "/input/thumbstick/x", "/input/trackpad/x" }, // ThumbstickX 4
