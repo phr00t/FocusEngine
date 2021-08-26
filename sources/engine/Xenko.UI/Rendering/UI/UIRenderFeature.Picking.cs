@@ -320,7 +320,7 @@ namespace Xenko.Rendering.UI
                                     MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Moved, 0, Vector2.Zero, Vector2.Zero, intersectionPoint, state.LastIntersectionPoint - intersectionPoint, time);
 
                                 // check the second button
-                                if (tc.IsTouchedDown(VirtualReality.VRDeviceSystem.UIActivationButton2) || tc.IsPressedDown(VirtualReality.VRDeviceSystem.UIActivationButton2))
+                                else if (tc.IsTouchedDown(VirtualReality.VRDeviceSystem.UIActivationButton2) || tc.IsPressedDown(VirtualReality.VRDeviceSystem.UIActivationButton2))
                                     MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Pressed, 2, Vector2.Zero, Vector2.Zero, intersectionPoint, Vector3.Zero, time);
                                 else if (tc.IsTouchReleased(VirtualReality.VRDeviceSystem.UIActivationButton2) || tc.IsPressReleased(VirtualReality.VRDeviceSystem.UIActivationButton2))
                                     MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Released, 2, Vector2.Zero, Vector2.Zero, intersectionPoint, Vector3.Zero, time);

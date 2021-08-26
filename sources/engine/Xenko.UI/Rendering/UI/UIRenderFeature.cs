@@ -174,11 +174,14 @@ namespace Xenko.Rendering.UI
                 if (renderObject.Source is UIComponent uic)
                     uic.RenderedResolution = virtualResolution;
 
-                PickingUpdate(uiElementState.RenderObject, context.CommandList.Viewport, ref uiElementState.WorldViewProjectionMatrix, drawTime, events);
+                if (events != null)
+                    PickingUpdate(uiElementState.RenderObject, context.CommandList.Viewport, ref uiElementState.WorldViewProjectionMatrix, drawTime, events);
 
                 ReturnBatch(batch);
             }
         }
+
+        ulong lastVRPoseCount;
 
         private void DrawInternal(RenderDrawContext context, RenderView renderView, RenderViewStage renderViewStage, int startIndex, int endIndex)
         {
@@ -192,8 +195,15 @@ namespace Xenko.Rendering.UI
             var drawTime = game != null ? game.DrawTime : new GameTime();
 
             // Prepare content required for Picking and MouseOver events
-            List<PointerEvent> events = new List<PointerEvent>();
-            PickingPrepare(events);
+            List<PointerEvent> events = null;
+            var vrDevice = VirtualReality.VRDeviceSystem.GetSystem?.Device;
+            if (vrDevice == null || vrDevice.PoseCount != lastVRPoseCount)
+            {
+                events = new List<PointerEvent>();
+                PickingPrepare(events);
+
+                if (vrDevice != null) lastVRPoseCount = vrDevice.PoseCount;
+            }
 
             // build the list of the UI elements to render
             UIElementState[] uiElementStates = new UIElementState[endIndex - startIndex];
@@ -212,7 +222,7 @@ namespace Xenko.Rendering.UI
                 }
             }
 
-            events.Clear();
+            events?.Clear();
 
             lock (drawLocker)
             {
