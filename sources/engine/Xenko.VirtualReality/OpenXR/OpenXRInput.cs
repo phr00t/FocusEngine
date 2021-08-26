@@ -44,7 +44,7 @@ namespace Xenko.VirtualReality
             new List<string>() { "/input/trackpad/x", "/input/thumbstick/x" }, // TrackpadX 7
             new List<string>() { "/input/trackpad/y", "/input/thumbstick/y" }, // TrackpadY 8
             new List<string>() { "/input/trackpad/click", "/input/thumbstick/click" }, // TrackpadClick 9
-            new List<string>() { "/input/squeeze/value" }, // GripValue 10
+            new List<string>() { "/input/squeeze/force", "/input/squeeze/value" }, // GripValue 10
             new List<string>() { "/input/squeeze/click" }, // GripClick 11
             new List<string>() { "/input/x/click", "/input/a/click" }, // ButtonXA 12
             new List<string>() { "/input/y/click", "/input/b/click" }, // ButtonYB 13
