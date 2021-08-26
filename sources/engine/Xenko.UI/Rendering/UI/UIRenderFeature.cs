@@ -174,7 +174,7 @@ namespace Xenko.Rendering.UI
                 if (renderObject.Source is UIComponent uic)
                 {
                     uic.RenderedResolution = virtualResolution;
-                    if (posecount != uic.VRPoseUpdate)
+                    if (posecount == 0 || posecount != uic.VRPoseUpdate)
                     {
                         PickingUpdate(uiElementState.RenderObject, context.CommandList.Viewport, ref uiElementState.WorldViewProjectionMatrix, drawTime, events);
                         uic.VRPoseUpdate = posecount;
