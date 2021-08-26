@@ -69,7 +69,7 @@ namespace Xenko.Rendering.UI
 
         private void initUIElementStates(RenderDrawContext context, RenderView renderView,
                                          RenderViewStage renderViewStage, ref UIElementState[] uiElementStates,
-                                         int index, int storeIndex, GameTime drawTime, List<PointerEvent> events)
+                                         int index, int storeIndex, GameTime drawTime, List<PointerEvent> events, ulong posecount)
         {
             var renderNodeReference = renderViewStage.SortedRenderNodes[index].RenderNode;
             var renderNode = GetRenderNode(renderNodeReference);
@@ -172,16 +172,18 @@ namespace Xenko.Rendering.UI
                 }
 
                 if (renderObject.Source is UIComponent uic)
+                {
                     uic.RenderedResolution = virtualResolution;
-
-                if (events != null)
-                    PickingUpdate(uiElementState.RenderObject, context.CommandList.Viewport, ref uiElementState.WorldViewProjectionMatrix, drawTime, events);
+                    if (posecount != uic.VRPoseUpdate)
+                    {
+                        PickingUpdate(uiElementState.RenderObject, context.CommandList.Viewport, ref uiElementState.WorldViewProjectionMatrix, drawTime, events);
+                        uic.VRPoseUpdate = posecount;
+                    }
+                }
 
                 ReturnBatch(batch);
             }
         }
-
-        ulong lastVRPoseCount;
 
         private void DrawInternal(RenderDrawContext context, RenderView renderView, RenderViewStage renderViewStage, int startIndex, int endIndex)
         {
@@ -195,15 +197,10 @@ namespace Xenko.Rendering.UI
             var drawTime = game != null ? game.DrawTime : new GameTime();
 
             // Prepare content required for Picking and MouseOver events
-            List<PointerEvent> events = null;
-            var vrDevice = VirtualReality.VRDeviceSystem.GetSystem?.Device;
-            if (vrDevice == null || vrDevice.PoseCount != lastVRPoseCount)
-            {
-                events = new List<PointerEvent>();
-                PickingPrepare(events);
+            var events = new List<PointerEvent>();
+            PickingPrepare(events);
 
-                if (vrDevice != null) lastVRPoseCount = vrDevice.PoseCount;
-            }
+            ulong poseCount = VirtualReality.VRDeviceSystem.GetSystem?.Device?.PoseCount ?? 0;
 
             // build the list of the UI elements to render
             UIElementState[] uiElementStates = new UIElementState[endIndex - startIndex];
@@ -211,14 +208,14 @@ namespace Xenko.Rendering.UI
             {
                 Xenko.Core.Threading.Dispatcher.For(startIndex, endIndex, (index) =>
                 {
-                    initUIElementStates(context, renderView, renderViewStage, ref uiElementStates, index, index - startIndex, drawTime, events);
+                    initUIElementStates(context, renderView, renderViewStage, ref uiElementStates, index, index - startIndex, drawTime, events, poseCount);
                 });
             } 
             else
             {
                 for(int i=startIndex; i<endIndex; i++)
                 {
-                    initUIElementStates(context, renderView, renderViewStage, ref uiElementStates, i, i - startIndex, drawTime, events);
+                    initUIElementStates(context, renderView, renderViewStage, ref uiElementStates, i, i - startIndex, drawTime, events, poseCount);
                 }
             }
 

@@ -233,5 +233,6 @@ namespace Xenko.Engine
 
         internal Vector2[] AveragedPositions;
         internal int AveragePositionIndex;
+        internal ulong VRPoseUpdate;
     }
 }
