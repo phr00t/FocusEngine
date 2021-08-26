@@ -20,6 +20,8 @@ namespace Xenko.VirtualReality
 
         public abstract DeviceState State { get; }
 
+        public virtual bool UseGripInsteadOfAimPose { get; set; }
+
         public virtual void Update(GameTime time)
         {           
         }

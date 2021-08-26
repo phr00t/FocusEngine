@@ -12,45 +12,47 @@ namespace Xenko.VirtualReality
         public enum HAND_PATHS
         {
             BaseIndex = 0,
-            Position = 1,
-            TriggerValue = 2,
-            TriggerClick = 3,
-            ThumbstickX = 4,
-            ThumbstickY = 5,
-            ThumbstickClick = 6,
-            TrackpadX = 7,
-            TrackpadY = 8,
-            TrackpadClick = 9,
-            GripValue = 10,
-            GripClick = 11,
-            ButtonXA = 12, // x on left, a on right (or either index)
-            ButtonYB = 13, // y on left, b on right (or either index)
-            Menu = 14,
-            System = 15, // may be inaccessible
-            HapticOut = 16
+            AimPosition = 1,
+            GripPosition = 2,
+            TriggerValue = 3,
+            TriggerClick = 4,
+            ThumbstickX = 5,
+            ThumbstickY = 6,
+            ThumbstickClick = 7,
+            TrackpadX = 8,
+            TrackpadY = 9,
+            TrackpadClick = 10,
+            GripValue = 11,
+            GripClick = 12,
+            ButtonXA = 13, // x on left, a on right (or either index)
+            ButtonYB = 14, // y on left, b on right (or either index)
+            Menu = 15,
+            System = 16, // may be inaccessible
+            HapticOut = 17
         }
-        public const int HAND_PATH_COUNT = 17;
+        public const int HAND_PATH_COUNT = 18;
 
         // most likely matches for input types above
         private static List<string>[] PathPriorities =
         {
             new List<string>() { "" }, // BaseIndex 0
-            new List<string>() { "/input/aim/pose", "/input/grip/pose" }, // Position 1
-            new List<string>() { "/input/trigger/value", "/input/select/value" }, // TriggerValue 2
-            new List<string>() { "/input/trigger/click", "/input/select/click" }, // TriggerClick 3
-            new List<string>() { "/input/thumbstick/x", "/input/trackpad/x" }, // ThumbstickX 4
-            new List<string>() { "/input/thumbstick/y", "/input/trackpad/y" }, // ThumbstickY 5
-            new List<string>() { "/input/thumbstick/click", "/input/trackpad/click" }, // ThumbstickClick 6
-            new List<string>() { "/input/trackpad/x", "/input/thumbstick/x" }, // TrackpadX 7
-            new List<string>() { "/input/trackpad/y", "/input/thumbstick/y" }, // TrackpadY 8
-            new List<string>() { "/input/trackpad/click", "/input/thumbstick/click" }, // TrackpadClick 9
-            new List<string>() { "/input/squeeze/force", "/input/squeeze/value" }, // GripValue 10
-            new List<string>() { "/input/squeeze/click" }, // GripClick 11
-            new List<string>() { "/input/x/click", "/input/a/click" }, // ButtonXA 12
-            new List<string>() { "/input/y/click", "/input/b/click" }, // ButtonYB 13
-            new List<string>() { "/input/menu/click" }, // Menu 14
-            new List<string>() { "/input/system/click" }, // System 15
-            new List<string>() { "/output/haptic" }, // HapticOut 16
+            new List<string>() { "/input/aim/pose" }, // AimPosition 1
+            new List<string>() { "/input/grip/pose" }, // GripPosition 2
+            new List<string>() { "/input/trigger/value", "/input/select/value" }, // TriggerValue 3
+            new List<string>() { "/input/trigger/click", "/input/select/click" }, // TriggerClick 4
+            new List<string>() { "/input/thumbstick/x", "/input/trackpad/x" }, // ThumbstickX 5
+            new List<string>() { "/input/thumbstick/y", "/input/trackpad/y" }, // ThumbstickY 6
+            new List<string>() { "/input/thumbstick/click", "/input/trackpad/click" }, // ThumbstickClick 7
+            new List<string>() { "/input/trackpad/x", "/input/thumbstick/x" }, // TrackpadX 8
+            new List<string>() { "/input/trackpad/y", "/input/thumbstick/y" }, // TrackpadY 9
+            new List<string>() { "/input/trackpad/click", "/input/thumbstick/click" }, // TrackpadClick 10
+            new List<string>() { "/input/squeeze/force", "/input/squeeze/value" }, // GripValue 11
+            new List<string>() { "/input/squeeze/click" }, // GripClick 12
+            new List<string>() { "/input/x/click", "/input/a/click" }, // ButtonXA 13
+            new List<string>() { "/input/y/click", "/input/b/click" }, // ButtonYB 14
+            new List<string>() { "/input/menu/click" }, // Menu 15
+            new List<string>() { "/input/system/click" }, // System 16
+            new List<string>() { "/output/haptic" }, // HapticOut 17
         };
 
         private static ActionType GetActionType(HAND_PATHS hp)
@@ -58,7 +60,8 @@ namespace Xenko.VirtualReality
             switch (hp)
             {
                 case HAND_PATHS.BaseIndex:
-                case HAND_PATHS.Position:
+                case HAND_PATHS.AimPosition:
+                case HAND_PATHS.GripPosition:
                     return ActionType.PoseInput;
                 case HAND_PATHS.GripValue:
                 case HAND_PATHS.ThumbstickX:

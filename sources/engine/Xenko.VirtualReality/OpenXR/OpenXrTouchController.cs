@@ -16,24 +16,32 @@ namespace Xenko.VirtualReality
 
         public ulong[] hand_paths = new ulong[12];
 
-        public Space myHandSpace;
-        public Silk.NET.OpenXR.Action myHandAction;
+        public Space myAimSpace, myGripSpace;
+        public Silk.NET.OpenXR.Action myAimAction, myGripAction;
 
         public OpenXrTouchController(OpenXRHmd hmd, TouchControllerHand whichHand)
         {
             baseHMD = hmd;
             handLocation.Type = StructureType.TypeSpaceLocation;
             myHand = whichHand;
-            myHandAction = OpenXRInput.MappedActions[(int)myHand, (int)OpenXRInput.HAND_PATHS.Position];
 
+            myAimAction = OpenXRInput.MappedActions[(int)myHand, (int)OpenXRInput.HAND_PATHS.AimPosition];
             ActionSpaceCreateInfo action_space_info = new ActionSpaceCreateInfo()
             {
                 Type = StructureType.TypeActionSpaceCreateInfo,
-                Action = myHandAction,
+                Action = myAimAction,
                 PoseInActionSpace = new Posef(new Quaternionf(0f, 0f, 0f, 1f), new Vector3f(0f, 0f, 0f)),
             };
+            OpenXRHmd.CheckResult(baseHMD.Xr.CreateActionSpace(baseHMD.globalSession, in action_space_info, ref myAimSpace), "CreateActionSpaceAim");
 
-            OpenXRHmd.CheckResult(baseHMD.Xr.CreateActionSpace(baseHMD.globalSession, in action_space_info, ref myHandSpace), "CreateActionSpace");
+            myGripAction = OpenXRInput.MappedActions[(int)myHand, (int)OpenXRInput.HAND_PATHS.GripPosition];
+            ActionSpaceCreateInfo action_grip_space_info = new ActionSpaceCreateInfo()
+            {
+                Type = StructureType.TypeActionSpaceCreateInfo,
+                Action = myGripAction,
+                PoseInActionSpace = action_space_info.PoseInActionSpace,
+            };
+            OpenXRHmd.CheckResult(baseHMD.Xr.CreateActionSpace(baseHMD.globalSession, in action_grip_space_info, ref myGripSpace), "CreateActionSpaceGrip");
         }
 
         private Vector3 currentPos;
@@ -199,7 +207,7 @@ namespace Xenko.VirtualReality
             ActionStateGetInfo get_info = new ActionStateGetInfo()
             {
                 Type = StructureType.TypeActionStateGetInfo,
-                Action = myHandAction,
+                Action = UseGripInsteadOfAimPose ? myGripAction : myAimAction,
             };
 
             SpaceVelocity sv = new SpaceVelocity()
@@ -211,8 +219,8 @@ namespace Xenko.VirtualReality
 
             baseHMD.Xr.GetActionStatePose(baseHMD.globalSession, in get_info, ref hand_pose_state);
 
-            baseHMD.Xr.LocateSpace(myHandSpace, baseHMD.globalPlaySpace, baseHMD.globalFrameState.PredictedDisplayTime,
-                                   ref handLocation);
+            baseHMD.Xr.LocateSpace(UseGripInsteadOfAimPose ? myGripSpace : myAimSpace, baseHMD.globalPlaySpace,
+                                   baseHMD.globalFrameState.PredictedDisplayTime, ref handLocation);
 
             currentPos.X = handLocation.Pose.Position.X;
             currentPos.Y = handLocation.Pose.Position.Y;

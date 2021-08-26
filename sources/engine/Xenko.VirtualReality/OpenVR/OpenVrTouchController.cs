@@ -139,6 +139,12 @@ namespace Xenko.VirtualReality
             }
         }
 
+        public override bool UseGripInsteadOfAimPose 
+        { 
+            get => throw new NotImplementedException("Only OpenXR for UseGripInsteadOfAimPose");
+            set => throw new NotImplementedException("Only OpenXR for UseGripInsteadOfAimPose");
+        }
+
         public override bool IsPressedDown(TouchControllerButton button)
         {
             return controller?.GetPressDown(ToOpenVrButton(button)) ?? false;
