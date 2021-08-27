@@ -92,7 +92,16 @@ namespace Xenko.VirtualReality
 
         public override string DebugControllerState()
         {
-            return "Not Implemented";
+            string val = "TouchpadAxis: " + TouchpadAxis.ToString() + "\n" +
+                         "ThumbstickAxis: " + ThumbstickAxis.ToString() + "\n";
+            for (int i=0;i<8;i++)
+            {
+                TouchControllerButton tcb = (TouchControllerButton)i;
+                val += tcb.ToString() + "Pressed: " + IsPressed(tcb) + "\n";
+                val += tcb.ToString() + "Down: " + IsPressedDown(tcb) + "\n";
+                val += tcb.ToString() + "Released: " + IsPressReleased(tcb) + "\n";
+            }
+            return val;
         }
 
         public override Vector2 GetAxis(int index)
