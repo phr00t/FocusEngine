@@ -198,7 +198,7 @@ namespace Xenko.Rendering
 
                     // If the mesh's vertex buffers miss any input streams, an additional input binding will have been added to the pipeline state.
                     // We bind an additional empty vertex buffer to that slot handle those streams gracefully.
-                    if (GraphicsDevice.Platform == GraphicsPlatform.Direct3D11 && emptyBufferSlot != drawData.VertexBuffers.Length)
+                    if (emptyBufferSlot != drawData.VertexBuffers.Length)
                     {
                         commandList.SetVertexBuffer(drawData.VertexBuffers.Length, emptyBuffer, 0, 0);
                         emptyBufferSlot = drawData.VertexBuffers.Length;
