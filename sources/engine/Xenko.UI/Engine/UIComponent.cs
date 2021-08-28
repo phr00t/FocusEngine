@@ -204,8 +204,7 @@ namespace Xenko.Engine
         /// If we are always tracking the pointer on this canvas, how much area should we expand the tracked space?
         /// </summary>
         [DataMember(140)]
-        [DefaultValue(1f)]
-        public float TrackedCanvasScale { get; set; } = 1f;
+        public Vector2 TrackedCanvasScale { get; set; } = Vector2.One;
 
         /// <summary>
         /// Where is the cursor relative to this UI component?

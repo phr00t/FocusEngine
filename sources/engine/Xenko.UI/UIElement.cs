@@ -1243,30 +1243,34 @@ namespace Xenko.UI
         /// <param name="ray">The ray in world space coordinate</param>
         /// <param name="intersectionPoint">The intersection point in world space coordinate</param>
         /// <returns><value>true</value> if the two elements intersects, <value>false</value> otherwise</returns>
-        protected internal virtual bool Intersects(ref Ray ray, out Vector3 intersectionPoint, bool nonUISpace, float canvasScale = 1f)
+        protected internal virtual bool Intersects(ref Ray ray, out Vector3 intersectionPoint, bool nonUISpace, Vector2? canvasScale = null)
         {
             // does ray intersect element Oxy face?
             bool intersects;
+
+            // resize canvas?
+            Vector3 scaledRenderSize = RenderSizeInternal;
+            if (canvasScale.HasValue)
+            {
+                scaledRenderSize.X *= canvasScale.Value.X;
+                scaledRenderSize.Y *= canvasScale.Value.Y;
+            }
+            
             if (nonUISpace)
             {
                 Matrix worldMatrix = WorldMatrixPickingInternal;
                 worldMatrix.M42 = -worldMatrix.M42; // for some reason Y translation needs to be flipped
                 worldMatrix *= WorldMatrix3D;
-                float rsx = RenderSizeInternal.X * 0.5f * canvasScale;
-                float rsy = RenderSizeInternal.Y * 0.5f * canvasScale;
+                float rsx = scaledRenderSize.X * 0.5f;
+                float rsy = scaledRenderSize.Y * 0.5f;
                 Vector3 topLeft = Vector3.Transform(new Vector3(-rsx, rsy, 0f), worldMatrix).XYZ();
                 Vector3 topRight = Vector3.Transform(new Vector3(rsx, rsy, 0f), worldMatrix).XYZ();
                 Vector3 bottomLeft = Vector3.Transform(new Vector3(-rsx, -rsy, 0f), worldMatrix).XYZ();
                 intersects = RayIntersectsRectangle(ref ray, ref topLeft, ref topRight, ref bottomLeft, out intersectionPoint);
             }
-            else if (canvasScale == 1f)
-            {
-                intersects = CollisionHelper.RayIntersectsRectangle(ref ray, ref WorldMatrixPickingInternal, ref RenderSizeInternal, 2, out intersectionPoint);
-            }
             else
             {
-                Vector3 renderSize = RenderSizeInternal * canvasScale;
-                intersects = CollisionHelper.RayIntersectsRectangle(ref ray, ref WorldMatrixPickingInternal, ref renderSize, 2, out intersectionPoint);
+                intersects = CollisionHelper.RayIntersectsRectangle(ref ray, ref WorldMatrixPickingInternal, ref scaledRenderSize, 2, out intersectionPoint);
             }
 
             // if element has depth also test other faces

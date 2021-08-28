@@ -85,7 +85,7 @@ namespace Xenko.UI.Controls
             }
         }
 
-        protected internal override bool Intersects(ref Ray ray, out Vector3 intersectionPoint, bool nonUISpace, float canvasScale = 1f)
+        protected internal override bool Intersects(ref Ray ray, out Vector3 intersectionPoint, bool nonUISpace, Vector2? canvasScale = null)
         {
             if (!IsModal)
                 return base.Intersects(ref ray, out intersectionPoint, false);
