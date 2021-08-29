@@ -288,7 +288,7 @@ namespace Xenko.Rendering.UI
             {
                 for (int i=0; i<2; i++)
                 {
-                    int swappedIndex = VirtualReality.VRDeviceSystem.GetSystem.GetControllerSwapped ? (i ^ 1) : i;
+                    int swappedIndex = VirtualReality.VRDeviceSystem.GetSystem.SwapControllerHands ? (i ^ 1) : i;
                     TransformComponent useHand = swappedIndex == 0 ?
                                                     (TransformComponent.OverrideRightHandUIPointer ?? TransformComponent.LastRightHandTracked) :
                                                     (TransformComponent.OverrideLeftHandUIPointer ?? TransformComponent.LastLeftHandTracked);

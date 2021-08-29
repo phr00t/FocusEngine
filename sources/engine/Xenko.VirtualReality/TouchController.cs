@@ -28,6 +28,10 @@ namespace Xenko.VirtualReality
 
         public abstract bool SwapTouchpadJoystick { get; set; }
 
+        public abstract bool HasTouchpad { get; internal set; }
+
+        public abstract bool HasThumbstick { get; internal set;  }
+
         public abstract float HoldAngleOffset { get; set; }
 
         public abstract float Trigger { get; }

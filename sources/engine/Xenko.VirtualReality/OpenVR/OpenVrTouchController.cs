@@ -145,6 +145,18 @@ namespace Xenko.VirtualReality
             set => throw new NotImplementedException("Only OpenXR for UseGripInsteadOfAimPose");
         }
 
+        public override bool HasThumbstick
+        {
+            get => throw new NotImplementedException("Only OpenXR for HasThumbstick");
+            internal set => throw new NotImplementedException("Only OpenXR for HasThumbstick");
+        }
+
+        public override bool HasTouchpad
+        {
+            get => throw new NotImplementedException("Only OpenXR for HasThumbstick");
+            internal set => throw new NotImplementedException("Only OpenXR for HasThumbstick");
+        }
+
         public override bool IsPressedDown(TouchControllerButton button)
         {
             return controller?.GetPressDown(ToOpenVrButton(button)) ?? false;

@@ -29,6 +29,8 @@ namespace Xenko.VirtualReality
         public SwapchainImageVulkanKHR[] images;
         public SwapchainImageVulkanKHR[] depth_images;
         public ActionSet globalActionSet;
+        public InteractionProfileState handProfileState;
+        internal ulong leftHandPath;
 
         // array of view_count containers for submitting swapchains with rendered VR frames
         CompositionLayerProjectionView[] projection_views;
@@ -671,6 +673,10 @@ namespace Xenko.VirtualReality
             };
 
             CheckResult(Xr.AttachSessionActionSets(session, &actionset_attach_info), "AttachSessionActionSets");
+
+            // figure out what interaction profile we are using, and determine if it has a touchpad/thumbstick or both
+            handProfileState.Type = StructureType.TypeInteractionProfileState;
+            Xr.StringToPath(Instance, "/user/hand/left", ref leftHandPath);
         }
 
         internal Matrix createViewMatrix(Vector3 translation, Quaternion rotation)
@@ -775,6 +781,23 @@ namespace Xenko.VirtualReality
 
         public override unsafe void Update(GameTime gameTime)
         {
+            // make sure we got the profile
+            if (handProfileState.InteractionProfile == 0)
+            {
+                CheckResult(Xr.GetCurrentInteractionProfile(globalSession, leftHandPath, ref handProfileState), "GetCurrentInteractionProfile");
+
+                if (handProfileState.InteractionProfile != 0)
+                {
+                    bool hasThumb = OpenXRInput.HasThumbsticks.Contains(handProfileState.InteractionProfile);
+                    bool hasTouch = OpenXRInput.HasTouchpads.Contains(handProfileState.InteractionProfile);
+
+                    // remember what controllers have what
+                    leftHand.HasThumbstick = hasThumb;
+                    leftHand.HasTouchpad = hasTouch;
+                    rightHand.HasThumbstick = hasThumb;
+                    rightHand.HasTouchpad = hasTouch;
+                }
+            }
         }
     }
 }

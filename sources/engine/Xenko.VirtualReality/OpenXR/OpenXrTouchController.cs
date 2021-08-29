@@ -74,9 +74,13 @@ namespace Xenko.VirtualReality
             }
         }
 
-        public override float Trigger => OpenXRInput.GetActionFloat(myHand, TouchControllerButton.Trigger, out _);
+        public override bool HasThumbstick { get; internal set; }
 
-        public override float Grip => OpenXRInput.GetActionFloat(myHand, TouchControllerButton.Grip, out _);
+        public override bool HasTouchpad { get; internal set; }
+
+        public override float Trigger => OpenXRInput.GetActionFloat(myHand, TouchControllerButton.Trigger, out _, OpenXRInput.INPUT_DESIRED.VALUE);
+
+        public override float Grip => OpenXRInput.GetActionFloat(myHand, TouchControllerButton.Grip, out _, OpenXRInput.INPUT_DESIRED.VALUE);
 
         public override bool IndexPointing => false;
 
@@ -104,69 +108,56 @@ namespace Xenko.VirtualReality
             return val;
         }
 
+        internal TouchControllerButton PickCorrectAxis(TouchControllerButton asked)
+        {
+            // first check swap
+            if (SwapTouchpadJoystick)
+            {
+                switch (asked)
+                {
+                    case TouchControllerButton.Thumbstick:
+                        asked = TouchControllerButton.Touchpad;
+                        break;
+                    case TouchControllerButton.Touchpad:
+                        asked = TouchControllerButton.Thumbstick;
+                        break;
+                }
+            }
+
+            // if this isn't available, try the other one
+            switch(asked)
+            {
+                case TouchControllerButton.Touchpad:
+                    return HasTouchpad ? TouchControllerButton.Touchpad : TouchControllerButton.Thumbstick;
+                case TouchControllerButton.Thumbstick:
+                    return HasThumbstick ? TouchControllerButton.Thumbstick : TouchControllerButton.Touchpad;
+            }
+
+            return asked;
+        }
+
         public override Vector2 GetAxis(int index)
         {
-            if (SwapTouchpadJoystick) index ^= 1;
+            TouchControllerButton button = PickCorrectAxis(index == 0 ? TouchControllerButton.Thumbstick : TouchControllerButton.Touchpad);
 
-            TouchControllerButton button = index == 0 ? TouchControllerButton.Thumbstick : TouchControllerButton.Touchpad;
-
-            return new Vector2(OpenXRInput.GetActionFloat(myHand, button, out _, false),
-                               OpenXRInput.GetActionFloat(myHand, button, out _, true));
+            return new Vector2(OpenXRInput.GetActionFloat(myHand, button, out _, OpenXRInput.INPUT_DESIRED.XAXIS),
+                               OpenXRInput.GetActionFloat(myHand, button, out _, OpenXRInput.INPUT_DESIRED.YAXIS));
         }
 
         public override bool IsPressed(TouchControllerButton button)
         {
-            if (SwapTouchpadJoystick)
-            {
-                switch (button)
-                {
-                    case TouchControllerButton.Thumbstick:
-                        button = TouchControllerButton.Touchpad;
-                        break;
-                    case TouchControllerButton.Touchpad:
-                        button = TouchControllerButton.Thumbstick;
-                        break;
-                }
-            }
-
-            return OpenXRInput.GetActionBool(myHand, button, out _);
+            return OpenXRInput.GetActionBool(myHand, PickCorrectAxis(button), out _);
         }
 
         public override bool IsPressedDown(TouchControllerButton button)
         {
-            if (SwapTouchpadJoystick)
-            {
-                switch (button)
-                {
-                    case TouchControllerButton.Thumbstick:
-                        button = TouchControllerButton.Touchpad;
-                        break;
-                    case TouchControllerButton.Touchpad:
-                        button = TouchControllerButton.Thumbstick;
-                        break;
-                }
-            }
-
-            bool isDownNow = OpenXRInput.GetActionBool(myHand, button, out bool changed);
+            bool isDownNow = OpenXRInput.GetActionBool(myHand, PickCorrectAxis(button), out bool changed);
             return isDownNow && changed;
         }
 
         public override bool IsPressReleased(TouchControllerButton button)
         {
-            if (SwapTouchpadJoystick)
-            {
-                switch (button)
-                {
-                    case TouchControllerButton.Thumbstick:
-                        button = TouchControllerButton.Touchpad;
-                        break;
-                    case TouchControllerButton.Touchpad:
-                        button = TouchControllerButton.Thumbstick;
-                        break;
-                }
-            }
-
-            bool isDownNow = OpenXRInput.GetActionBool(myHand, button, out bool changed);
+            bool isDownNow = OpenXRInput.GetActionBool(myHand, PickCorrectAxis(button), out bool changed);
             return !isDownNow && changed;
         }
 

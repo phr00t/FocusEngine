@@ -75,7 +75,7 @@ namespace Xenko.VirtualReality
         {
         }
 
-        public bool IsRightHand => ((Index & (1 << 16)) != 0) == !VRDeviceSystem.GetSystem.GetControllerSwapped;
+        public bool IsRightHand => ((Index & (1 << 16)) != 0) == !VRDeviceSystem.GetSystem.SwapControllerHands;
 
         public override float GetValue()
         {
