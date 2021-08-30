@@ -34,7 +34,7 @@ namespace Xenko.UI
         /// <returns><value>True</value> if the two contexts are equals</returns>
         public bool Equals(LayoutingContext other)
         {
-            return RealResolution.Equals(other.RealResolution) && VirtualResolution.Equals(other.VirtualResolution);
+            return RealResolution == other.RealResolution && RealVirtualResolutionRatio == other.RealVirtualResolutionRatio;
         }
     }
 }

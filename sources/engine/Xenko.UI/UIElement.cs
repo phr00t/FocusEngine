@@ -665,7 +665,12 @@ namespace Xenko.UI
                     return;
 
                 if (layoutingContext != null && layoutingContext.Equals(value))
+                {
+                    // make sure virtual resolution is the same, as it might have been different
+                    // but this doesn't require remeasuring everything (virt res used for ray intersecting)
+                    layoutingContext.VirtualResolution = value.VirtualResolution;
                     return;
+                }
 
                 ForceMeasure();
                 layoutingContext = value;
