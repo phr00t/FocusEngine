@@ -53,6 +53,7 @@ namespace Xenko.UI.Controls
             {
                 if (text == value) return;
                 text = value;
+                wrappedTextDirty = true;
                 OnTextChanged();
             }
         }
@@ -73,6 +74,7 @@ namespace Xenko.UI.Controls
                     return;
 
                 font = value;
+                wrappedTextDirty = true;
                 InvalidateMeasure();
             }
         }
@@ -96,6 +98,7 @@ namespace Xenko.UI.Controls
                 float clamped = MathUtil.Clamp(value, 0.0f, float.MaxValue);
                 if (textSize == clamped) return;
                 textSize = clamped;
+                wrappedTextDirty = true;
                 InvalidateMeasure();
             }
         }
@@ -152,6 +155,7 @@ namespace Xenko.UI.Controls
                     return;
 
                 wrapText = value;
+                wrappedTextDirty = true;
                 InvalidateMeasure();
             }
         }
@@ -278,9 +282,18 @@ namespace Xenko.UI.Controls
             return realSize;
         }
 
+        // store this to determine if we need to UpdateWrappedText at all
+        private bool wrappedTextDirty = true;
+        private Vector3 lastWrappedText;
+
         public void UpdateWrappedText(Vector3? overrideAvailableSpace = null)
         {
             var availableSpace = overrideAvailableSpace ?? availableSizeWithoutMargins;
+
+            // skip this costly procedure if nothing changed with the text
+            if (wrappedTextDirty == false && availableSpace == lastWrappedText) return;
+            wrappedTextDirty = false;
+            lastWrappedText = availableSpace;
 
             if (availableSpace.X <= 0f)
             {
