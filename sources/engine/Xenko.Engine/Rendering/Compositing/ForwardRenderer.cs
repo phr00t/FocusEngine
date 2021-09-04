@@ -303,7 +303,7 @@ namespace Xenko.Rendering.Compositing
                 // Mark this view as requiring shadows
                 shadowMapRenderer?.RenderViewsWithShadows.Add(context.RenderView);
 
-                context.RenderOutput = new RenderOutputDescription(PostEffects != null && PostEffects.Enabled ? PixelFormat.R16G16B16A16_Float : context.RenderOutput.RenderTargetFormat0, DepthBufferFormat, MSAALevel);
+                context.RenderOutput = new RenderOutputDescription(context.RenderOutput.RenderTargetFormat0, DepthBufferFormat, MSAALevel);
 
                 CollectStages(context);
 
