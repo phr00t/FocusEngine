@@ -373,32 +373,30 @@ namespace Xenko.Graphics
 
             EmptyTexelBuffer = Buffer.Typed.New(this, 1, PixelFormat.R32G32B32A32_Float);
             EmptyTexture = Texture.New2D(this, 1, 1, PixelFormat.R8G8B8A8_UNorm_SRgb, TextureFlags.ShaderResource);
+
+            // prepare upload buffer now
+            // Allocate buffer that will be recycled
+            nativeUploadBufferSize = Buffer.UploadBufferSizeInMB * 1024 * 1024;
+
+            var bufferCreateInfo = new VkBufferCreateInfo
+            {
+                sType = VkStructureType.BufferCreateInfo,
+                size = (ulong)nativeUploadBufferSize,
+                flags = VkBufferCreateFlags.None,
+                usage = VkBufferUsageFlags.TransferSrc,
+            };
+            vkCreateBuffer(NativeDevice, &bufferCreateInfo, null, out nativeUploadBuffer);
+            AllocateMemory(VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
+
+            fixed (IntPtr* nativeUploadBufferStartPtr = &nativeUploadBufferStart)
+                vkMapMemory(NativeDevice, nativeUploadBufferMemory, 0, (ulong)nativeUploadBufferSize, VkMemoryMapFlags.None, (void**)nativeUploadBufferStartPtr);
+
+            nativeUploadBufferOffset = 0;
         }
 
         internal object uploadBufferLocker = new object();
         internal unsafe IntPtr AllocateUploadBuffer(int size, out VkBuffer resource, out int offset)
         {
-            if (nativeUploadBuffer == VkBuffer.Null)
-            {
-                // Allocate buffer that will be recycled
-                nativeUploadBufferSize = Buffer.UploadBufferSizeInMB * 1024 * 1024;
-
-                var bufferCreateInfo = new VkBufferCreateInfo
-                {
-                    sType = VkStructureType.BufferCreateInfo,
-                    size = (ulong)nativeUploadBufferSize,
-                    flags = VkBufferCreateFlags.None,
-                    usage = VkBufferUsageFlags.TransferSrc,
-                };
-                vkCreateBuffer(NativeDevice, &bufferCreateInfo, null, out nativeUploadBuffer);
-                AllocateMemory(VkMemoryPropertyFlags.HostVisible | VkMemoryPropertyFlags.HostCoherent);
-
-                fixed (IntPtr* nativeUploadBufferStartPtr = &nativeUploadBufferStart)
-                    vkMapMemory(NativeDevice, nativeUploadBufferMemory, 0, (ulong)nativeUploadBufferSize, VkMemoryMapFlags.None, (void**)nativeUploadBufferStartPtr);
-
-                nativeUploadBufferOffset = 0;
-            }
-
             resource = nativeUploadBuffer;
 
             // Bump allocate
@@ -409,8 +407,9 @@ namespace Xenko.Graphics
 
                 offset = nativeUploadBufferOffset;
                 nativeUploadBufferOffset += size;
-                return nativeUploadBufferStart + offset;
             }
+
+            return nativeUploadBufferStart + offset;
         }
 
         protected unsafe void AllocateMemory(VkMemoryPropertyFlags memoryProperties)
