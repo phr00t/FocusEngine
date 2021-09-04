@@ -102,11 +102,15 @@ namespace Xenko.Graphics
             CleanupRenderPass();
 
             // are we a flush and need to wait for idle?
-            if (waitFor)
-                vkDeviceWaitIdle(GraphicsDevice.NativeDevice);
-
-            // Close
-            vkEndCommandBuffer(currentCommandList.NativeCommandBuffer);
+            if (waitFor) 
+            {
+                using (GraphicsDevice.QueueLock.WriteLock())
+                {
+                    vkDeviceWaitIdle(GraphicsDevice.NativeDevice);
+                    vkEndCommandBuffer(currentCommandList.NativeCommandBuffer);
+                }
+            }
+            else vkEndCommandBuffer(currentCommandList.NativeCommandBuffer);
 
             // Staging resources not updated anymore
             foreach (var stagingResource in currentCommandList.StagingResources)
