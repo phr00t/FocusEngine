@@ -201,13 +201,20 @@ namespace Xenko.Graphics
             vkGetBufferMemoryRequirements(GraphicsDevice.NativeDevice, NativeBuffer, out var memoryRequirements);
 
             if (bufferDescription.Usage == GraphicsResourceUsage.Staging || Usage == GraphicsResourceUsage.Dynamic)
+            {
                 AllocateMemory(memoryProperties, memoryRequirements); // special case that doesn't use a pool
+                NativeMemoryOffset = null;
+            }
             else if (VulkanMemoryPool.TryAllocateMemoryForBuffer(createInfo.size, GraphicsDevice.NativeDevice, GraphicsDevice.NativePhysicalDevice, ref memoryRequirements, ref memoryProperties, out var memOffset, out var devmem))
             {
                 NativeMemory = devmem;
                 NativeMemoryOffset = memOffset;
             }
-            else AllocateMemory(memoryProperties, memoryRequirements); // last resort, allocate its own VkDeviceMemory
+            else
+            {
+                AllocateMemory(memoryProperties, memoryRequirements); // last resort, allocate its own VkDeviceMemory
+                NativeMemoryOffset = null;
+            }
 
             if (NativeMemory != VkDeviceMemory.Null)
             {

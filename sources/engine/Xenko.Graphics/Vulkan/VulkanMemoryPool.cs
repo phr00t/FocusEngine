@@ -46,11 +46,14 @@ namespace Xenko.Graphics
 
         public static bool Free(Buffer buf, ulong offset)
         {
-            if (BigMemoryPool != VkDeviceMemory.Null && (ulong)buf.SizeInBytes >= Buffer.SmallPooledBufferSize)
+            if ((ulong)buf.SizeInBytes >= Buffer.SmallPooledBufferSize)
             {
-                FreeBig.Enqueue(offset);
-                Buffer.CurrentFreeBigPool = FreeBig.Count;
-                return true;
+                if (BigMemoryPool != VkDeviceMemory.Null)
+                {
+                    FreeBig.Enqueue(offset);
+                    Buffer.CurrentFreeBigPool = FreeBig.Count;
+                    return true;
+                }
             }
             else if (SmallMemoryPool != VkDeviceMemory.Null)
             {
