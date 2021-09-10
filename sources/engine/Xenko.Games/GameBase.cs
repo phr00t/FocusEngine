@@ -909,7 +909,7 @@ namespace Xenko.Games
         {
             if (beginDrawOk)
             {
-                if (GraphicsDevice.Presenter != null && GraphicsDevice.Platform != GraphicsPlatform.Vulkan )
+                if (GraphicsDevice.Presenter != null)
                 {
                     // Perform end of frame presenter operations
                     GraphicsDevice.Presenter.EndDraw(GraphicsContext.CommandList, present);
