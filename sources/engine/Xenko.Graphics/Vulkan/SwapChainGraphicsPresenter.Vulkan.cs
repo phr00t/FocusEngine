@@ -9,7 +9,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
-using System.Threading;
 using Xenko.Core;
 using Xenko.Core.Threading;
 using System.Runtime.ExceptionServices;
@@ -66,49 +65,17 @@ namespace Xenko.Graphics
 
         public override bool InternalFullscreen { get; set; }
 
-        private ManualResetEventSlim presentWaiter = new ManualResetEventSlim(false);
-        private Thread presenterThread;
-        private bool runPresenter;
-        private volatile uint presentFrame;
-
-        [HandleProcessCorruptedStateExceptionsAttribute]
-        private unsafe void PresenterThread() {
+        public override unsafe void Present()
+        {
+            // remember which frame we need to present (for presenting thread)
             VkSwapchainKHR swapChainCopy = swapChain;
-            uint currentBufferIndexCopy = 0;
+            uint currentBufferIndexCopy = currentBufferIndex;
             VkPresentInfoKHR presentInfo = new VkPresentInfoKHR {
                 sType = VkStructureType.PresentInfoKHR,
                 swapchainCount = 1,
                 pSwapchains = &swapChainCopy,
                 pImageIndices = &currentBufferIndexCopy,
             };
-            try {
-                while (runPresenter) {
-                    // wait until we have a frame to present
-                    presentWaiter.Wait();
-
-                    // set the frame
-                    currentBufferIndexCopy = presentFrame; 
-
-                    // prepare for next frame
-                    presentWaiter.Reset();
-
-                    // are we still OK to present?
-                    if (runPresenter == false) return;
-
-                    using (GraphicsDevice.QueueLock.WriteLock())
-                    {
-                        vkQueuePresentKHR(GraphicsDevice.NativeCommandQueue, &presentInfo);
-                    }                
-                }
-            } catch (AccessViolationException ave) {
-                Xenko.Graphics.SDL.Window.GeneratePresentError();                
-            }
-        }
-
-        public override unsafe void Present()
-        {
-            // remember which frame we need to present (for presenting thread)
-            presentFrame = currentBufferIndex;
 
             VkResult result;
 
@@ -118,8 +85,7 @@ namespace Xenko.Graphics
                 result = vkAcquireNextImageKHR(GraphicsDevice.NativeDevice, swapChain, (ulong)0, VkSemaphore.Null, VkFence.Null, out currentBufferIndex);
             }
 
-            // say we can present
-            presentWaiter.Set();
+            vkQueuePresentKHR(GraphicsDevice.NativeCommandQueue, &presentInfo);
 
             if ((int)result < 0)
             {
@@ -189,13 +155,6 @@ namespace Xenko.Graphics
             if (swapChain == VkSwapchainKHR.Null)
                 return;
     
-            // stop our presenter thread
-            if( presenterThread != null ) {
-                runPresenter = false;
-                presentWaiter.Set();
-                presenterThread.Join();
-            }
-
             vkQueueWaitIdle(GraphicsDevice.NativeCommandQueue);
 
             backbuffer.OnDestroyed();
@@ -317,14 +276,6 @@ namespace Xenko.Graphics
 
             // Put it in our back buffer texture
             DepthStencilBuffer.InitializeFrom(newTextureDescription);
-
-            // start new presentation thread
-            runPresenter = true;
-            presenterThread = new Thread(new ThreadStart(PresenterThread));
-            presenterThread.IsBackground = true;
-            presenterThread.Name = "Vulkan Presentation Thread";
-            presenterThread.Priority = ThreadPriority.AboveNormal;
-            presenterThread.Start();
         }
 
         private unsafe void CreateSurface()
