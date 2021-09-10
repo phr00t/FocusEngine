@@ -10,6 +10,10 @@ using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using Xenko.Core;
 
+#if DEBUG
+using System.Collections.Concurrent;
+#endif
+
 namespace Xenko.Graphics
 {
     public static partial class GraphicsAdapterFactory
@@ -247,13 +251,33 @@ namespace Xenko.Graphics
         }
 
 #if DEBUG
+
+        private static ConcurrentDictionary<string, bool> ErrorsAlready = new ConcurrentDictionary<string, bool>();
+
         private static bool DebugReport(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objectType, ulong @object, nuint location, int messageCode, string layerPrefix, string message, IntPtr userData)
         {
-            string debugMessage = $"{flags}: {message} ([{messageCode}] {layerPrefix})";
-            Debug.WriteLine(debugMessage);
-            if (GraphicsAdapterFactory.adapterFlags == DeviceCreationFlags.DebugAndBreak)
-                Debugger.Break();
-            return false;
+            string debugMessage = $"{flags}, {@object}, {location}: {message} ([{messageCode}] {layerPrefix})";
+            switch (GraphicsAdapterFactory.adapterFlags)
+            {
+                default:
+                    Debug.WriteLine(debugMessage);
+                    return false;
+                case DeviceCreationFlags.DebugAndBreak:
+                    Debug.WriteLine(debugMessage);
+                    Debugger.Break();
+                    return false;
+                case DeviceCreationFlags.DebugAndBreakUnique:
+                    int start = message.IndexOf("[ ");
+                    int end = message.IndexOf(" ]");
+                    string key = message.Substring(start, end - start);
+                    if (ErrorsAlready.TryGetValue(key, out _) == false)
+                    {
+                        ErrorsAlready[key] = true;
+                        Debug.WriteLine(debugMessage);
+                        Debugger.Break();
+                    }
+                    return false;
+            }
         }
 #endif
 

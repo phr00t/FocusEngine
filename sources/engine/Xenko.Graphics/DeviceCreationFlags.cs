@@ -11,6 +11,11 @@ namespace Xenko.Graphics
     public enum DeviceCreationFlags : int
     {
         /// <summary>
+        /// Creates a device that supports the debug layer, breaking only on unique errors
+        /// </summary>
+        DebugAndBreakUnique = unchecked((int)8),
+
+        /// <summary>
         /// Creates a device that supports the debug layer.
         /// </summary>
         DebugAndBreak = unchecked((int)4),

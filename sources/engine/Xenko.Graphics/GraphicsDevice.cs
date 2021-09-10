@@ -88,7 +88,7 @@ namespace Xenko.Graphics
             if (profile == null) throw new ArgumentNullException("profile");
 
             Adapter = adapter;
-            IsDebugMode = deviceCreationFlags == DeviceCreationFlags.Debug || deviceCreationFlags == DeviceCreationFlags.DebugAndBreak;
+            IsDebugMode = deviceCreationFlags == DeviceCreationFlags.Debug || deviceCreationFlags == DeviceCreationFlags.DebugAndBreak || deviceCreationFlags == DeviceCreationFlags.DebugAndBreakUnique;
 
             // Initialize this instance
             InitializePlatformDevice(profile, deviceCreationFlags, windowHandle);
