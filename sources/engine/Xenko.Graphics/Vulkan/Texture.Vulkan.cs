@@ -146,7 +146,7 @@ namespace Xenko.Graphics
                     IsRenderTarget ? VkImageLayout.ColorAttachmentOptimal :
                     IsDepthStencil ? VkImageLayout.DepthStencilAttachmentOptimal :
                     IsShaderResource ? VkImageLayout.ShaderReadOnlyOptimal :
-                    VkImageLayout.General;
+                    VkImageLayout.TransferDstOptimal;
 
                 if (NativeLayout == VkImageLayout.TransferDstOptimal)
                     NativeAccessMask = VkAccessFlags.TransferRead;
@@ -333,7 +333,6 @@ namespace Xenko.Graphics
                 var bufferMemoryBarrier = new VkBufferMemoryBarrier(upBuf, VkAccessFlags.HostWrite, VkAccessFlags.TransferRead, (ulong)uploadOffset, (ulong)totalSize);
 
                 // Image barrier
-                NativeLayout = VkImageLayout.TransferDstOptimal;
                 var initialBarrier = new VkImageMemoryBarrier(NativeImage, new VkImageSubresourceRange(NativeImageAspect, 0, uint.MaxValue, 0, uint.MaxValue), VkAccessFlags.None, VkAccessFlags.TransferWrite, VkImageLayout.Undefined, VkImageLayout.TransferDstOptimal);
                 vkCmdPipelineBarrier(commandBuffer, VkPipelineStageFlags.Host, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, 1, &bufferMemoryBarrier, 1, &initialBarrier);
 
