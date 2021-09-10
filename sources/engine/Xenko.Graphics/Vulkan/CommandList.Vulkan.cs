@@ -89,28 +89,10 @@ namespace Xenko.Graphics
         /// <returns>The executable command list.</returns>
         public CompiledCommandList Close()
         {
-            return Close(false);
-        }
-
-        /// <summary>
-        /// Closes the command list for recording and returns an executable token.
-        /// </summary>
-        /// <returns>The executable command list.</returns>
-        public CompiledCommandList Close(bool waitFor = false)
-        {
             // End active render pass
             CleanupRenderPass();
 
-            // are we a flush and need to wait for idle?
-            if (waitFor) 
-            {
-                using (GraphicsDevice.QueueLock.WriteLock())
-                {
-                    vkDeviceWaitIdle(GraphicsDevice.NativeDevice);
-                    vkEndCommandBuffer(currentCommandList.NativeCommandBuffer);
-                }
-            }
-            else vkEndCommandBuffer(currentCommandList.NativeCommandBuffer);
+            vkEndCommandBuffer(currentCommandList.NativeCommandBuffer);
 
             // Staging resources not updated anymore
             foreach (var stagingResource in currentCommandList.StagingResources)
@@ -131,7 +113,7 @@ namespace Xenko.Graphics
         public void Flush()
         {
             CompiledCommandList ccl;
-            ccl = Close(true);
+            ccl = Close();
             GraphicsDevice.ExecuteCommandList(ccl);
         }
 
