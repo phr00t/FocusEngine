@@ -829,10 +829,16 @@ namespace Xenko.Particles
         /// so only set what isn't being initialized by the particle system. Returns false if the particle system doesn't have capacity
         /// </summary>
         public bool EmitSpecificParticle(Vector3 pos, Color4? color = null, Quaternion? rotation = null, float? size = null,
-                                         float life = 1f, Vector3? velocity = null, uint? seed = null)
+                                         float life = 1f, Vector3? velocity = null, uint? seed = null, bool prioritize = false)
         {
-            if (SpawnIndividuals.Count >= pool.AvailableParticles) return false;
+            // first sanity check
+            if (pool.AvailableParticles <= 0) return false;
 
+            // do we have room if we are not prioritizing?
+            bool noneAvailable = SpawnIndividuals.Count >= pool.AvailableParticles;
+            if (noneAvailable && !prioritize) return false;
+
+            // make sure pool has the fields needed
             if (color.HasValue)
             {
                 pool.AddField(ParticleFields.Color);
@@ -850,7 +856,8 @@ namespace Xenko.Particles
             }
             if (velocity.HasValue) pool.AddField(ParticleFields.Velocity);
 
-            SpawnIndividuals.Add(new SpecificParticle()
+            // make the specific particle
+            SpecificParticle sp = new SpecificParticle()
             {
                 _position = pos,
                 _color = color ?? Color4.White,
@@ -859,7 +866,18 @@ namespace Xenko.Particles
                 _velocity = velocity ?? Vector3.Zero,
                 _lifetime = life,
                 _seed = seed ?? (uint)System.Environment.TickCount
-            });
+            };
+
+            if (noneAvailable)
+            {
+                // need to find one to replace (with positive seed)
+                int pseed = (int)sp._seed;
+                pseed = pseed >= 0 ? pseed : -pseed;
+                SpawnIndividuals[pseed % SpawnIndividuals.Count] = sp;
+            }
+            else
+                // just add it to the list
+                SpawnIndividuals.Add(sp);
 
             return true;
         }
