@@ -80,10 +80,10 @@ namespace Xenko.Core.Mathematics
 
             // Near
             Plane.Normalize(
-                matrix.M13,
-                matrix.M23,
-                matrix.M33,
-                matrix.M43,
+                matrix.M14 + matrix.M13,
+                matrix.M24 + matrix.M23,
+                matrix.M34 + matrix.M33,
+                matrix.M44 + matrix.M43,
                 out NearPlane);
 
             // Far
