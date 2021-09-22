@@ -36,6 +36,12 @@ namespace Xenko.Assets.Presentation.AssetEditors.PrefabEditor.Game
             EnsureContentScene();
 
             ContentScene.Entities.AddRange(entities);
+
+            foreach (Entity e in entities)
+            {
+                ModelComponent mc = e.Get<ModelComponent>();
+                if (mc != null) mc.ForceModelUpdateCount = int.MaxValue;
+            }
         }
 
         /// <summary>
@@ -48,6 +54,9 @@ namespace Xenko.Assets.Presentation.AssetEditors.PrefabEditor.Game
             EnsureContentScene();
 
             ContentScene.Entities.Add(entity);
+
+            ModelComponent mc = entity.Get<ModelComponent>();
+            if (mc != null) mc.ForceModelUpdateCount = int.MaxValue;
         }
 
         /// <summary>
