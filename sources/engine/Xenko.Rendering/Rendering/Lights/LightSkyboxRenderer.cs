@@ -154,7 +154,7 @@ namespace Xenko.Rendering.Lights
                 parameters.Set(skyMatrixKey, skyMatrix);
 
                 // This need to be working with new system
-                parameters.SetValues(sphericalColorsKey, diffuseParameters, SphericalHarmonicsEnvironmentColorKeys.SphericalColors);
+                diffuseParameters.CopyTo(SphericalHarmonicsEnvironmentColorKeys.SphericalColors, parameters, sphericalColorsKey);
                 parameters.Set(specularCubeMapkey, specularCubemap);
                 parameters.Set(specularMipCountKey, specularCubemapLevels);
             }

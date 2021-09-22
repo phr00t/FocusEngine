@@ -240,7 +240,9 @@ namespace Xenko.Rendering.Materials
                                 }
                                 catch (Exception)
                                 {
-                                    // material not ready yet
+                                    // material got corrupted, clear its broken parameters and render black for this material
+                                    material.Parameters.Clear();
+                                    // we will go through this process again next pass with empty parameters
                                     continue;
                                 }
                             }
