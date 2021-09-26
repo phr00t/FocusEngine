@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Runtime.InteropServices;
 using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
@@ -65,6 +66,7 @@ namespace Xenko.Graphics
 
         public override bool InternalFullscreen { get; set; }
 
+        [HandleProcessCorruptedStateExceptionsAttribute]
         public override unsafe void Present()
         {
             // remember which frame we need to present (for presenting thread)
@@ -77,29 +79,23 @@ namespace Xenko.Graphics
                 pImageIndices = &currentBufferIndexCopy,
             };
 
-            VkResult result;
+            VkResult result = VkResult.Success;
 
-            // try to get the next frame
-            using (GraphicsDevice.QueueLock.ReadLock())
-            {
+            try {
                 result = vkAcquireNextImageKHR(GraphicsDevice.NativeDevice, swapChain, (ulong)0, VkSemaphore.Null, VkFence.Null, out currentBufferIndex);
+                vkQueuePresentKHR(GraphicsDevice.NativeCommandQueue, &presentInfo);
+            } catch (AccessViolationException ave) {
+                Xenko.Graphics.SDL.Window.GeneratePresentError();                
             }
-
-            vkQueuePresentKHR(GraphicsDevice.NativeCommandQueue, &presentInfo);
 
             if ((int)result < 0)
-            {
                 Xenko.Graphics.SDL.Window.GenerateSwapchainError("vkAcquireNextImageKHR result: " + (int)result);
-            }
 
             // did we get another image?
             while ((int)result > 0)
             {
-                // try to get the next frame (again)
-                using (GraphicsDevice.QueueLock.ReadLock())
-                {
-                    result = vkAcquireNextImageKHR(GraphicsDevice.NativeDevice, swapChain, (ulong)0, VkSemaphore.Null, VkFence.Null, out currentBufferIndex);
-                }
+                result = vkAcquireNextImageKHR(GraphicsDevice.NativeDevice, swapChain, (ulong)0, VkSemaphore.Null, VkFence.Null, out currentBufferIndex);
+                Thread.Sleep(1);
             }
 
             // Flip render targets
