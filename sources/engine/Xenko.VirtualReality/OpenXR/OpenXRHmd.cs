@@ -56,13 +56,11 @@ namespace Xenko.VirtualReality
         /// The same result passed in, just in case it's meaningful and we just want to use this to filter out errors.
         /// </returns>
         /// <exception cref="Exception">An exception for the given result if it indicates an error.</exception>
-        [DebuggerHidden]
-        [DebuggerStepThrough]
         protected internal static Result CheckResult(Result result, string forFunction)
         {
             if ((int)result < 0)
             {
-                Window.GenerateGenericError(null, $"OpenXR error! Make sure a Vulkan-enabled OpenXR runtime is set & running (like SteamVR)\n\nCode: {result} ({result:X}) in " + forFunction + "\n\nStack Trace: " + (new StackTrace()).ToString());
+                Window.GenerateGenericError(null, $"OpenXR error! Only SteamVR is supported as an OpenXR runtime. Make sure it is set & running:\nSteamVR Settings > Show Advanced Settings > Developer > Set SteamVR as OpenXR Runtime\n\nCode: {result} ({result:X}) in " + forFunction + "\n\nStack Trace: " + (new StackTrace()).ToString());
             }
 
             return result;
