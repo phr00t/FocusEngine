@@ -35,15 +35,10 @@ namespace Xenko.Importer.Assimp
         public static unsafe uint GetNumUVChannels(Silk.NET.Assimp.Mesh* mesh)
         {
             var n = 0;
-
-            if (mesh->MTextureCoords.Element0 != null) n++;
-            if (mesh->MTextureCoords.Element1 != null) n++;
-            if (mesh->MTextureCoords.Element2 != null) n++;
-            if (mesh->MTextureCoords.Element3 != null) n++;
-            if (mesh->MTextureCoords.Element4 != null) n++;
-            if (mesh->MTextureCoords.Element5 != null) n++;
-            if (mesh->MTextureCoords.Element6 != null) n++;
-            if (mesh->MTextureCoords.Element7 != null) n++;
+            while (n < AI_MAX_NUMBER_OF_TEXTURECOORDS && mesh->MTextureCoords[n] != null)
+            {
+                ++n;
+            }
 
             return (uint)n;
         }
@@ -51,7 +46,6 @@ namespace Xenko.Importer.Assimp
         public static unsafe uint GetNumColorChannels(Silk.NET.Assimp.Mesh* mesh)
         {
             var n = 0;
-            var AI_MAX_NUMBER_OF_COLOR_SETS = 8;
             while (n < AI_MAX_NUMBER_OF_COLOR_SETS && mesh->MColors[n] != null)
             {
                 ++n;
