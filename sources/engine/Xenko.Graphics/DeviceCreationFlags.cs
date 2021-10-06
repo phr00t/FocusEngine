@@ -13,6 +13,11 @@ namespace Xenko.Graphics
         /// <summary>
         /// Creates a device that supports the debug layer, breaking only on unique errors
         /// </summary>
+        DebugAndLogUnique = unchecked((int)16),
+
+        /// <summary>
+        /// Creates a device that supports the debug layer, breaking only on unique errors
+        /// </summary>
         DebugAndBreakUnique = unchecked((int)8),
 
         /// <summary>

@@ -277,6 +277,17 @@ namespace Xenko.Graphics
                         Debugger.Break();
                     }
                     return false;
+                case DeviceCreationFlags.DebugAndLogUnique:
+                    start = message.IndexOf("[ ");
+                    end = message.IndexOf(" ]");
+                    key = message.Substring(start, end - start);
+                    if (ErrorsAlready.TryGetValue(key, out _) == false)
+                    {
+                        ErrorsAlready[key] = true;
+                        debugMessage += "\n\nStack Trace: " + (new StackTrace()).ToString();
+                        ErrorFileLogger.WriteLogToFile(debugMessage);
+                    }
+                    return false;
             }
         }
 #endif

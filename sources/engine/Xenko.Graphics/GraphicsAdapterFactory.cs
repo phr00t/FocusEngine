@@ -25,7 +25,8 @@ namespace Xenko.Graphics
             {
                 if (!isInitialized)
                 {
-                    InitializeInternal(adapterFlags == DeviceCreationFlags.Debug || adapterFlags == DeviceCreationFlags.DebugAndBreak || adapterFlags == DeviceCreationFlags.DebugAndBreakUnique);
+                    InitializeInternal(adapterFlags == DeviceCreationFlags.Debug || adapterFlags == DeviceCreationFlags.DebugAndBreak ||
+                                       adapterFlags == DeviceCreationFlags.DebugAndBreakUnique || adapterFlags == DeviceCreationFlags.DebugAndLogUnique);
                     isInitialized = true;
                 }
             }
