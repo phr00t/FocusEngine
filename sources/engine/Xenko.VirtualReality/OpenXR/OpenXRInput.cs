@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 using Silk.NET.Core.Native;
 using Silk.NET.OpenXR;
+using Xenko.Core;
 
 namespace Xenko.VirtualReality
 {
-    class OpenXRInput
+    public class OpenXRInput
     {
+        public static bool LogInputDetected = false;
+
         // different types of input we are interested in
         public enum HAND_PATHS
         {
@@ -243,7 +246,7 @@ namespace Xenko.VirtualReality
             return floatresult.CurrentState;
         }
 
-        public static unsafe void Initialize(OpenXRHmd hmd)
+        internal static unsafe void Initialize(OpenXRHmd hmd)
         {
             baseHMD = hmd;
 
@@ -268,6 +271,8 @@ namespace Xenko.VirtualReality
                         hmd.Xr.CreateAction(hmd.globalActionSet, &action_info, aptr);
                 }
             }
+
+            string allInputDetected = "";
 
             // probe bindings for all profiles
             for (int i=0; i<InteractionProfiles.Length; i++)
@@ -312,6 +317,9 @@ namespace Xenko.VirtualReality
                                         break;
                                 }
 
+                                if (LogInputDetected)
+                                    allInputDetected += "\nGot " + final_path + " for " + InteractionProfiles[i];
+
                                 // got one!
                                 bindings.Add(suggest);
                                 break;
@@ -338,6 +346,9 @@ namespace Xenko.VirtualReality
                     }
                 }
             }
+
+            if (LogInputDetected)
+                ErrorFileLogger.WriteLogToFile(allInputDetected);
         }
     }
 }
