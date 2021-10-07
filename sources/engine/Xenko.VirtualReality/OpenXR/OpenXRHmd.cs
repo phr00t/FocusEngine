@@ -60,7 +60,9 @@ namespace Xenko.VirtualReality
         {
             if ((int)result < 0)
             {
-                Window.GenerateGenericError(null, $"OpenXR error! Only SteamVR is supported as an OpenXR runtime. Make sure it is set & running:\nSteamVR Settings > Show Advanced Settings > Developer > Set SteamVR as OpenXR Runtime\n\nCode: {result} ({result:X}) in " + forFunction + "\n\nStack Trace: " + (new StackTrace()).ToString());
+                Window.GenerateGenericError(null, 
+                    $"Only SteamVR is supported as an OpenXR runtime. Make sure it is set & running:\nSteamVR Settings > Show Advanced Settings > Developer > Set SteamVR as OpenXR Runtime\n\nCode: {result} ({result:X}) in " + forFunction + "\n\nStack Trace: " + (new StackTrace()).ToString(),
+                    "OpenXR Error: is SteamVR set as your OpenXR runtime?");
             }
 
             return result;

@@ -93,11 +93,11 @@ namespace Xenko.Graphics.SDL
             return modeList;
         }
 
-        internal static void GenerateGenericError(Exception e = null, string msg = null)
+        internal static void GenerateGenericError(Exception e = null, string msg = null, string title = "Error in Application")
         {
             string error = msg ?? "There was an error!";
             if (e != null) error += "\n\nException: " + e.ToString();
-            SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Error in Application", error, IntPtr.Zero);
+            SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, title, error, IntPtr.Zero);
             Console.Error.WriteLine(error);
             throw new Exception(error);
         }
