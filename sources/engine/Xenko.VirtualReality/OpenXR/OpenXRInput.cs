@@ -207,7 +207,7 @@ namespace Xenko.VirtualReality
                 }
 
                 // fallback if couldn't find bool
-                return GetActionFloat(hand, button, out wasChangedSinceLast, INPUT_DESIRED.VALUE, true) == 1f;
+                return GetActionFloat(hand, button, out wasChangedSinceLast, INPUT_DESIRED.VALUE, true) >= 0.75f;
             }
 
             wasChangedSinceLast = boolresult.ChangedSinceLastSync == 1;

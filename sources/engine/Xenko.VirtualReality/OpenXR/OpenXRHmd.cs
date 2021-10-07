@@ -145,13 +145,14 @@ namespace Xenko.VirtualReality
             CheckResult(Xr.CreateInstance(in instanceCreateInfo, ref Instance), "CreateInstance");
 
             // For our benefit, let's log some information about the instance we've just created.
-            InstanceProperties properties = new();
+            // skip this, as it crashes on Oculus runtime and is not needed
+            /*InstanceProperties properties = new();
             CheckResult(Xr.GetInstanceProperties(Instance, ref properties), "GetInstanceProperties");
 
             var runtimeName = SilkMarshal.PtrToString((nint)properties.RuntimeName);
             var runtimeVersion = ((Version)(Version64)properties.RuntimeVersion).ToString(3);
 
-            Console.WriteLine($"[INFO] Application: Using OpenXR Runtime \"{runtimeName}\" v{runtimeVersion}");
+            Console.WriteLine($"[INFO] Application: Using OpenXR Runtime \"{runtimeName}\" v{runtimeVersion}");*/
 
             // We're creating a head-mounted-display (HMD, i.e. a VR headset) example, so we ask for a runtime which
             // supports that form factor. The response we get is a ulong that is the System ID.

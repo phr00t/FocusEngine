@@ -9,12 +9,13 @@ namespace Xenko.VirtualReality
 {
     class OpenXrTouchController : TouchController
     {
-        private string baseHandPath;
         private OpenXRHmd baseHMD;
         private SpaceLocation handLocation;
         private TouchControllerHand myHand;
 
         public ulong[] hand_paths = new ulong[12];
+
+        private bool[,] buttonWasDown = new bool[(int)TouchControllerButton.MaxCount, 2];
 
         public Space myAimSpace, myGripSpace;
         public Silk.NET.OpenXR.Action myAimAction, myGripAction;
@@ -151,14 +152,18 @@ namespace Xenko.VirtualReality
 
         public override bool IsPressedDown(TouchControllerButton button)
         {
-            bool isDownNow = OpenXRInput.GetActionBool(myHand, PickCorrectAxis(button), out bool changed);
-            return isDownNow && changed;
+            bool isDownNow = OpenXRInput.GetActionBool(myHand, PickCorrectAxis(button), out _);
+            bool wasPressedDown = isDownNow && buttonWasDown[(int)button, 1] == false;
+            buttonWasDown[(int)button, 0] = isDownNow;
+            return wasPressedDown;
         }
 
         public override bool IsPressReleased(TouchControllerButton button)
         {
-            bool isDownNow = OpenXRInput.GetActionBool(myHand, PickCorrectAxis(button), out bool changed);
-            return !isDownNow && changed;
+            bool isDownNow = OpenXRInput.GetActionBool(myHand, PickCorrectAxis(button), out _);
+            bool wasReleasedUp = !isDownNow && buttonWasDown[(int)button, 1] == true;
+            buttonWasDown[(int)button, 0] = isDownNow;
+            return wasReleasedUp;
         }
 
         public override bool IsTouched(TouchControllerButton button)
@@ -199,6 +204,10 @@ namespace Xenko.VirtualReality
 
         public override unsafe void Update(GameTime time)
         {
+            // move our data on historical button down state over
+            for (int i = 0; i < (int)TouchControllerButton.MaxCount; i++)
+                buttonWasDown[i, 1] = buttonWasDown[i, 0];
+
             ActionStatePose hand_pose_state = new ActionStatePose()
             {
                 Type = StructureType.TypeActionStatePose,
