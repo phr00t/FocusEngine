@@ -22,6 +22,7 @@ namespace Xenko.Rendering.Rendering {
 
         internal Xenko.Graphics.Buffer _vertexBuffer, _indexBuffer;
         internal static GraphicsDevice internalDevice;
+        internal static ConcurrentQueue<Graphics.Buffer> StagedBufferTrashBin = new ConcurrentQueue<Graphics.Buffer>();
 
         ~StagedMeshDraw()
         {
@@ -33,19 +34,23 @@ namespace Xenko.Rendering.Rendering {
             performStage = null;
 
             if (_vertexBuffer != null)
-            {
-                _vertexBuffer.DestroyNow();
-                _vertexBuffer.Dispose();
-                Disposed++;
-            }
+                StagedBufferTrashBin.Enqueue(_vertexBuffer);
+
             if (_indexBuffer != null)
-            {
-                _indexBuffer.DestroyNow();
-                _indexBuffer.Dispose();
-            }
+                StagedBufferTrashBin.Enqueue(_indexBuffer);
 
             _vertexBuffer = null;
             _indexBuffer = null;
+        }
+
+        internal static void FlushTrash()
+        {
+            while (StagedBufferTrashBin.TryDequeue(out var buf))
+            {
+                buf.DestroyNow();
+                buf.Dispose();
+                Disposed++;
+            }
         }
 
         /// <summary>

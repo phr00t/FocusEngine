@@ -23,6 +23,7 @@ using Xenko.Input;
 using Xenko.Profiling;
 using Xenko.Rendering;
 using Xenko.Rendering.Fonts;
+using Xenko.Rendering.Rendering;
 using Xenko.Rendering.Sprites;
 using Xenko.Shaders.Compiler;
 using Xenko.Streaming;
@@ -259,8 +260,12 @@ namespace Xenko.Engine
         {
             base.EndDraw(present);
 
+            // handle any VR flushing
             if (VRDeviceSystem.Device != null)
                 VRDeviceSystem.Device.Flush();
+
+            // have any staged mesh draws to clear out?
+            StagedMeshDraw.FlushTrash();
         }
 
         /// <inheritdoc/>
