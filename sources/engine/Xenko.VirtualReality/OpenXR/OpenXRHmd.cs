@@ -12,6 +12,7 @@ using System.Diagnostics;
 using Silk.NET.Core.Native;
 using Xenko.Graphics.SDL;
 using Vortice.Vulkan;
+using System.IO;
 
 namespace Xenko.VirtualReality
 {
@@ -373,6 +374,39 @@ namespace Xenko.VirtualReality
             poseCount++;
         }
 
+        private void AttemptOverrideOpenXRRuntime()
+        {
+            string[] possibleSteamXRLocations =
+            {
+                "C:/Program Files (x86)/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "D:/Program Files (x86)/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "E:/Program Files (x86)/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "F:/Program Files (x86)/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "C:/Program Files/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "D:/Program Files/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "E:/Program Files/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "F:/Program Files/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "C:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "D:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "E:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "F:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "C:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json",
+                "D:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json",
+                "E:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json",
+                "F:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json"
+            };
+
+            foreach (string s in possibleSteamXRLocations)
+            {
+                if (File.Exists(s))
+                {
+                    Environment.SetEnvironmentVariable("XR_RUNTIME_JSON", s);
+                    System.Console.WriteLine("Set OpenXR runtime to: " + s);
+                    return;
+                }
+            }
+        }
+
         public override unsafe void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, bool requireMirror)
         {
             // Changing the form_factor may require changing the view_type too.
@@ -402,6 +436,8 @@ namespace Xenko.VirtualReality
             // depth swapchain equivalent to the VR color swapchains (not supported yet)
             //Swapchain depth_swapchains;
             //uint[] depth_swapchain_lengths;
+
+            AttemptOverrideOpenXRRuntime();
 
             Prepare();
 
