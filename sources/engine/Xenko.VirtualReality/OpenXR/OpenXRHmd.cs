@@ -379,6 +379,10 @@ namespace Xenko.VirtualReality
             string[] possibleSteamXRLocations =
             {
                 "C:/Program Files (x86)/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "C:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json",
+                "D:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json",
+                "C:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
+                "D:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
                 "D:/Program Files (x86)/Steam/steamapps/common/SteamVR/steamxr_win64.json",
                 "E:/Program Files (x86)/Steam/steamapps/common/SteamVR/steamxr_win64.json",
                 "F:/Program Files (x86)/Steam/steamapps/common/SteamVR/steamxr_win64.json",
@@ -386,12 +390,8 @@ namespace Xenko.VirtualReality
                 "D:/Program Files/Steam/steamapps/common/SteamVR/steamxr_win64.json",
                 "E:/Program Files/Steam/steamapps/common/SteamVR/steamxr_win64.json",
                 "F:/Program Files/Steam/steamapps/common/SteamVR/steamxr_win64.json",
-                "C:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
-                "D:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
                 "E:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
                 "F:/Steam/steamapps/common/SteamVR/steamxr_win64.json",
-                "C:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json",
-                "D:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json",
                 "E:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json",
                 "F:/SteamLibrary/steamapps/common/SteamVR/steamxr_win64.json"
             };
