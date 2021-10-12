@@ -314,29 +314,19 @@ namespace Xenko.Physics.Bepu
                 // indicies
                 fixed (byte* pdst = ibuf.VertIndexData)
                 {
+                    int numIndices = modelMesh.Draw.IndexBuffer.Count;
+                    indicies = new List<int>(numIndices);
                     if (modelMesh.Draw.IndexBuffer.Is32Bit)
                     {
-                        var dst = (uint*)pdst;
-
-                        int numIndices = ibuf.VertIndexData.Length / sizeof(uint);
-                        indicies = new List<int>(numIndices);
+                        var dst = (uint*)(pdst + modelMesh.Draw.IndexBuffer.Offset);
                         for (var k = 0; k < numIndices; k++)
-                        {
-                            // Offset indices
                             indicies.Add((int)dst[k]);
-                        }
                     }
                     else
                     {
-                        var dst = (ushort*)pdst;
-
-                        int numIndices = ibuf.VertIndexData.Length / sizeof(ushort);
-                        indicies = new List<int>(numIndices);
+                        var dst = (ushort*)(pdst + modelMesh.Draw.IndexBuffer.Offset);
                         for (var k = 0; k < numIndices; k++)
-                        {
-                            // Offset indices
                             indicies.Add(dst[k]);
-                        }
                     }
                 }
 

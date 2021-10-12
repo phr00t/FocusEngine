@@ -262,12 +262,12 @@ namespace Xenko.Engine
                             // indicies
                             fixed (byte* pdst = ibuf.VertIndexData)
                             {
+                                int numIndices = modelMesh.Draw.IndexBuffer.Count;
+                                cmd.indicies = new uint[numIndices];
+
                                 if (modelMesh.Draw.IndexBuffer.Is32Bit)
                                 {
-                                    var dst = (uint*)pdst;
-
-                                    int numIndices = ibuf.VertIndexData.Length / sizeof(uint);
-                                    cmd.indicies = new uint[numIndices];
+                                    var dst = (uint*)(pdst + modelMesh.Draw.IndexBuffer.Offset);
                                     for (var k = 0; k < numIndices; k++)
                                     {
                                         // Offset indices
@@ -277,10 +277,7 @@ namespace Xenko.Engine
                                 }
                                 else
                                 {
-                                    var dst = (ushort*)pdst;
-
-                                    int numIndices = ibuf.VertIndexData.Length / sizeof(ushort);
-                                    cmd.indicies = new uint[numIndices];
+                                    var dst = (ushort*)(pdst + modelMesh.Draw.IndexBuffer.Offset);
                                     for (var k = 0; k < numIndices; k++)
                                     {
                                         // Offset indices
