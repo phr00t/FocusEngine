@@ -120,6 +120,22 @@ namespace Xenko.Engine
         }
 
         /// <summary>
+        /// Shortcut to adding this entity to PersistentEntities
+        /// </summary>
+        [DataMemberIgnore]
+        public bool PersistThroughSceneChanges
+        {
+            get => SceneInstance.PersistentEntities.Contains(this);
+            set
+            {
+                if (value)
+                    SceneInstance.PersistentEntities.Add(this);
+                else
+                    SceneInstance.PersistentEntities.Remove(this);
+            }
+        }
+
+        /// <summary>
         /// Manually puts this entity back into a pool. This should happen automatically when something
         /// gets removed from a scene.
         /// </summary>

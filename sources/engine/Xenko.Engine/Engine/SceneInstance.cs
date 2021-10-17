@@ -59,7 +59,7 @@ namespace Xenko.Engine
         /// <summary>
         /// Entities in this list will persist across root scene changes, IF the entity was attached in the previous scene.
         /// </summary>
-        public HashSet<Entity> PersistentEntities = new HashSet<Entity>();
+        public static readonly HashSet<Entity> PersistentEntities = new HashSet<Entity>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SceneInstance" /> class.
