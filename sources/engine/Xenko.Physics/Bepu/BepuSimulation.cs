@@ -466,7 +466,7 @@ namespace Xenko.Physics.Bepu
                 else if (component is BepuRigidbodyComponent rigidBody)
                 {
                     rigidBody.bodyDescription.Pose.Position = BepuHelpers.ToBepu(component.Entity.Transform.WorldPosition() - (rigidBody.LocalPhysicsOffset ?? Vector3.Zero));
-                    rigidBody.bodyDescription.Pose.Orientation = BepuHelpers.ToBepu(component.Entity.Transform.WorldRotation());
+                    if (!rigidBody.RotationLock) rigidBody.bodyDescription.Pose.Orientation = BepuHelpers.ToBepu(component.Entity.Transform.WorldRotation());
                     using (simulationLocker.WriteLock())
                     {
                         rigidBody.bodyDescription.Collidable = rigidBody.ColliderShape.GenerateDescription(internalSimulation, rigidBody.SpeculativeMargin);
