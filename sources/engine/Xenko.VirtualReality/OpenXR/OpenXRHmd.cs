@@ -14,6 +14,11 @@ using Xenko.Graphics.SDL;
 using Vortice.Vulkan;
 using System.IO;
 
+#if XENKO_PLATFORM_WINDOWS_DESKTOP
+using Microsoft.Win32;
+using System.Data;
+#endif
+
 namespace Xenko.VirtualReality
 {
     public class OpenXRHmd : VRDevice
@@ -376,6 +381,11 @@ namespace Xenko.VirtualReality
 
         private void AttemptOverrideOpenXRRuntime()
         {
+#if XENKO_PLATFORM_WINDOWS_DESKTOP
+            // wait, do we even need to do this?
+            string ar = Registry.GetValue("HKEY_LOCAL_MACHINE\\SOFTWARE\\Khronos\\OpenXR\\1", "ActiveRuntime", null) as string;
+            if (ar != null && ar.Contains("SteamVR")) return;
+
             string[] possibleSteamXRLocations =
             {
                 "C:/Program Files (x86)/Steam/steamapps/common/SteamVR/steamxr_win64.json",
@@ -405,6 +415,7 @@ namespace Xenko.VirtualReality
                     return;
                 }
             }
+#endif
         }
 
         public override unsafe void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, bool requireMirror)

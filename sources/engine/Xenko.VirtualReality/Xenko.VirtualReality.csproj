@@ -27,6 +27,11 @@
           <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </XenkoNativeLib>
+        <XenkoNativeLib Include="..\..\..\deps\WindowsRegistry\Microsoft.Win32.Registry.dll">
+          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+          <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </XenkoNativeLib>
       </ItemGroup>
     </When>
   </Choose>
@@ -43,6 +48,7 @@
       <Name>Xenko.Input</Name>
     </ProjectReference>
     <PackageReference Include="Silk.NET.OpenXR" Version="2.8.0" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
   </ItemGroup>
   <Import Project="$(XenkoPostSettingsTargets)" />
   <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
