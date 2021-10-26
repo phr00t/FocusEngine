@@ -38,7 +38,6 @@ namespace Xenko.Rendering.Materials
         public MaterialNormalMapFeature(IComputeColor normalMap)
         {
             ScaleAndBias = true;
-            IsXYNormal = true;
             NormalMap = normalMap;
         }
 
