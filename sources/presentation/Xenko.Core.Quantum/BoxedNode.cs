@@ -41,7 +41,7 @@ namespace Xenko.Core.Quantum
                 var dictionaryDescriptor = Descriptor as DictionaryDescriptor;
                 if (collectionDescriptor != null)
                 {
-                    collectionDescriptor.SetValue(Value, index.Int, newValue);
+                    collectionDescriptor.SetValue(Value, index.Value, newValue);
                 }
                 else if (dictionaryDescriptor != null)
                 {

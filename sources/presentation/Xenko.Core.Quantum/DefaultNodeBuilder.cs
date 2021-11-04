@@ -169,7 +169,7 @@ namespace Xenko.Core.Quantum
             PushContextNode(content);
             if (content.TargetReference == null)
             {
-                // For enumerable references, we visit the member to allow VisitCollection or VisitDictionary to enrich correctly the node.
+                // For enumerable references, we visit the member to allow VisitList or VisitDictionary or VisitSet or VisitCollection to enrich correctly the node.
                 Visit(content.Retrieve());
             }
             PopContextNode();

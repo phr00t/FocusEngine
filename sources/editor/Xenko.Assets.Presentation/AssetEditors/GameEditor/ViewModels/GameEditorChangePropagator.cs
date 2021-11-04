@@ -1,4 +1,4 @@
-﻿// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Threading.Tasks;
@@ -13,6 +13,7 @@ using Xenko.Core.Quantum;
 using Xenko.Assets.Presentation.AssetEditors.AssetCompositeGameEditor.ViewModels;
 using Xenko.Assets.Presentation.AssetEditors.GameEditor.Services;
 using Xenko.Particles.Materials;
+using Xenko.Core.Reflection;
 
 namespace Xenko.Assets.Presentation.AssetEditors.GameEditor.ViewModels
 {
@@ -175,6 +176,11 @@ namespace Xenko.Assets.Presentation.AssetEditors.GameEditor.ViewModels
                     else
                     {
                         var value = RetrieveValue(assetNode, e.NewValue, e.ChangeType, index);
+
+                        if (value == null && assetNode.Descriptor.Category == DescriptorCategory.Set)
+                        {
+                            value = e.NewValue;
+                        }
                         var isReference = await PropagatePartReference(gameSideNode, value, e);
                         if (!isReference)
                         {
