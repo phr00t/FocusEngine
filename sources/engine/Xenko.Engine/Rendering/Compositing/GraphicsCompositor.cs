@@ -149,6 +149,38 @@ namespace Xenko.Rendering.Compositing
             recursiveVRSet(Game, enable);
         }
 
+        /// <summary>
+        /// Get the game's first VRRendererSettings, can be useful for changing VR settings during runtime
+        /// </summary>
+        /// <returns></returns>
+        public VRRendererSettings GetVRSettings()
+        {
+            return findVRSettings(Game);
+        }
+
+        private VRRendererSettings findVRSettings(ISceneRenderer r)
+        {
+            if (r is ForwardRenderer fr)
+            {
+                return fr.VRSettings;
+            }
+            else if (r is SceneCameraRenderer scr)
+            {
+                return findVRSettings(scr.Child);
+            }
+            else if (r is SceneRendererCollection src)
+            {
+                VRRendererSettings vrs;
+                foreach (ISceneRenderer isr in src.Children)
+                {
+                    vrs = findVRSettings(isr);
+                    if (vrs != null) return vrs;
+                }
+            }
+
+            return null;
+        }
+
         private void recursiveVRSet(ISceneRenderer r, bool enable)
         {
             if (r is ForwardRenderer fr)
