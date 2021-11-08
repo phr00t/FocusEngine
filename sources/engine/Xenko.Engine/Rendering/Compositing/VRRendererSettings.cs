@@ -31,8 +31,8 @@ namespace Xenko.Rendering.Compositing
         /// </summary>
         /// <userdoc>Copy VR rendering to the current render target. Leave disabled to have different rendering on desktop than VR headset.</userdoc>
         [DataMember(25)]
-        [DefaultValue(true)]
-        public bool CopyMirror { get; set; } = true;
+        [DefaultValue(VRDeviceSystem.MIRROR_OPTION.SINGLE_EYE)]
+        public VRDeviceSystem.MIRROR_OPTION CopyMirror { get; set; } = VRDeviceSystem.MIRROR_OPTION.SINGLE_EYE;
 
         [DataMember(30)]
         public List<VRDeviceDescription> RequiredApis { get; } = new List<VRDeviceDescription>();

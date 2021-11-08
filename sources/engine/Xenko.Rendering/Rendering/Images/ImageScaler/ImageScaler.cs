@@ -36,6 +36,11 @@ namespace Xenko.Rendering.Images
         public Color4 Color { get; set; }
 
         /// <summary>
+        /// Scale the UV texture scale, can be used to stretch the scaling out
+        /// </summary>
+        public Vector2 TexScale { get; set; } = Vector2.One;
+
+        /// <summary>
         /// Copy only the red channel. Default is <c>false</c>
         /// </summary>
         /// <value><c>true</c> if this instance is only channel red; otherwise, <c>false</c>.</value>
@@ -80,6 +85,7 @@ namespace Xenko.Rendering.Images
 
             // Use actual ColorSpace
             Parameters.Set(ImageScalerShaderKeys.Color, Color.ToColorSpace(GraphicsDevice.ColorSpace));
+            Parameters.Set(ImageScalerShaderKeys.Scale, TexScale);
         }
     }
 }

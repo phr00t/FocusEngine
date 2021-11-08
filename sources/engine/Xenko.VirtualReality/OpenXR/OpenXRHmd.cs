@@ -418,7 +418,7 @@ namespace Xenko.VirtualReality
 #endif
         }
 
-        public override unsafe void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, bool requireMirror)
+        public override unsafe void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, VRDeviceSystem.MIRROR_OPTION requireMirror)
         {
             // Changing the form_factor may require changing the view_type too.
             ViewConfigurationType view_type = ViewConfigurationType.PrimaryStereo;

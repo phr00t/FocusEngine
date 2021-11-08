@@ -714,10 +714,11 @@ namespace Xenko.Rendering.Compositing
                     }
 
                     //draw mirror if desired
-                    if (VRSettings.CopyMirror)
+                    if (VRSettings.CopyMirror != VRDeviceSystem.MIRROR_OPTION.NONE)
                     {
                         GameBase.ShouldPresent = true;
-                        CopyOrScaleTexture(drawContext, vrFullSurface, drawContext.CommandList.RenderTarget);
+                        CopyOrScaleTexture(drawContext, vrFullSurface, drawContext.CommandList.RenderTarget,
+                                           VRSettings.CopyMirror == VRDeviceSystem.MIRROR_OPTION.BOTH_EYES ? Vector2.One : new Vector2(0.5f, 1f));
                     }
                 }
                 else
@@ -750,10 +751,11 @@ namespace Xenko.Rendering.Compositing
             currentDepthStencilNonMSAA = null;
         }
 
-        private void CopyOrScaleTexture(RenderDrawContext drawContext, Texture input, Texture output)
+        private void CopyOrScaleTexture(RenderDrawContext drawContext, Texture input, Texture output, Vector2 scaling)
         {
-            if (input.Size != output.Size)
+            if (input.Size != output.Size || scaling != Vector2.One)
             {
+                VRSettings.MirrorScaler.TexScale = scaling;
                 VRSettings.MirrorScaler.SetInput(0, input);
                 VRSettings.MirrorScaler.SetOutput(output);
                 VRSettings.MirrorScaler.Draw(drawContext);

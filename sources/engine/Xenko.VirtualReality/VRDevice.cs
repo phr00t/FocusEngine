@@ -46,7 +46,7 @@ namespace Xenko.VirtualReality
 
         public abstract bool CanInitialize { get; }
 
-        public abstract void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, bool requireMirror);
+        public abstract void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, VRDeviceSystem.MIRROR_OPTION requireMirror);
 
         public virtual void Recenter()
         {

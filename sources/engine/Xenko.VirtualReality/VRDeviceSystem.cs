@@ -12,6 +12,16 @@ namespace Xenko.VirtualReality
     public class VRDeviceSystem : GameSystemBase
     {
         /// <summary>
+        /// Mirroring options
+        /// </summary>
+        public enum MIRROR_OPTION
+        {
+            NONE = 0,
+            BOTH_EYES = 1,
+            SINGLE_EYE = 2
+        };
+
+        /// <summary>
         /// An active instance of the VRDeviceSystem
         /// </summary>
         public static VRDeviceSystem GetSystem { get; private set; }
@@ -85,7 +95,7 @@ namespace Xenko.VirtualReality
 
         public VRDevice Device { get; private set; }
 
-        public bool RequireMirror;
+        public MIRROR_OPTION RequireMirror;
 
         public bool PreviousUseCustomProjectionMatrix;
 
@@ -121,13 +131,6 @@ namespace Xenko.VirtualReality
                             Device = new OpenXRHmd(Game);
 #endif
                             break;
-                        case VRApi.OpenVR:
-                        {
-#if XENKO_GRAPHICS_API_VULKAN || XENKO_GRAPHICS_API_DIRECT3D11
-                            Device = new OpenVRHmd(Game);
-#endif
-                            break;
-                        }
                         default:
                             throw new ArgumentOutOfRangeException();
                     }

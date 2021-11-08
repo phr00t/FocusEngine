@@ -11,12 +11,13 @@ namespace Xenko.Rendering.Images
         // TODO: Color and IsOnlyChannelRed could be part of a color filter that we can pre-prend automatically
         [Color]
         stage float4 Color;
+        stage float2 Scale;
         stage float IsOnlyChannelRed;
 
         // Shading of the sprite
         stage override float4 Shading()
         {
-            float4 color = base.Shading();
+            float4 color = Texture0.Sample(Sampler, streams.TexCoord * Scale);
             if (IsOnlyChannelRed != 0)
             {
                 color = float4(color.rrr, 1);
