@@ -285,9 +285,7 @@ extern "C" {
 			ALC_ERROR(device->device);
 
 			device->deviceLock.Lock();
-
 			device->listeners.insert(res);
-
 			device->deviceLock.Unlock();
 
 			return res;
@@ -296,9 +294,7 @@ extern "C" {
 		DLL_EXPORT_API void xnAudioListenerDestroy(xnAudioListener* listener)
 		{
 			listener->device->deviceLock.Lock();
-
 			listener->device->listeners.erase(listener);
-
 			listener->device->deviceLock.Unlock();
 
 			DestroyContext(listener->context);
@@ -308,12 +304,10 @@ extern "C" {
 
 		DLL_EXPORT_API void xnAudioSetMasterVolume(xnAudioDevice* device, float volume)
 		{
-			device->deviceLock.Lock();
 			for(auto listener : device->listeners)
 			{
 				ListenerF(AL_GAIN, volume);
 			}
-			device->deviceLock.Unlock();
 		}
 
 		DLL_EXPORT_API npBool xnAudioListenerEnable(xnAudioListener* listener)
@@ -356,7 +350,9 @@ extern "C" {
 				SourceI(res->source, AL_SOURCE_RELATIVE, AL_TRUE);
 			}
 
+			listener->device->deviceLock.Lock();
 			listener->sources.insert(res);
+			listener->device->deviceLock.Unlock();
 			
 			return res;
 		}
@@ -366,7 +362,9 @@ extern "C" {
 			DeleteSources(1, &source->source);
 			AL_ERROR;
 
+			source->listener->device->deviceLock.Lock();
 			source->listener->sources.erase(source);
+			source->listener->device->deviceLock.Unlock();
 
 			delete source;
 		}
@@ -458,8 +456,10 @@ extern "C" {
 
 		DLL_EXPORT_API void xnAudioSourceSetBuffer(xnAudioSource* source, xnAudioBuffer* buffer)
 		{
+			source->listener->device->deviceLock.Lock();
 			source->singleBuffer = buffer;
 			SourceI(source->source, AL_BUFFER, buffer->buffer);
+			source->listener->device->deviceLock.Unlock();
 		}
 
 		DLL_EXPORT_API void xnAudioSourceQueueBuffer(xnAudioSource* source, xnAudioBuffer* buffer, short* pcm, int bufferSize, BufferType type)
@@ -467,19 +467,24 @@ extern "C" {
 			buffer->type = type;
 			buffer->size = bufferSize;
 			BufferData(buffer->buffer, source->mono ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, pcm, bufferSize, source->sampleRate);
+			source->listener->device->deviceLock.Lock();
 			SourceQueueBuffers(source->source, 1, &buffer->buffer);
 			source->listener->buffers[buffer->buffer] = buffer;
+			source->listener->device->deviceLock.Unlock();
 		}
 
 		DLL_EXPORT_API xnAudioBuffer* xnAudioSourceGetFreeBuffer(xnAudioSource* source)
 		{
+			source->listener->device->deviceLock.Lock();
 			if(source->freeBuffers.size() > 0)
 			{
 				auto buffer = source->freeBuffers.back();
 				source->freeBuffers.pop_back();
+				source->listener->device->deviceLock.Unlock();
 				return buffer;
 			}
 
+			source->listener->device->deviceLock.Unlock();
 			return NULL;
 		}
 
@@ -497,6 +502,7 @@ extern "C" {
 		{
 			if (source->streamed)
 			{
+				source->listener->device->deviceLock.Lock();
 				//flush all buffers
 				auto processed = 0;
 				GetSourceI(source->source, AL_BUFFERS_PROCESSED, &processed);
@@ -515,6 +521,7 @@ extern "C" {
 				{
 					source->freeBuffers.push_back(buffer.second);
 				}
+				source->listener->device->deviceLock.Unlock();
 			}
 		}
 
