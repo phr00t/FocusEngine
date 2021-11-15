@@ -48,6 +48,11 @@ namespace Xenko.Core.Reflection
         Nullable,
 
         /// <summary>
+        /// A nullable value
+        /// </summary>
+        NotSupportedObject,
+
+        /// <summary>
         /// A custom descriptor.
         /// </summary>
         Custom

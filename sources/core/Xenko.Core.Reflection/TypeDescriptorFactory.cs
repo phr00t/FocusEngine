@@ -114,11 +114,11 @@ namespace Xenko.Core.Reflection
                     // array[] - only single dimension array is supported
                     descriptor = new ArrayDescriptor(this, type, emitDefaultValues, namingConvention);
                 }
-                /*else
+                else
                 {
                     // multi-dimension array to be treated as a 'standard' object
                     descriptor = new NotSupportedObjectDescriptor(this, type, emitDefaultValues, namingConvention);
-                }*/
+                }
             }
             else if (NullableDescriptor.IsNullable(type))
             {
