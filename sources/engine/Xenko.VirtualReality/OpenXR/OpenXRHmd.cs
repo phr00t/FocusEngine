@@ -193,6 +193,12 @@ namespace Xenko.VirtualReality
         private unsafe delegate Result pfnGetVulkanGraphicsRequirementsKHR(Instance instance, ulong sys_id, GraphicsRequirementsVulkanKHR* req);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        private unsafe delegate Result pfnGetVulkanInstanceExtensionsKHR(Instance instance, ulong systemId, int bufferCapacityInput, int* bufferCountOutput, char* buffer);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        private unsafe delegate Result pfnGetVulkanDeviceExtensionsKHR(Instance instance, ulong systemId, int bufferCapacityInput, int* bufferCountOutput, char* buffer);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         private unsafe delegate Result pfnGetVulkanGraphicsDeviceKHR(Instance instance, ulong systemId, VkHandle vkInstance, VkHandle* vkPhysicalDevice);
 
         public OpenXRHmd(GameBase game)
@@ -482,6 +488,32 @@ namespace Xenko.VirtualReality
             // this function pointer was loaded with xrGetInstanceProcAddr
             Delegate vulk_req = Marshal.GetDelegateForFunctionPointer((IntPtr)func.Handle, typeof(pfnGetVulkanGraphicsRequirementsKHR));
             vulk_req.DynamicInvoke(Instance, system_id, new System.IntPtr(&vulk));
+
+#if DEBUG
+            Silk.NET.Core.PfnVoidFunction iex = new Silk.NET.Core.PfnVoidFunction();
+            CheckResult(Xr.GetInstanceProcAddr(Instance, "xrGetVulkanInstanceExtensionsKHR", ref iex), "GetInstanceProcAddr::xrGetVulkanInstanceExtensionsKHR");
+            // this function pointer was loaded with xrGetInstanceProcAddr
+            Delegate iex_d = Marshal.GetDelegateForFunctionPointer((IntPtr)iex.Handle, typeof(pfnGetVulkanInstanceExtensionsKHR));
+            int bufsize = 0;
+            byte[] buffer = new byte[256];
+            fixed (byte* bptr = &buffer[0])
+            {
+                iex_d.DynamicInvoke(Instance, system_id, buffer.Length, new System.IntPtr(&bufsize), new System.IntPtr(bptr));
+                string InstanceExtensions = System.Text.Encoding.Default.GetString(bptr, bufsize);
+                System.Diagnostics.Debug.WriteLine("Instance Vulkan Extensions Desired: " + InstanceExtensions);
+            }
+
+            Silk.NET.Core.PfnVoidFunction dex = new Silk.NET.Core.PfnVoidFunction();
+            CheckResult(Xr.GetInstanceProcAddr(Instance, "xrGetVulkanDeviceExtensionsKHR", ref dex), "GetInstanceProcAddr::xrGetVulkanDeviceExtensionsKHR");
+            // this function pointer was loaded with xrGetInstanceProcAddr
+            Delegate dex_d = Marshal.GetDelegateForFunctionPointer((IntPtr)dex.Handle, typeof(pfnGetVulkanDeviceExtensionsKHR));
+            fixed (byte* bptr = &buffer[0])
+            {
+                dex_d.DynamicInvoke(Instance, system_id, buffer.Length, new System.IntPtr(&bufsize), new System.IntPtr(bptr));
+                string DeviceExtensions = System.Text.Encoding.Default.GetString(bptr, bufsize);
+                System.Diagnostics.Debug.WriteLine("Device Vulkan Extensions Desired: " + DeviceExtensions);
+            }
+#endif
 
 #if XENKO_GRAPHICS_API_VULKAN
 
