@@ -748,9 +748,16 @@ namespace Xenko.UI.Panels
         {
             var sum = 0f;
             // ReSharper disable once LoopCanBeConvertedToQuery
-            foreach (var def in definitions) // do not use linq to avoid allocations
-                if (def.Type != StripType.Star)
-                    sum += def.ActualSize;
+            try
+            {
+                foreach (var def in definitions) // do not use linq to avoid allocations
+                    if (def.Type != StripType.Star)
+                        sum += def.ActualSize;
+            } 
+            catch(Exception e)
+            {
+                throw new InvalidOperationException("Grid measuring problem. Are you trying to render the same UIElement or Page 2+ times? More info: " + e.ToString());
+            }
 
             return sum;
         }
