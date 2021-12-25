@@ -16,6 +16,7 @@ namespace Xenko.Core.Diagnostics
         /// <param name="callerInfo">Information about the caller. Default is null, otherwise use <see cref="CallerInfo.Get"/>.</param>
         public void Verbose(string message, Exception exception, CallerInfo callerInfo = null)
         {
+            if (ConsoleLogListener.LogLevel > LogMessageType.Verbose) return;
             Log(new LogMessage(Module, LogMessageType.Verbose, message, exception, callerInfo));
         }
 
@@ -36,6 +37,7 @@ namespace Xenko.Core.Diagnostics
         /// <param name="callerInfo">Information about the caller. Default is null, otherwise use <see cref="CallerInfo.Get"/>.</param>
         public void Debug(string message, Exception exception, CallerInfo callerInfo = null)
         {
+            if (ConsoleLogListener.LogLevel > LogMessageType.Debug) return;
             Log(new LogMessage(Module, LogMessageType.Debug, message, exception, callerInfo));
         }
 
@@ -56,6 +58,7 @@ namespace Xenko.Core.Diagnostics
         /// <param name="callerInfo">Information about the caller. Default is null, otherwise use <see cref="CallerInfo.Get"/>.</param>
         public void Info(string message, Exception exception, CallerInfo callerInfo = null)
         {
+            if (ConsoleLogListener.LogLevel > LogMessageType.Info) return;
             Log(new LogMessage(Module, LogMessageType.Info, message, exception, callerInfo));
         }
 
@@ -76,6 +79,7 @@ namespace Xenko.Core.Diagnostics
         /// <param name="callerInfo">Information about the caller. Default is null, otherwise use <see cref="CallerInfo.Get"/>.</param>
         public void Warning(string message, Exception exception, CallerInfo callerInfo = null)
         {
+            if (ConsoleLogListener.LogLevel > LogMessageType.Warning) return;
             Log(new LogMessage(Module, LogMessageType.Warning, message, exception, callerInfo));
         }
 
@@ -96,6 +100,7 @@ namespace Xenko.Core.Diagnostics
         /// <param name="callerInfo">Information about the caller. Default is null, otherwise use <see cref="CallerInfo.Get"/>.</param>
         public void Error(string message, Exception exception, CallerInfo callerInfo = null)
         {
+            if (ConsoleLogListener.LogLevel > LogMessageType.Error) return;
             Log(new LogMessage(Module, LogMessageType.Error, message, exception, callerInfo));
         }
 

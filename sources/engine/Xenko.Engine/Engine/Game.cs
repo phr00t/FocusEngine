@@ -154,48 +154,18 @@ namespace Xenko.Engine
         }
 
         /// <summary>
-        /// Gets or sets the console log mode. See remarks.
-        /// </summary>
-        /// <value>The console log mode.</value>
-        /// <remarks>
-        /// Defines how the console will be displayed when running the game. By default, on Windows, It will open only on debug
-        /// if there are any messages logged.
-        /// </remarks>
-        public ConsoleLogMode ConsoleLogMode
-        {
-            get
-            {
-                var consoleLogListener = logListener as ConsoleLogListener;
-                return consoleLogListener != null ? consoleLogListener.LogMode : default(ConsoleLogMode);
-            }
-            set
-            {
-                var consoleLogListener = logListener as ConsoleLogListener;
-                if (consoleLogListener != null)
-                {
-                    consoleLogListener.LogMode = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the default console log level.
+        /// Gets or sets the default console log level (shortcut)
         /// </summary>
         /// <value>The console log level.</value>
         public LogMessageType ConsoleLogLevel
         {
             get
             {
-                var consoleLogListener = logListener as ConsoleLogListener;
-                return consoleLogListener != null ? consoleLogListener.LogLevel : default(LogMessageType);
+                return ConsoleLogListener.LogLevel;
             }
             set
             {
-                var consoleLogListener = logListener as ConsoleLogListener;
-                if (consoleLogListener != null)
-                {
-                    consoleLogListener.LogLevel = value;
-                }
+                ConsoleLogListener.LogLevel = value;
             }
         }
 

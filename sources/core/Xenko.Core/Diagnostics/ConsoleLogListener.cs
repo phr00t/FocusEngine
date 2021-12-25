@@ -27,23 +27,13 @@ namespace Xenko.Core.Diagnostics
         /// Gets or sets the minimum log level handled by this listener.
         /// </summary>
         /// <value>The minimum log level.</value>
-        public LogMessageType LogLevel { get; set; }
-
-        /// <summary>
-        /// Gets or sets the log mode.
-        /// </summary>
-        /// <value>The log mode.</value>
-        public ConsoleLogMode LogMode { get; set; }
+        public static LogMessageType LogLevel { get; set; }
 
         protected override void OnLog([NotNull] ILogMessage logMessage)
         {
             // filter logs with lower level
-            if (!Debugger.IsAttached && // Always log when debugger is attached
-                (logMessage.Type < LogLevel || LogMode == ConsoleLogMode.None
-                || (!(LogMode == ConsoleLogMode.Auto && Platform.IsRunningDebugAssembly) && LogMode != ConsoleLogMode.Always)))
-            {
+            if (logMessage.Type < LogLevel)
                 return;
-            }
 
             // Make sure the console is opened when the debugger is not attached
             EnsureConsole();

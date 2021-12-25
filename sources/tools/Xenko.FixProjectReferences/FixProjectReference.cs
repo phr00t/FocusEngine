@@ -56,7 +56,7 @@ namespace Xenko.FixProjectReferences
 
                 var inputFile = inputFiles[0];
 
-                var consoleLogListener = new ConsoleLogListener { LogMode = ConsoleLogMode.Always };
+                var consoleLogListener = new ConsoleLogListener();
                 GlobalLogger.GlobalMessageLogged += consoleLogListener;
 
                 var log = GlobalLogger.GetLogger("FixProjectReference");

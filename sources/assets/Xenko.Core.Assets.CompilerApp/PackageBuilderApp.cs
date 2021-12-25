@@ -194,7 +194,7 @@ namespace Xenko.Core.Assets.CompilerApp
                     }
                     else
                     {
-                        globalLoggerOnGlobalMessageLogged = new ConsoleLogListener { LogMode = ConsoleLogMode.Always };
+                        globalLoggerOnGlobalMessageLogged = new ConsoleLogListener();
                     }
                     globalLoggerOnGlobalMessageLogged.TextFormatter = FormatLog;
                     GlobalLogger.GlobalMessageLogged += globalLoggerOnGlobalMessageLogged;
