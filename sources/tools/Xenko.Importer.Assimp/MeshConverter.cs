@@ -43,16 +43,14 @@ namespace Xenko.Importer.Assimp
         private string vfsOutputFilename;
         private string vfsInputPath;
 
-        private Vector3 rootScaling;
         private Quaternion rootOrientation;
         private Quaternion rootOrientationInverse;
         private Matrix rootTransform;
         private Matrix rootTransformInverse;
         private Model modelData;
+
         private readonly List<ModelNodeDefinition> nodes = new List<ModelNodeDefinition>();
-        private readonly Dictionary<IntPtr, int> nodeMapping = new Dictionary<IntPtr, int>();
         private readonly Dictionary<string, int> textureNameCount = new Dictionary<string, int>();
-        private readonly List<Mesh> effectMeshes = new List<Mesh>();	// array of EffectMeshes built from the aiMeshes (same order)
 
         public MeshConverter(Logger logger)
         {
@@ -61,7 +59,6 @@ namespace Xenko.Importer.Assimp
 
         private void ResetConvertionData()
         {
-            effectMeshes.Clear();
             textureNameCount.Clear();
         }
 
@@ -532,7 +529,7 @@ namespace Xenko.Importer.Assimp
             {
                 rootTransform = fromNode->MTransformation.ToXenkoMatrix();
 
-                rootTransform.Decompose(out rootScaling, out rootOrientation, out var rootTranslation);
+                rootTransform.Decompose(out var rootScaling, out rootOrientation, out var rootTranslation);
 
                 rootTransformInverse = Matrix.Invert(rootTransform);
                 rootOrientationInverse = Quaternion.Invert(rootOrientation);
@@ -716,16 +713,17 @@ namespace Xenko.Importer.Assimp
                 for (uint i = 0; i < mesh->MNumVertices; i++)
                 {
                     var positionPointer = (Vector3*)(vbPointer + positionOffset);
-                    *positionPointer = mesh->MVertices[i].ToXenkoVector3();
-                    // TODO: NO IDEA IF THIS WORKS :D
+                    *positionPointer = mesh->MVertices[i].ToStrideVector3();
+
                     Vector3.TransformCoordinate(ref *positionPointer, ref rootTransform, out *positionPointer);
 
                     if (mesh->MNormals != null)
                     {
                         var normalPointer = (Vector3*)(vbPointer + normalOffset);
-                        *normalPointer = mesh->MNormals[i].ToXenkoVector3();
-                        // TODO: NO IDEA IF THIS WORKS :D
+                        *normalPointer = mesh->MNormals[i].ToStrideVector3();
+
                         Vector3.TransformNormal(ref *normalPointer, ref rootTransform, out *normalPointer);
+
                         if (float.IsNaN(normalPointer->X) || float.IsNaN(normalPointer->Y) || float.IsNaN(normalPointer->Z))
                             *normalPointer = new Vector3(1, 0, 0);
                         else
@@ -783,7 +781,6 @@ namespace Xenko.Importer.Assimp
                             {
                                 if (AllowUnsignedBlendIndices)
                                     ((byte*)(vbPointer + blendIndicesOffset))[bone] = (byte)vertexIndexToBoneIdWeight[(int)i][bone].Item1;
-
                                 else
                                     ((sbyte*)(vbPointer + blendIndicesOffset))[bone] = (sbyte)vertexIndexToBoneIdWeight[(int)i][bone].Item1;
                             }
@@ -869,7 +866,11 @@ namespace Xenko.Importer.Assimp
                         new ArgumentOutOfRangeException("To much bones influencing a single vertex"));
                 }
 
-                curVertexWeights.Capacity = nbBoneByVertex;
+                // resize the weights so that they contains exactly the number of bone weights required
+                while (curVertexWeights.Count < nbBoneByVertex)
+                {
+                    curVertexWeights.Add((0, 0));
+                }
 
                 var totalWeight = 0.0f;
                 for (var boneId = 0; boneId < nbBoneByVertex; ++boneId)
