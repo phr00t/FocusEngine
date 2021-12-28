@@ -32,9 +32,9 @@ namespace Xenko.Assets.Models
             return supportedExtensions.Any(supExt => supExt.Equals(extToLower));
         }
 
-        private Xenko.Importer.AssimpNET.MeshConverter CreateMeshConverter(ICommandContext commandContext)
+        private Xenko.Importer.Assimp.MeshConverter CreateMeshConverter(ICommandContext commandContext)
         {
-            return new Xenko.Importer.AssimpNET.MeshConverter(commandContext.Logger)
+            return new Xenko.Importer.Assimp.MeshConverter(commandContext.Logger)
             {
                 AllowUnsignedBlendIndices = this.AllowUnsignedBlendIndices,
             };

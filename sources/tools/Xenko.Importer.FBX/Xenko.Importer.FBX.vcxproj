@@ -243,6 +243,12 @@
       <Project>{7732cb84-a39a-4adf-b740-fd32a352fa8a}</Project>
       <Private>False</Private>
     </ProjectReference>
+    <ProjectReference Include="..\Xenko.Importer.Assimp\Xenko.Importer.Assimp.csproj">
+      <Project>{092984ef-90a1-46d2-8aee-de24744e6b2d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Xenko.Importer.Common\Xenko.Importer.Common.csproj">
+      <Project>{43a8197b-874f-4ce2-9d56-518a23547c96}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Xenko.Importer.Common\Xenko.Importer.Common.vcxproj">
       <Project>{43a6e62e-1b1c-4630-abb8-c3f716004645}</Project>
       <Private>False</Private>

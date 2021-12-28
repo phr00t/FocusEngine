@@ -13,4 +13,7 @@
     <ClInclude Include="UtilityFunctions.h" />
     <ClInclude Include="..\Xenko.Importer.Common\ImporterUtils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)nuget-icon.png" />
+  </ItemGroup>
 </Project>
