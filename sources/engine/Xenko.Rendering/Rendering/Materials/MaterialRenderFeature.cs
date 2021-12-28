@@ -77,10 +77,12 @@ namespace Xenko.Rendering.Materials
             public bool HasNormalMap, SkipTangents;
 
             /// <summary>
-            /// Indicates that material requries using pixel shader stage during depth-only pass (Z prepass or shadow map rendering).
+            /// Indicates that material requires using pixel shader stage during depth-only pass (Z prepass or shadow map rendering).
             /// Used by transparent and cut off materials.
             /// </summary>
             public bool UsePixelShaderWithDepthPass;
+
+            public bool UseDitheredShadows;
 
             public MaterialInfo(MaterialPass materialPass)
             {
@@ -233,7 +235,8 @@ namespace Xenko.Rendering.Materials
                                     materialInfo.HasNormalMap = material.Parameters.Get(MaterialKeys.HasNormalMap);
                                     materialInfo.SkipTangents = material.Parameters.Get(MaterialKeys.SkipTangents);
                                     materialInfo.UsePixelShaderWithDepthPass = material.Parameters.Get(MaterialKeys.UsePixelShaderWithDepthPass);
-
+                                	materialInfo.UseDitheredShadows = material.Parameters.Get(MaterialKeys.UseDitheredShadows);
+                                	
                                     materialInfo.MaterialParameters = material.Parameters;
                                     materialInfo.ParametersChanged = isMaterialParametersChanged;
                                     materialInfo.PermutationCounter = material.Parameters.PermutationCounter;
