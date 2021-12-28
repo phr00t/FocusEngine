@@ -42,6 +42,12 @@
     <None Include="build\**\*.targets" PackagePath="buildTransitive\" Pack="true" />
   </ItemGroup>
   <ItemGroup>
+    <XenkoNativeLib Include="..\..\..\deps\assimp\bin\x64\Assimp64.dll">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+    </XenkoNativeLib>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\engine\Xenko.Assets.Models\Xenko.Assets.Models.csproj" />
     <ProjectReference Include="..\..\engine\Xenko.Particles\Xenko.Particles.csproj" />
     <ProjectReference Include="..\..\engine\Xenko.Physics\Xenko.Physics.csproj" />
