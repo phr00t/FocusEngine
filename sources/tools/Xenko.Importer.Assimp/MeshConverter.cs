@@ -21,7 +21,7 @@ using Xenko.Importer.Common;
 using Xenko.Animations;
 using Xenko.Rendering.Materials.ComputeColors;
 using System.IO;
-using Stride.Core.Serialization;
+using Xenko.Core.Serialization;
 
 namespace Xenko.Importer.Assimp
 {
@@ -713,14 +713,14 @@ namespace Xenko.Importer.Assimp
                 for (uint i = 0; i < mesh->MNumVertices; i++)
                 {
                     var positionPointer = (Vector3*)(vbPointer + positionOffset);
-                    *positionPointer = mesh->MVertices[i].ToStrideVector3();
+                    *positionPointer = mesh->MVertices[i].ToXenkoVector3();
 
                     Vector3.TransformCoordinate(ref *positionPointer, ref rootTransform, out *positionPointer);
 
                     if (mesh->MNormals != null)
                     {
                         var normalPointer = (Vector3*)(vbPointer + normalOffset);
-                        *normalPointer = mesh->MNormals[i].ToStrideVector3();
+                        *normalPointer = mesh->MNormals[i].ToXenkoVector3();
 
                         Vector3.TransformNormal(ref *normalPointer, ref rootTransform, out *normalPointer);
 
@@ -944,9 +944,9 @@ namespace Xenko.Importer.Assimp
                 hasSpecColor = true;
             }
 
-            BuildLayeredSurface(pMaterial, hasDiffColor, false, diffColor.ToStrideColor(), 0.0f, TextureType.TextureTypeDiffuse, finalMaterial);
-            BuildLayeredSurface(pMaterial, hasSpecColor, false, specColor.ToStrideColor(), 0.0f, TextureType.TextureTypeSpecular, finalMaterial);
-            BuildLayeredSurface(pMaterial, false, false, dummyColor.ToStrideColor(), 0.0f, TextureType.TextureTypeNormals, finalMaterial);
+            BuildLayeredSurface(pMaterial, hasDiffColor, false, diffColor.ToXenkoColor(), 0.0f, TextureType.TextureTypeDiffuse, finalMaterial);
+            BuildLayeredSurface(pMaterial, hasSpecColor, false, specColor.ToXenkoColor(), 0.0f, TextureType.TextureTypeSpecular, finalMaterial);
+            BuildLayeredSurface(pMaterial, false, false, dummyColor.ToXenkoColor(), 0.0f, TextureType.TextureTypeNormals, finalMaterial);
 
             return finalMaterial;
         }
