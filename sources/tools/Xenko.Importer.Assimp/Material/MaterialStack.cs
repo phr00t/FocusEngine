@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Stride.Core.Mathematics;
+using Xenko.Core.Mathematics;
 
-namespace Stride.Importer.Assimp.Material
+namespace Xenko.Importer.Assimp.Material
 {
     /// <summary>
     /// Enumeration of the different types of node in the new Assimp's material stack.

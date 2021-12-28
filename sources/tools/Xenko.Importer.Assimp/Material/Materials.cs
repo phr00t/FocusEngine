@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Silk.NET.Assimp;
-using Stride.Core.Mathematics;
+using Xenko.Core.Mathematics;
 
-namespace Stride.Importer.Assimp.Material
+namespace Xenko.Importer.Assimp.Material
 {
     public static unsafe class Materials
     {
