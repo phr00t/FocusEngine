@@ -1,4 +1,4 @@
-﻿using Xenko.Animations;
+using Xenko.Animations;
 using Xenko.Core.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -35,11 +35,15 @@ namespace Xenko.Importer.Assimp
         public static unsafe uint GetNumUVChannels(Silk.NET.Assimp.Mesh* mesh)
         {
             var n = 0;
-            var AI_MAX_NUMBER_OF_TEXTURECOORDS = 8;
-            while (n < AI_MAX_NUMBER_OF_TEXTURECOORDS && mesh->MColors[n] != null)
-            {
-                ++n;
-            }
+
+            if (mesh->MTextureCoords.Element0 != null) n++;
+            if (mesh->MTextureCoords.Element1 != null) n++;
+            if (mesh->MTextureCoords.Element2 != null) n++;
+            if (mesh->MTextureCoords.Element3 != null) n++;
+            if (mesh->MTextureCoords.Element4 != null) n++;
+            if (mesh->MTextureCoords.Element5 != null) n++;
+            if (mesh->MTextureCoords.Element6 != null) n++;
+            if (mesh->MTextureCoords.Element7 != null) n++;
 
             return (uint)n;
         }
