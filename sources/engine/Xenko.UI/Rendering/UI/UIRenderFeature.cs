@@ -240,7 +240,7 @@ namespace Xenko.Rendering.UI
 
                     renderingContext.RenderObject = uiElementState.RenderObject;
                     var rootElement = renderingContext.RenderObject.Page?.RootElement;
-                    if (rootElement == null) continue;
+                    if (rootElement == null || rootElement.IsVisible == false) continue;
 
                     // update the rendering context values specific to this element
                     renderingContext.ViewProjectionMatrix = uiElementState.WorldViewProjectionMatrix;
@@ -318,7 +318,7 @@ namespace Xenko.Rendering.UI
 
         private void RecursiveDrawWithClipping(RenderDrawContext context, UIElement element, ref Matrix worldViewProj, UIBatch batch, ref DepthStencilStateDescription dstate, SamplerState samplerState)
         {
-            // if the element is not visible, we also remove all its children
+            // not visible, remove children too
             if (!element.IsVisible)
                 return;
 

@@ -777,6 +777,15 @@ namespace Xenko.UI.Controls
             // set the arrange matrix of the child.
             VisualContent.DependencyProperties.Set(ContentArrangeMatrixPropertyKey, Matrix.Translation(childOffsets));
 
+            // update Hidden status for all VisualChildren
+            foreach (UIElement child in VisualContent.VisualChildren)
+            {
+                Vector3 topLeft = child.RenderOffsets + offsets;
+                Vector3 bottomRight = topLeft + child.RenderSize;
+                child.Hidden = !(topLeft.Y < RenderSize.Y && bottomRight.Y > 0f &&
+                                 topLeft.X < RenderSize.X && bottomRight.X > 0f);
+            }
+
             // force re-calculation of main element and scroll bars world matrices
             ArrangeChanged = true;
         }

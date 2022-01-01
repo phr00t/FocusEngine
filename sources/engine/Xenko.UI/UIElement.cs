@@ -790,9 +790,15 @@ namespace Xenko.UI
         public bool IsHierarchyEnabled => isHierarchyEnabled;
 
         /// <summary>
+        /// Is this UIElement hidden and shouldn't be drawn?
+        /// </summary>
+        [DataMemberIgnore]
+        public bool Hidden;
+
+        /// <summary>
         /// Gets a value indicating whether this element is visible in the user interface (UI).
         /// </summary>
-        public bool IsVisible => Visibility == Visibility.Visible;
+        public bool IsVisible => Visibility == Visibility.Visible && !Hidden;
 
         /// <summary>
         /// This checks the whole UIElement parent tree for visibility
@@ -801,12 +807,12 @@ namespace Xenko.UI
         {
             get
             {
-                if (Visibility != Visibility.Visible) return false;
+                if (!IsVisible) return false;
                 UIElement checkToRoot = this;
                 while (checkToRoot?.Parent != null)
                 {
                     checkToRoot = checkToRoot.Parent;
-                    if (checkToRoot.Visibility != Visibility.Visible) return false;
+                    if (!checkToRoot.IsVisible) return false;
                 }
                 return true;
             }
