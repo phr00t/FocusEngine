@@ -137,13 +137,13 @@ namespace Xenko.Editor.Thumbnails
             lock (hashLock)
             {
                 thumbnailQueueHash.Remove(asset);
-                if (thumbnailsInProgressAndContinuation.ContainsKey(asset.Id) && System.Diagnostics.Debugger.IsAttached)
+                /*if (thumbnailsInProgressAndContinuation.ContainsKey(asset.Id) && System.Diagnostics.Debugger.IsAttached)
                 {
                     // Virgile: This case should not happen, but it happened to me once and could not reproduce.
                     // Please let me know if it happens to you.
                     // Note: this is likely not critical and should work fine even if it happens.
                     System.Diagnostics.Debugger.Break();
-                }
+                }*/
                 thumbnailsInProgressAndContinuation[asset.Id] = null;
             }
 
