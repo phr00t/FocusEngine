@@ -191,7 +191,7 @@ namespace Xenko.Graphics
             // Queue
             // TODO VULKAN: Queue family is needed when creating the Device, so here we can just do a sanity check?
             var queueNodeIndex = vkGetPhysicalDeviceQueueFamilyProperties(GraphicsDevice.NativePhysicalDevice).ToArray().
-                Where((properties, index) => (properties.queueFlags & VkQueueFlags.Graphics) != 0 && vkGetPhysicalDeviceSurfaceSupportKHR(GraphicsDevice.NativePhysicalDevice, (uint)index, surface, out var supported) == VkResult.Success && supported == 1).
+                Where((properties, index) => (properties.queueFlags & VkQueueFlags.Graphics) != 0 && vkGetPhysicalDeviceSurfaceSupportKHR(GraphicsDevice.NativePhysicalDevice, (uint)index, surface, out var supported) == VkResult.Success && supported == Vortice.Vulkan.VkBool32.True).
                 Select((properties, index) => index).First();
 
             // Surface format
@@ -255,7 +255,7 @@ namespace Xenko.Graphics
                 minImageCount = desiredImageCount,
                 preTransform = preTransform,
                 oldSwapchain = swapChain,
-                clipped = 1
+                clipped = Vortice.Vulkan.VkBool32.True
             };
 
             vkCreateSwapchainKHR(GraphicsDevice.NativeDevice, &swapchainCreateInfo, null, out swapChain);

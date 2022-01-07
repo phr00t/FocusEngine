@@ -380,7 +380,7 @@ namespace Xenko.Core.Assets
         private static RemoteWalkContext CreateRemoteWalkContext(RestoreRequest request, RestoreCollectorLogger logger)
         {
             var context = new RemoteWalkContext(
-                request.CacheContext,
+                request.CacheContext, request.PackageSourceMapping,
                 logger);
 
             foreach (var provider in request.DependencyProviders.LocalProviders)

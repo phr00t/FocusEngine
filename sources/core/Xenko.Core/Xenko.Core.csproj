@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
   </PropertyGroup>
@@ -49,7 +49,7 @@
   
   <ItemGroup>
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="5.0.0" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.1" />
   </ItemGroup>
   
   <ItemGroup>
