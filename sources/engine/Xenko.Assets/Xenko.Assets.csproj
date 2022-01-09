@@ -26,7 +26,7 @@
       <HintPath>..\..\..\deps\SSH.NET\Renci.SshNet.dll</HintPath>
     </Reference>
     <PackageReference Include="System.AppContext" Version="4.3.0" />
-    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
     <PackageReference Include="System.Console" Version="4.3.1" />
     <PackageReference Include="System.Diagnostics.FileVersionInfo" Version="4.3.0" />
     <PackageReference Include="System.Diagnostics.StackTrace" Version="4.3.0" />
