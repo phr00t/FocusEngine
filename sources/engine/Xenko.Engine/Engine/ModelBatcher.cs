@@ -399,8 +399,9 @@ namespace Xenko.Engine
         /// <param name="root">The root entity to batch from and merge into</param>
         /// <param name="preserveAndTransferComponents">Try to move components from batched entities to the main consolidated entity</param>
         /// <param name="onlyImmobile">Try to batch only things immobile and keep motion things</param>
+        /// <param name="AdditionalComponentTypesToPreserve">If we are preserveAndTransferComponents, are there any other types to maintain in a separate entity? Like lights?</param>
         /// <returns>Returns the number of successfully batched and removed entities</returns>
-        public static int BatchChildren(Entity root, bool preserveAndTransferComponents = false, bool onlyImmobile = false)
+        public static int BatchChildren(Entity root, bool preserveAndTransferComponents = false, bool onlyImmobile = false, List<Type> AdditionalComponentTypesToPreserve = null)
         {
             // gather all of the children (and root)
             List<Entity> allEs = new List<Entity>(), motion = onlyImmobile ? new List<Entity>() : null;
@@ -450,7 +451,9 @@ namespace Xenko.Engine
                             if (ec is ModelComponent == false &&
                                 ec is TransformComponent == false)
                             {
-                                if (EntityComponentAttributes.Get(ec.GetType()).AllowMultipleComponents)
+                                Type t = ec.GetType();
+                                if ( EntityComponentAttributes.Get(t).AllowMultipleComponents &&
+                                    (AdditionalComponentTypesToPreserve == null || AdditionalComponentTypesToPreserve.Contains(t) == false))
                                 {
                                     ec.PrepareForTransfer(root);
                                     e.Remove(ec);
