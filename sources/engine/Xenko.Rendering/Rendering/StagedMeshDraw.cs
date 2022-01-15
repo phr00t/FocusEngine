@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using Xenko.Core;
 using Xenko.Games;
 using Xenko.Graphics;
@@ -18,7 +19,6 @@ namespace Xenko.Rendering.Rendering {
         public static uint Disposed { get; private set; }
 
         private StagedMeshDraw() { }
-        private static object StagedLock = new object();
 
         internal Xenko.Graphics.Buffer _vertexBuffer, _indexBuffer;
         internal static GraphicsDevice internalDevice;
@@ -94,27 +94,30 @@ namespace Xenko.Rendering.Rendering {
             smd.Indicies = indexBuffer;
             smd.Verticies = vertexBuffer;
             smd.performStage = (GraphicsDevice graphicsDevice, StagedMeshDraw _smd) => {
-                lock (StagedLock)
+                lock (_smd)
                 {
-                    _smd._vertexBuffer = Xenko.Graphics.Buffer.Vertex.New<T>(
-                        graphicsDevice,
-                        (T[])_smd.Verticies,
-                        GraphicsResourceUsage.Default
-                    );
-                    _smd._indexBuffer = Xenko.Graphics.Buffer.Index.New<uint>(
-                        graphicsDevice,
-                        _smd.Indicies,
-                        GraphicsResourceUsage.Default
-                    );
+                    if (_smd.VertexBuffers == null)
+                    {
+                        _smd._vertexBuffer = Xenko.Graphics.Buffer.Vertex.New<T>(
+                            graphicsDevice,
+                            (T[])_smd.Verticies,
+                            GraphicsResourceUsage.Default
+                        );
+                        _smd._indexBuffer = Xenko.Graphics.Buffer.Index.New<uint>(
+                            graphicsDevice,
+                            _smd.Indicies,
+                            GraphicsResourceUsage.Default
+                        );
+                        Created++;
+                        VertexBufferBinding[] vbb = new[] {
+                            new VertexBufferBinding(_smd._vertexBuffer, vertexBufferLayout, _smd.DrawCount)
+                        };
+                        IndexBufferBinding ibb = new IndexBufferBinding(_smd._indexBuffer, true, _smd.DrawCount);
+                        _smd.VertexBuffers = vbb;
+                        _smd.IndexBuffer = ibb;
+                        _smd.performStage = null;
+                    }
                 }
-                Created++;
-                VertexBufferBinding[] vbb = new[] {
-                    new VertexBufferBinding(_smd._vertexBuffer, vertexBufferLayout, _smd.DrawCount)
-                };
-                IndexBufferBinding ibb = new IndexBufferBinding(_smd._indexBuffer, true, _smd.DrawCount);
-                _smd.VertexBuffers = vbb;
-                _smd.IndexBuffer = ibb;
-                _smd.performStage = null;
             };
             return smd;
         }
