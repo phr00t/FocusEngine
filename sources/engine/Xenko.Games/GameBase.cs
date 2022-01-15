@@ -528,7 +528,6 @@ namespace Xenko.Games
                     width = native_width;
                     height = native_height;
                     fullscreen = true;
-                    fov = -1f;
                 }
                 gotCustomWH = true;
             }
@@ -539,7 +538,6 @@ namespace Xenko.Games
                 width = 1280;
                 height = 720;
                 fullscreen = false;
-                fov = -1f;
             }
         }
 
