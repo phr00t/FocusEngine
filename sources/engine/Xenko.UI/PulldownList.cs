@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xenko.Core;
+using Xenko.Core.Mathematics;
 using Xenko.Engine;
 using Xenko.Input;
 using Xenko.UI.Controls;
@@ -144,6 +145,9 @@ namespace Xenko.UI
             {
                 inputManager.RemoveListener(listener);
             }
+
+            // get a jumpstart on its rendersize, which is useful for determining what is now visible
+            scroll.RenderSize = new Vector3(scroll.RenderSize.X, scroll.Height, 1f);
         }
 
         private InputManager inputManager;

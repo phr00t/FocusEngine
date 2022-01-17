@@ -877,7 +877,7 @@ namespace Xenko.UI
         public Vector3 RenderSize
         {
             get => RenderSizeInternal;
-            private set => RenderSizeInternal = value;
+            internal set => RenderSizeInternal = value;
         }
 
         /// <summary>
