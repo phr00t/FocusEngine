@@ -194,7 +194,7 @@ namespace Xenko.Rendering.Images
 
         // For auto-focus
         private ImageEffect pointDepthShader;
-        private ImageReadback<Half> depthReadBack;
+        private ImageReadback<Xenko.Core.Mathematics.Half> depthReadBack;
         private Texture depthCenter1x1;
         private float autoFocusDistanceTarget = 10f;
         private float autoFocusDistanceCurrent = 10f;
@@ -255,7 +255,7 @@ namespace Xenko.Rendering.Images
             thresholdAlphaCoC = ToLoadAndUnload(new ImageEffectShader("ThresholdAlphaCoC"));
             thresholdAlphaCoCFront = ToLoadAndUnload(new ImageEffectShader("ThresholdAlphaCoCFront"));
             pointDepthShader = ToLoadAndUnload(new ImageEffectShader("PointDepth"));
-            depthReadBack = ToLoadAndUnload(new ImageReadback<Half>());
+            depthReadBack = ToLoadAndUnload(new ImageReadback<Xenko.Core.Mathematics.Half>());
             depthCenter1x1 = Texture.New2D(GraphicsDevice, 1, 1, 1, PixelFormat.R16_Float, TextureFlags.ShaderResource | TextureFlags.RenderTarget).DisposeBy(this);
         }
 

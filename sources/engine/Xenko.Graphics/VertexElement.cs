@@ -507,7 +507,7 @@ namespace Xenko.Graphics
                 return PixelFormat.R16G16B16A16_Float;
             if (typeof(Half2) == typeT)
                 return PixelFormat.R16G16_Float;
-            if (typeof(Half) == typeT)
+            if (typeof(Xenko.Core.Mathematics.Half) == typeT)
                 return PixelFormat.R16_Float;
 
             if (typeof(Int4) == typeT)

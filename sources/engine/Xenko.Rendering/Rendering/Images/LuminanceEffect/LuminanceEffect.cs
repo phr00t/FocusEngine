@@ -21,7 +21,7 @@ namespace Xenko.Rendering.Images
         private GaussianBlur blur;
 
         private ImageMultiScaler multiScaler;
-        private ImageReadback<Half> readback;
+        private ImageReadback<Xenko.Core.Mathematics.Half> readback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LuminanceEffect" /> class.
@@ -32,7 +32,7 @@ namespace Xenko.Rendering.Images
             DownscaleCount = 6;
             UpscaleCount = 4;
             EnableAverageLuminanceReadback = true;
-            readback = new ImageReadback<Half>();
+            readback = new ImageReadback<Xenko.Core.Mathematics.Half>();
         }
 
         protected override void InitializeCore()

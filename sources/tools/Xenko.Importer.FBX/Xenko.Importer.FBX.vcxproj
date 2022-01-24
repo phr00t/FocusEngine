@@ -249,10 +249,6 @@
     <ProjectReference Include="..\Xenko.Importer.Common\Xenko.Importer.Common.csproj">
       <Project>{43a8197b-874f-4ce2-9d56-518a23547c96}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Xenko.Importer.Common\Xenko.Importer.Common.vcxproj">
-      <Project>{43a6e62e-1b1c-4630-abb8-c3f716004645}</Project>
-      <Private>False</Private>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="BulletSharp">

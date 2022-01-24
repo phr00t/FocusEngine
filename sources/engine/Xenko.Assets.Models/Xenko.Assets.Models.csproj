@@ -27,7 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\tools\Xenko.Importer.Assimp\Xenko.Importer.Assimp.csproj" />
     <ProjectReference Include="..\..\tools\Xenko.Importer.Common\Xenko.Importer.Common.csproj" />
-    <ProjectReference Include="..\..\tools\Xenko.Importer.FBX\Xenko.Importer.FBX.vcxproj" PrivateAssets="All" />
+    <ProjectReference Include="..\..\tools\Xenko.Importer.FBX\Xenko.Importer.FBX.vcxproj" />
     <ProjectReference Include="..\Xenko.Assets\Xenko.Assets.csproj" />
   </ItemGroup>
   <Import Project="$(XenkoPostSettingsTargets)" />
