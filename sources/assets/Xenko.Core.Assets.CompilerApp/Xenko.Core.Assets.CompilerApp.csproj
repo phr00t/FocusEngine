@@ -46,6 +46,10 @@
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
       <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
     </XenkoNativeLib>
+    <XenkoNativeLib Include="..\..\..\sources\tools\Xenko.Importer.FBX\bin\x64\Release\Xenko.Importer.FBX.dll">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+    </XenkoNativeLib>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\engine\Xenko.Assets.Models\Xenko.Assets.Models.csproj" />
