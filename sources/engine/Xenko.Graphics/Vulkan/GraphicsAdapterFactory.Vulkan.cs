@@ -206,7 +206,7 @@ namespace Xenko.Graphics
                 if (enableDebugReport)
                 {
                     var createDebugReportCallbackName = Marshal.StringToHGlobalAnsi("vkCreateDebugReportCallbackEXT");
-                    var createDebugReportCallback = (CreateDebugReportCallbackDelegate)Marshal.GetDelegateForFunctionPointer(new System.IntPtr(vkGetInstanceProcAddr(NativeInstance, (byte*)createDebugReportCallbackName)), typeof(CreateDebugReportCallbackDelegate));
+                    var createDebugReportCallback = (CreateDebugReportCallbackDelegate)Marshal.GetDelegateForFunctionPointer(vkGetInstanceProcAddr(NativeInstance, (byte*)createDebugReportCallbackName), typeof(CreateDebugReportCallbackDelegate));
 
                     debugReport = DebugReport;
                     var createInfo = new VkDebugReportCallbackCreateInfoEXT
@@ -223,12 +223,12 @@ namespace Xenko.Graphics
                 {
                     var beginDebugMarkerName = System.Text.Encoding.ASCII.GetBytes("vkCmdDebugMarkerBeginEXT");
 
-                    var ptr = new System.IntPtr(vkGetInstanceProcAddr(NativeInstance, (byte*)Core.Interop.Fixed(beginDebugMarkerName)));
+                    var ptr = vkGetInstanceProcAddr(NativeInstance, (byte*)Core.Interop.Fixed(beginDebugMarkerName));
                     if (ptr != IntPtr.Zero)
                         BeginDebugMarker = (BeginDebugMarkerDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(BeginDebugMarkerDelegate));
 
                     var endDebugMarkerName = System.Text.Encoding.ASCII.GetBytes("vkCmdDebugMarkerEndEXT");
-                    ptr = new System.IntPtr(vkGetInstanceProcAddr(NativeInstance, (byte*)Core.Interop.Fixed(endDebugMarkerName)));
+                    ptr = vkGetInstanceProcAddr(NativeInstance, (byte*)Core.Interop.Fixed(endDebugMarkerName));
                     if (ptr != IntPtr.Zero)
                         EndDebugMarker = (EndDebugMarkerDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(EndDebugMarkerDelegate));
                 }
