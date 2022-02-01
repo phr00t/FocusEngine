@@ -1,4 +1,4 @@
-﻿// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Collections.Generic;
@@ -142,7 +142,7 @@ namespace Xenko.Core.Shaders.Convertor
                 {
                     case PipelineStage.Vertex:
                         builtinInputs.Add("SV_VertexID", "gl_VertexID");
-                        builtinInputs.Add("SV_InstanceID", "gl_InstanceID");
+                        builtinInputs.Add("SV_InstanceID", "gl_InstanceIndex");
                         if (shaderModel < ShaderModel.Model40)
                         {
                             builtinOutputs.Add("POSITION", "gl_Position");
