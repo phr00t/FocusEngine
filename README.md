@@ -50,9 +50,15 @@ Most of Focus is similar to Stride and there shouldn't be any loss of functional
 * Takes good things from many different Xenko/Stride forks, including the original branch when it gets updated. I don't get everything, as I focus on things that are more apparently beneficial to seasoned and commercial PC developers. I exclude tutorials, samples, non-PC platforms, launcher updates, internal naming conventions, building refactors etc. which I don't maintain.
 * Probably lots of other stuff: haven't kept that great of track of improvements, I usually fix things as needed and keep moving forward!
 
+## OK, show me something neat!
+
+![Lots of Boxes](https://i.imgur.com/XaOuMQH.png)
+
+This is 6100+ physical boxes being rendered @ 50fps, which may not be the fastest thing out there, but it is pretty good! It is using BepuPhysics + Vulkan + https://github.com/phr00t/FocusEngine/blob/master/sources/engine/Xenko.Engine/Engine/Batching/BatchedMeshDraw.cs to draw all these boxes with 1 material, 1 mesh & 1 draw call. BatchedMeshDraw allows custom UV offsets per copy, hence why you see some boxes with different textures. Neat!
+
 ## What is worse in this fork?
 
-Android/mobile support, different languages, and Universal Windows Platform support. I also work very little with DirectX, which is maintained just for the editor. Some changes I make to improve Vulkan might cause a (hopefully minor) bug in the DirectX API, which will be of low priority to fix. Vulkan isn't as fully featured as DirectX yet, so GPU instancing doesn't work on Vulkan (although you may find the ModelBatcher works in many cases).
+Android/mobile support, different languages, and Universal Windows Platform support. I also work very little with DirectX, which is maintained just for the editor. Some changes I make to improve Vulkan might cause a (hopefully minor) bug in the DirectX API, which will be of low priority to fix. Vulkan isn't as fully featured as DirectX yet, so GPU instancing doesn't work on Vulkan (although you may find the ModelBatcher & BatchedMeshDraw works in most cases).
 
 Documentation is worse in this fork, as I don't have time to go back and properly document the new features I add. The list above isn't updated often enough to showcase the latest improvements. I try to comment new additions, but would require looking at the source to see them. Stride documentation is mostly still applicable, but there may be better ways to do things in this fork (VR for example).
 
