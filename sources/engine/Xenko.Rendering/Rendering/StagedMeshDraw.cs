@@ -10,19 +10,19 @@ using Xenko.Graphics;
 namespace Xenko.Rendering.Rendering {
     public class StagedMeshDraw : MeshDraw, IDisposable {
 
-        public Action<GraphicsDevice, StagedMeshDraw> performStage;
-
         public uint[] Indicies { get; private set; }
         public object Verticies { get; private set; }
 
         public static uint Created { get; private set; }
         public static uint Disposed { get; private set; }
 
-        private StagedMeshDraw() { }
+        protected StagedMeshDraw() { }
 
-        internal Xenko.Graphics.Buffer _vertexBuffer, _indexBuffer;
-        internal static GraphicsDevice internalDevice;
-        internal static ConcurrentQueue<Graphics.Buffer> StagedBufferTrashBin = new ConcurrentQueue<Graphics.Buffer>();
+        protected Xenko.Graphics.Buffer _vertexBuffer, _indexBuffer;
+        protected static GraphicsDevice internalDevice;
+        protected static ConcurrentQueue<Graphics.Buffer> StagedBufferTrashBin = new ConcurrentQueue<Graphics.Buffer>();
+
+        internal override StagedMeshDraw getStagedMeshDraw => this;
 
         ~StagedMeshDraw()
         {

@@ -103,6 +103,12 @@ namespace Xenko.Engine
         public VirtualReality.TouchControllerHand TrackVRHand = TouchControllerHand.None;
 
         /// <summary>
+        /// Should this TransformComponent automatically update a batched model index?
+        /// </summary>
+        [DataMemberIgnore]
+        public BatchedMeshDraw.BatchedMeshDrawReference AutoUpdateBatchedMesh;
+
+        /// <summary>
         /// If in VR, do we want to override the normally tracked TransformComponent to point at UI elements?
         /// This is useful if we want to adjust our pointer with a child TransformComponent.
         /// </summary>
@@ -635,6 +641,9 @@ namespace Xenko.Engine
                 {
                     PostOperations[i].Process(this);
                 }
+
+                if (AutoUpdateBatchedMesh != null)
+                    AutoUpdateBatchedMesh.batchedMeshDraw.SetTransform(AutoUpdateBatchedMesh.index, WorldMatrix);
             }
         }
 

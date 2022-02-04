@@ -123,8 +123,8 @@ namespace Xenko.Rendering
             var renderMesh = (RenderMesh)renderObject;
             var drawData = renderMesh.ActiveMeshDraw;
 
-            if (drawData is StagedMeshDraw smd && smd.VertexBuffers == null)
-                smd.performStage(context.GraphicsDevice, smd);
+            if (drawData.performStage != null)
+                drawData.performStage(context.GraphicsDevice, drawData.getStagedMeshDraw);
 
             pipelineState.InputElements = PrepareInputElements(pipelineState, drawData);
             pipelineState.PrimitiveType = drawData.PrimitiveType;

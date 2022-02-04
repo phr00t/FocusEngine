@@ -166,6 +166,10 @@ namespace Xenko.Rendering.Materials
                 else
                 {
                     renderMesh.ActiveMeshDraw = renderMesh.Mesh.Draw;
+
+                    if (renderMesh.ActiveMeshDraw.updateVerts != null)
+                        renderMesh.ActiveMeshDraw.updateVerts(context.CommandList);
+
                     if (tessellationState.GeneratedIndicesAEN != null)
                     {
                         // Not using tessellation anymore, dispose AEN indices if they were generated

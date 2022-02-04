@@ -1,8 +1,10 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
+using System;
 using Xenko.Core;
 using Xenko.Graphics;
+using Xenko.Rendering.Rendering;
 
 namespace Xenko.Rendering
 {
@@ -10,14 +12,20 @@ namespace Xenko.Rendering
     [DataContract]
     public class MeshDraw
     {
-        public PrimitiveType PrimitiveType;
+        virtual public PrimitiveType PrimitiveType { get; set; }
 
-        public int DrawCount;
+        virtual public int DrawCount { get; set; }
 
-        public int StartLocation;
+        virtual public int StartLocation { get; set; }
 
-        public VertexBufferBinding[] VertexBuffers;
+        virtual public VertexBufferBinding[] VertexBuffers { get; set; }
 
-        public IndexBufferBinding IndexBuffer;
+        virtual public IndexBufferBinding IndexBuffer { get; set; }
+
+        virtual internal Action<GraphicsDevice, StagedMeshDraw> performStage { get; set; }
+
+        virtual internal Action<CommandList> updateVerts { get; set; }
+
+        virtual internal StagedMeshDraw getStagedMeshDraw { get; set; }
     }
 }
