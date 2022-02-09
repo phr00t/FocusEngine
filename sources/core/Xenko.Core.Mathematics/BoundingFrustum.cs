@@ -105,5 +105,16 @@ namespace Xenko.Core.Mathematics
         {
             return CollisionHelper.FrustumContainsBox(ref this, ref boundingBoxExt);
         }
+
+        /// <summary>
+        /// Check whether this frustum contains the specified <see cref="BoundingBox"/>.
+        /// </summary>
+        /// <param name="boundingBox">The bounding box.</param>
+        /// <returns><c>true</c> if this frustum contains the specified bounding box.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(ref BoundingBox boundingBox)
+        {
+            return CollisionHelper.FrustumContainsBox(ref this, ref boundingBox);
+        }
     }
 }

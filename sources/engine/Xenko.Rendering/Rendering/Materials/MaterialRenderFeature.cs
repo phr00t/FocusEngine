@@ -166,12 +166,21 @@ namespace Xenko.Rendering.Materials
                 else
                 {
                     renderMesh.ActiveMeshDraw = renderMesh.Mesh.Draw;
-
+                   
                     if (renderMesh.ActiveMeshDraw.updateVerts != null)
-                        renderMesh.ActiveMeshDraw.updateVerts(context.CommandList);
+                    {
+                        for (int i=0; i<RenderSystem.Views.Count; i++)
+                        {
+                            if (RenderSystem.Views[i].Camera != null)
+                            {
+                                renderMesh.ActiveMeshDraw.updateVerts(context.CommandList, RenderSystem.Views[i].Frustum);
+                                break;
+                            }
+                        }
+                    }
 
                     if (tessellationState.GeneratedIndicesAEN != null)
-                    {
+                    { 
                         // Not using tessellation anymore, dispose AEN indices if they were generated
                         Utilities.Dispose(ref tessellationState.GeneratedIndicesAEN);
                     }

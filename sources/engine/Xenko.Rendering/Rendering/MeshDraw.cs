@@ -3,6 +3,7 @@
 
 using System;
 using Xenko.Core;
+using Xenko.Core.Mathematics;
 using Xenko.Graphics;
 using Xenko.Rendering.Rendering;
 
@@ -24,7 +25,7 @@ namespace Xenko.Rendering
 
         virtual internal Action<GraphicsDevice, StagedMeshDraw> performStage { get; set; }
 
-        virtual internal Action<CommandList> updateVerts { get; set; }
+        virtual internal Action<CommandList, BoundingFrustum> updateVerts { get; set; }
 
         virtual internal StagedMeshDraw getStagedMeshDraw { get; set; }
     }

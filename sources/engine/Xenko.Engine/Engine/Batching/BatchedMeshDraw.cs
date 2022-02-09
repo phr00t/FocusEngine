@@ -18,7 +18,7 @@ namespace Xenko.Engine
     /// Can be linked with other TransformComponents for easy updating "instanced" copies via each TransformComponent's BatchedMeshDrawReference
     /// Needs one Entity with a ModelComponent to do drawing of all "instances", and you can use GenerateDynamicBatchedModel to provide the Model for dynamic batching
     /// </summary>
-    public class BatchedMeshDraw : MeshDraw
+    public class BatchedMeshDraw : MeshDraw, IDisposable
     {
         /// <summary>
         /// Set an instance at a certain transform matrix
@@ -31,6 +31,9 @@ namespace Xenko.Engine
             {
                 internalTransforms[index] = transform;
                 MarkUpdateNeeded(index);
+
+                if (index == PossibleFreeIndex)
+                    PossibleFreeIndex = (PossibleFreeIndex + 1) % internalTransforms.Length;
             }
         }
 
@@ -77,7 +80,15 @@ namespace Xenko.Engine
                 internalTransforms[index] = dontdraw;
                 MarkUpdateNeeded(index);
             }
+
+            PossibleFreeIndex = index;
         }
+
+        /// <summary>
+        /// If true, only copies within the camera's frustum will be updated.
+        /// May cause issues with shadows, but improves performance.
+        /// </summary>
+        public bool OptimizeForFrustum = true;
 
         /// <summary>
         /// Reference used on TransformComponent to automatically update as needed
@@ -95,20 +106,49 @@ namespace Xenko.Engine
         }
 
         /// <summary>
+        /// Get a copy index that is currently hidden and is ready to be used
+        /// </summary>
+        /// <returns>index of free one. -1 if none could be found</returns>
+        public int GetAvailableIndex()
+        {
+            for (int i=0; i<internalTransforms.Length; i++)
+            {
+                int checkindex = (i + PossibleFreeIndex) % internalTransforms.Length;
+                if (internalTransforms[checkindex] == dontdraw)
+                    return checkindex;
+            }
+
+            return -1;
+        }
+
+        /// <summary>
         /// Easy function for making dynamic models. Make sure to do this during initialization and not runtime, as it is a bit slow.
         /// </summary>
         /// <param name="baseModel">What is the model we will be copying?</param>
         /// <param name="capacity">How many do we want to be able to draw at once?</param>
+        /// <param name="bounds">What are the maximum rendering bounds for this?</param>
         /// <param name="batchManager">Output used for updating transforms of each copy</param>
         /// <returns></returns>
-        public static Model GenerateDynamicBatchedModel(Model baseModel, int capacity, out BatchedMeshDraw batchManager)
+        public static Model GenerateDynamicBatchedModel(Model baseModel, int capacity, BoundingBox bounds, out BatchedMeshDraw batchManager)
         {
             batchManager = new BatchedMeshDraw(baseModel, capacity);
             Model mod = new Xenko.Rendering.Model();
             Xenko.Rendering.Mesh m = new Xenko.Rendering.Mesh(batchManager, new ParameterCollection());
+            m.BoundingBox = mod.BoundingBox = bounds;
             mod.Add(m);
             mod.Add(baseModel.Materials[0]);
             return mod;
+        }
+
+        /// <summary>
+        /// Hides all of the copies, resetting this BatchedMeshDraw to an empty state
+        /// </summary>
+        public void Clear()
+        {
+            for (int i = 0; i < internalTransforms.Length; i++)
+                HideIndex(i);
+
+            PossibleFreeIndex = 0;
         }
 
         /// <summary>
@@ -130,12 +170,18 @@ namespace Xenko.Engine
             else if (singleDraw.Verticies is VertexPositionNormalColor[] vpnc)
                 origVerts1 = vpnc;
 
+            if (m.BoundingBox == BoundingBox.Empty) m.UpdateBoundingBox();
+            originalBoundingBox = m.BoundingBox;
+
             internalTransforms = new Matrix[capacity];
             for (int i = 0; i < capacity; i++)
                 internalTransforms[i] = dontdraw;
 
+            tempHiding = new bool[capacity];
             avoidDuplicates = new ConcurrentHashSet<int>(Xenko.Core.Threading.Dispatcher.MaxDegreeOfParallelism, capacity);
             indexUpdatesRequired = new int[capacity];
+            proccessingUpdates = new int[capacity];
+            actuallyUpdated = new int[capacity];
             Model batched = ModelBatcher.GenerateBatch(singleMesh, new List<Matrix>(internalTransforms));
             smd = (StagedMeshDraw)batched.Meshes[0].Draw;
             updateVerts = UpdateVertexBuffer;
@@ -147,27 +193,42 @@ namespace Xenko.Engine
         private void MarkUpdateNeeded(int index)
         {
             if (avoidDuplicates.Add(index))
-            {
-                tCount = Interlocked.Increment(ref tCount);
-                indexUpdatesRequired[tCount] = index;
-            }
+                indexUpdatesRequired[Interlocked.Increment(ref tCount) - 1] = index;
         }
 
-        internal void UpdateVertexBuffer(CommandList commandList)
+        internal void UpdateVertexBuffer(CommandList commandList, BoundingFrustum frustum)
         {
             if (smd == null || (smd.VertexBuffers?[0].Buffer?.Ready ?? false) == false) return; // not ready yet
             int tUpdateCount = Interlocked.Exchange(ref tCount, 0);
             avoidDuplicates.Clear();
             if (tUpdateCount == 0) return;
             if (tUpdateCount > indexUpdatesRequired.Length) tUpdateCount = indexUpdatesRequired.Length;
-            
+            auCount = 0;
+
+            // use a copy of this array, so we don't step over it during multithreaded events
+            Array.Copy(indexUpdatesRequired, proccessingUpdates, tUpdateCount);
+
             object origVerts = origVerts0 == null ? origVerts1 : origVerts0;
             int len = origVerts0 == null ? origVerts1.Length : origVerts0.Length;
 
             Xenko.Core.Threading.Dispatcher.For(0, tUpdateCount, (i) =>
             {
-                int index = indexUpdatesRequired[i];
+                int index = proccessingUpdates[i];
                 Matrix tMatrix = internalTransforms[index];
+                if (OptimizeForFrustum)
+                {
+                    BoundingBox.Transform(ref originalBoundingBox, ref tMatrix, out BoundingBox newbb);
+                    if (frustum.Contains(ref newbb) == false)
+                    {
+                        // this isn't in the camera's frustum, so check next frame if it is
+                        MarkUpdateNeeded(index);
+                        if (tempHiding[index]) return;
+                        tempHiding[index] = true;
+                        tMatrix = tempskipdraw; // update this to hide it
+                    }
+                    else tempHiding[index] = false;
+                }
+                actuallyUpdated[Interlocked.Increment(ref auCount) - 1] = index;
                 Vector2? uvOffset = uvOffsets == null ? null : uvOffsets[index];
                 tMatrix.GetScale(out var tMatrixScale);
                 int vPos = index * len;
@@ -177,9 +238,8 @@ namespace Xenko.Engine
                     Xenko.Core.Threading.Dispatcher.For(0, Xenko.Core.Threading.Dispatcher.MaxDegreeOfParallelism, (t) =>
                     {
                         int start = vPos + t * vertsPerThread;
-                        for (int j=start; j<start + vertsPerThread; j++)
+                        for (int j=start; j<start + vertsPerThread && j < vPos + len; j++)
                         {
-                            if (j >= vPos + len) return;
                             ref VertexPositionNormalTextureTangent ovr = ref ov[j - vPos];
                             Vector3 origPos = ovr.Position;
                             Vector3 origNom = ovr.Normal;
@@ -202,8 +262,7 @@ namespace Xenko.Engine
                     var opnc = origVerts as VertexPositionNormalColor[];
                     Xenko.Core.Threading.Dispatcher.For(0, Xenko.Core.Threading.Dispatcher.MaxDegreeOfParallelism, (t) => {
                         int start = vPos + t * vertsPerThread;
-                        for (int j = start; j < start + vertsPerThread; j++) {
-                            if (j >= vPos + len) return;
+                        for (int j = start; j < start + vertsPerThread && j < vPos + len; j++) {
                             ref VertexPositionNormalColor ovr = ref opnc[j - vPos];
                             Vector3 origPos = ovr.Position;
                             Vector3 origNom = ovr.Normal;
@@ -221,13 +280,43 @@ namespace Xenko.Engine
                 }
             });
 
-            if (origVerts is VertexPositionNormalTextureTangent[])
-                smd.VertexBuffers[0].Buffer.SetData<VertexPositionNormalTextureTangent>(commandList, (VertexPositionNormalTextureTangent[])smd.Verticies);
-            else
-                smd.VertexBuffers[0].Buffer.SetData<VertexPositionNormalColor>(commandList, (VertexPositionNormalColor[])smd.Verticies);
+            // only update buffers if somethingn changed
+            if (auCount > 0)
+            {
+                // find the actual range of the buffer we need to upload
+                Array.Sort(actuallyUpdated, 0, auCount);
+
+                int startIndex = actuallyUpdated[0] * len;
+                int endIndex = (1 + actuallyUpdated[auCount - 1]) * len;
+
+                if (origVerts is VertexPositionNormalTextureTangent[])
+                    smd.VertexBuffers[0].Buffer.FastRawSetData<VertexPositionNormalTextureTangent>(commandList, (VertexPositionNormalTextureTangent[])smd.Verticies, startIndex, endIndex);
+                else
+                    smd.VertexBuffers[0].Buffer.FastRawSetData<VertexPositionNormalColor>(commandList, (VertexPositionNormalColor[])smd.Verticies, startIndex, endIndex);
+            }
+        }
+
+        public void Dispose()
+        {
+            if (smd != null)
+                smd.Dispose();
+
+            tempHiding = null;
+            internalTransforms = null;
+            indexUpdatesRequired = null;
+            proccessingUpdates = null;
+            avoidDuplicates = null;
+            uvOffsets = null;
+            colors = null;
+        }
+
+        ~BatchedMeshDraw()
+        {
+            Dispose();
         }
 
         private static Matrix dontdraw = Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.Zero);
+        private static Matrix tempskipdraw = Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One);
 
         public override PrimitiveType PrimitiveType => smd.PrimitiveType;
         public override int DrawCount => smd.DrawCount;
@@ -236,11 +325,14 @@ namespace Xenko.Engine
         public override IndexBufferBinding IndexBuffer => smd.IndexBuffer;
         internal override Action<GraphicsDevice, StagedMeshDraw> performStage => smd.performStage;
         internal override StagedMeshDraw getStagedMeshDraw => smd;
+        private BoundingBox originalBoundingBox;
+        private int PossibleFreeIndex;
+        private bool[] tempHiding;
 
         private Matrix[] internalTransforms;
         private StagedMeshDraw smd;
-        private int tCount;
-        private int[] indexUpdatesRequired;
+        private int tCount, auCount;
+        private int[] indexUpdatesRequired, proccessingUpdates, actuallyUpdated;
         private ConcurrentHashSet<int> avoidDuplicates;
         private Vector2[] uvOffsets;
         private Color4[] colors;

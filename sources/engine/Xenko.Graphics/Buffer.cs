@@ -427,6 +427,15 @@ namespace Xenko.Graphics
             }
         }
 
+        internal unsafe void FastRawSetData<TData>(CommandList commandList, TData[] data, int startIndex, int endIndex) where TData : struct
+        {
+            int structSize = Utilities.SizeOf<TData>();
+            int offsetInBytes = startIndex * structSize;
+            int endOffset = endIndex * structSize;
+            var destRegion = new ResourceRegion(offsetInBytes, 0, 0, endOffset, 1, 1);
+            commandList.UpdateSubresource(this, 0, new DataBox(new IntPtr(Interop.Fixed(ref data[startIndex])), 0, 0), destRegion);
+        }
+
         /// <summary>
         /// Creates a new <see cref="Buffer" /> instance.
         /// </summary>

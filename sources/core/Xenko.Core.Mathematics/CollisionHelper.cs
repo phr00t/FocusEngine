@@ -1503,49 +1503,37 @@ namespace Xenko.Core.Mathematics
 
                 return true;
             }
-/*
+        }
+
+        /// <summary>
+        /// Determines whether a <see cref="BoundingFrustum" /> intersects or contains an AABB determined by its center and extent.
+        /// Faster variant specific for frustum culling. Takes a BoundingBox instead of BoundingBoxExt
+        /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        /// <param name="boundingBox">Bounding box</param>
+        /// <returns></returns>
+        public static bool FrustumContainsBox(ref BoundingFrustum frustum, ref BoundingBox boundingBox)
+        {
             unsafe
             {
                 fixed (Plane* planeStart = &frustum.LeftPlane)
-                fixed (Vector3* pExtent = &boundingBoxExt.Extent)
                 {
                     var plane = planeStart;
                     for (int i = 0; i < 6; ++i)
                     {
                         // Previous code:
-                        //if (Vector3.Dot(boundingBoxExt.Center, plane->Normal)
-                        //    + boundingBoxExt.Extent.X * Math.Abs(plane->Normal.X)
-                        //    + boundingBoxExt.Extent.Y * Math.Abs(plane->Normal.Y)
-                        //    + boundingBoxExt.Extent.Z * Math.Abs(plane->Normal.Z)
-                        //    <= -plane->D)
-
-                        // Optimized version (only 1 dot and cheaper Math.Abs)
-                        // https://fgiesen.wordpress.com/2010/10/17/view-frustum-culling/
-                        // return dot3(center, plane) + dot3(extent, absPlane) <= -plane.w;
-                        // or
-                        // vector4 signFlip = componentwise_and(plane, 0x80000000);
-                        // vector3 centerOffset = xor(extent, signFlip)
-                        // dot3(center + centerOffset, plane) <= -plane.w;
-
-                        uint val = (((uint*)&plane->Normal)[0] & 0x80000000) ^ ((uint*)pExtent)[0];
-                        var dist = plane->Normal.X * ((*(float*)(&val)) + boundingBoxExt.Center.X);
-
-                        val = (((uint*)&plane->Normal)[1] & 0x80000000) ^ ((uint*)pExtent)[1];
-                        dist += plane->Normal.Y * ((*(float*)(&val)) + boundingBoxExt.Center.Y);
-
-                        val = (((uint*)&plane->Normal)[2] & 0x80000000) ^ ((uint*)pExtent)[2];
-                        dist += plane->Normal.Z * ((*(float*)(&val)) + boundingBoxExt.Center.Z);
-
-                        if (dist <= -plane->D)
+                        if (Vector3.Dot(boundingBox.Center, plane->Normal)
+                            + boundingBox.Extent.X * Math.Abs(plane->Normal.X)
+                            + boundingBox.Extent.Y * Math.Abs(plane->Normal.Y)
+                            + boundingBox.Extent.Z * Math.Abs(plane->Normal.Z)
+                            <= -plane->D)
                             return false;
-
                         plane++;
                     }
                 }
 
                 return true;
             }
- */
         }
     }
 }
