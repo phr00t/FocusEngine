@@ -27,10 +27,10 @@
   <ItemGroup>
     <PackageReference Include="EnvDTE" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="6.0.0" />
-	<PackageReference Include="System.Numerics.Vectors" Version="4.4.0">
+	<PackageReference Include="System.Numerics.Vectors" Version="4.5.0">
 	  <NoWarn>NU1605</NoWarn>
 	</PackageReference>
-	<PackageReference Include="Mono.Options" Version="6.6.0.161" />
+	<PackageReference Include="Mono.Options" Version="6.12.0.148" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
