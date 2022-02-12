@@ -184,7 +184,7 @@ namespace Xenko.VirtualReality
             return false;
         }
 
-        public override unsafe bool Vibrate(float amount = 1)
+        public override unsafe bool Vibrate(float duration = 1f, float frequency = 0f, float amplitude = 1f)
         {
             HapticActionInfo hai = new HapticActionInfo()
             {
@@ -194,8 +194,9 @@ namespace Xenko.VirtualReality
 
             HapticVibration hv = new HapticVibration()
             {
-                Amplitude = 1f,
-                Duration = (long)Math.Round(1000f * amount),
+                Amplitude = amplitude,
+                Frequency = frequency,
+                Duration = (long)Math.Round(1000f * duration),
                 Type = StructureType.TypeHapticVibration
             };
 
