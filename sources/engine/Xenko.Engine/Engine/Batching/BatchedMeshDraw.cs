@@ -21,6 +21,20 @@ namespace Xenko.Engine
     public class BatchedMeshDraw : MeshDraw, IDisposable
     {
         /// <summary>
+        /// If we set custom colors, are we multiplying or setting directly?
+        /// </summary>
+        public enum COLOR_MODE
+        {
+            MULTIPLY = 0, // original color * custom color
+            SET = 1 // custom color direct set
+        };
+
+        /// <summary>
+        /// Defaults to multiplying colors
+        /// </summary>
+        public COLOR_MODE UseColorTintMode = COLOR_MODE.MULTIPLY;
+
+        /// <summary>
         /// Set an instance at a certain transform matrix
         /// </summary>
         /// <param name="index">Which one to use?</param>
@@ -35,6 +49,48 @@ namespace Xenko.Engine
                 if (index == PossibleFreeIndex)
                     PossibleFreeIndex = (PossibleFreeIndex + 1) % internalTransforms.Length;
             }
+        }
+
+        /// <summary>
+        /// Gets where this index is, or returns a certain zero-scaled matrix if it is hidden
+        /// </summary>
+        /// <param name="index">Which one</param>
+        /// <returns>Current matrix of index</returns>
+        public Matrix GetTransform(int index)
+        {
+            return internalTransforms[index];
+        }
+
+        /// <summary>
+        /// Is this index hidden?
+        /// </summary>
+        /// <param name="index">Which one</param>
+        /// <returns>true if hidden</returns>
+        public bool IsHidden(int index)
+        {
+            return internalTransforms[index] == dontdraw;
+        }
+
+        /// <summary>
+        /// Gets the UV offset of this index, if we are doing that kinda thing
+        /// </summary>
+        /// <param name="index">which one</param>
+        /// <returns>UV offset, if any</returns>
+        public Vector2 GetUVOffset(int index)
+        {
+            if (uvOffsets == null) return Vector2.Zero;
+            return uvOffsets[index];
+        }
+
+        /// <summary>
+        /// Gets the custom color of this index, if any
+        /// </summary>
+        /// <param name="index">which one</param>
+        /// <returns>Color, if any</returns>
+        public Color4 GetColorTint(int index)
+        {
+            if (colors == null) return Color4.White;
+            return colors[index];
         }
 
         /// <summary>
@@ -54,13 +110,18 @@ namespace Xenko.Engine
         }
 
         /// <summary>
-        /// You can give individual "instances" colors if the shader is using vertex colors instead of textures
+        /// You can give individual "instances" color/tints if the shader is using vertex colors instead of textures
         /// </summary>
         /// <param name="index">Which index to set a custom color?</param>
-        /// <param name="offset">What should the custom color be?</param>
-        public void SetColor(int index, Color4 color)
+        /// <param name="offset">What should the custom color tint be?</param>
+        public void SetColorTint(int index, Color4 color)
         {
-            if (colors == null) colors = new Color4[internalTransforms.Length];
+            if (colors == null)
+            {
+                // initialize everything to white, so it doesn't black everything else out
+                colors = new Color4[internalTransforms.Length];
+                for (int i = 0; i < colors.Length; i++) colors[i] = Color4.White;
+            }
 
             if (colors[index] != color)
             {
@@ -230,6 +291,7 @@ namespace Xenko.Engine
                 }
                 actuallyUpdated[Interlocked.Increment(ref auCount) - 1] = index;
                 Vector2? uvOffset = uvOffsets == null ? null : uvOffsets[index];
+                Color4? specialColor = colors == null ? null : colors[index];
                 tMatrix.GetScale(out var tMatrixScale);
                 int vPos = index * len;
                 int vertsPerThread = (int)Math.Ceiling((float)len / (float)Xenko.Core.Threading.Dispatcher.MaxDegreeOfParallelism);
@@ -273,7 +335,7 @@ namespace Xenko.Engine
                                 Normal = new Vector3(((origNom.X * tMatrix.M11) + (origNom.Y * tMatrix.M21) + (origNom.Z * tMatrix.M31)) / tMatrixScale.X,
                                                      ((origNom.X * tMatrix.M12) + (origNom.Y * tMatrix.M22) + (origNom.Z * tMatrix.M32)) / tMatrixScale.Y,
                                                      ((origNom.X * tMatrix.M13) + (origNom.Y * tMatrix.M23) + (origNom.Z * tMatrix.M33)) / tMatrixScale.Z),
-                                Color = ovr.Color,
+                                Color = specialColor.HasValue ? (UseColorTintMode == COLOR_MODE.MULTIPLY ? ovr.Color * specialColor.Value : specialColor.Value) : ovr.Color,
                             };
                         }
                     });
