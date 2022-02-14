@@ -15,6 +15,7 @@
     <XenkoBulletPlatform></XenkoBulletPlatform> <!--Empty by default, only iOS needs special care-->
     <XenkoBulletPlatform Condition="'$(XenkoPlatform)' == 'iOS'">iOS</XenkoBulletPlatform>
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
+    <XenkoPublicApi>true</XenkoPublicApi>
   </PropertyGroup>
   <ItemGroup>
     <XenkoNativeLib Include="..\..\..\deps\BulletPhysics\$(XenkoPlatform)\**\libbulletc.*">

@@ -12,6 +12,7 @@
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoAssemblyProcessorOptions>--serialization --parameter-key</XenkoAssemblyProcessorOptions>
     <XenkoBuildTags>*</XenkoBuildTags>
+    <XenkoPublicApi>true</XenkoPublicApi>
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
   </PropertyGroup>
   <Choose>

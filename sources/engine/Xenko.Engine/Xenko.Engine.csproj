@@ -15,6 +15,7 @@
     <XenkoAssemblyProcessorOptions>$(XenkoAssemblyProcessorDefaultOptions)</XenkoAssemblyProcessorOptions>
     <XenkoProjectPlatformDependentWindows>true</XenkoProjectPlatformDependentWindows>
     <XenkoBuildTags>*</XenkoBuildTags>
+    <XenkoPublicApi>true</XenkoPublicApi>
     <RestorePackages>true</RestorePackages>
     <RootNamespace>Xenko</RootNamespace>
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>

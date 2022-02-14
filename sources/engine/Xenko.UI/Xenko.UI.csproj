@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
   </PropertyGroup>
@@ -9,6 +9,7 @@
     <XenkoPlatformDependent>true</XenkoPlatformDependent>
     <XenkoProjectPlatformDependentWindows>true</XenkoProjectPlatformDependentWindows>
     <XenkoBuildTags>*</XenkoBuildTags>
+    <XenkoPublicApi>true</XenkoPublicApi>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">

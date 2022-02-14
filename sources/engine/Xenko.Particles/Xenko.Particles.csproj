@@ -11,6 +11,7 @@
     <XenkoAssemblyProcessorOptions>$(XenkoAssemblyProcessorDefaultOptions)</XenkoAssemblyProcessorOptions>
     <XenkoProjectPlatformDependentWindows>true</XenkoProjectPlatformDependentWindows>
     <XenkoBuildTags>*</XenkoBuildTags>
+    <XenkoPublicApi>true</XenkoPublicApi>
     <XenkoPackAssets>true</XenkoPackAssets>
   </PropertyGroup>
   <ItemGroup>

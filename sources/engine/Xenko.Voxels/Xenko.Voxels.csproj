@@ -10,6 +10,7 @@
     <XenkoPlatformDependent>true</XenkoPlatformDependent>
     <XenkoBuildTags>*</XenkoBuildTags>
     <XenkoPackAssets>true</XenkoPackAssets>
+    <XenkoPublicApi>true</XenkoPublicApi>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">

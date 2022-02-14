@@ -12,6 +12,7 @@
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoPlatformDependent>true</XenkoPlatformDependent>
     <XenkoBuildTags>*</XenkoBuildTags>
+    <XenkoPublicApi>true</XenkoPublicApi>
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(XenkoPlatform)' == 'Android'">

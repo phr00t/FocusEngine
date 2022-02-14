@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
 
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
@@ -13,6 +13,7 @@
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoAssemblyProcessorOptions>--serialization</XenkoAssemblyProcessorOptions>
     <XenkoBuildTags>*</XenkoBuildTags>
+    <XenkoPublicApi>true</XenkoPublicApi>
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
   </PropertyGroup>
 

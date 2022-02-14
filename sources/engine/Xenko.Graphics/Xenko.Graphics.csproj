@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
     <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
@@ -13,6 +13,7 @@
     <XenkoProjectPlatformDependentWindows>true</XenkoProjectPlatformDependentWindows>
     <XenkoBuildTags>*</XenkoBuildTags>
     <XenkoPackAssets>true</XenkoPackAssets>
+    <XenkoPublicApi>true</XenkoPublicApi>
     <DefineConstants>$(DefineConstants);XENKO_GRAPHICS_NO_DESCRIPTOR_COPIES</DefineConstants>
   </PropertyGroup>
   <Choose>

@@ -14,6 +14,7 @@
     <XenkoPlatformDependent>true</XenkoPlatformDependent>
     <XenkoProjectPlatformDependentWindows>true</XenkoProjectPlatformDependentWindows>
     <XenkoBuildTags>*</XenkoBuildTags>
+    <XenkoPublicApi>true</XenkoPublicApi>
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
   </PropertyGroup>
   <Import Condition="$(XenkoUI.Contains('SDL'))" Project="..\..\targets\SDL.targets" />
