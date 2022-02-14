@@ -53,11 +53,11 @@ namespace Xenko.VirtualReality
         /// <summary>
         /// Vibrate the controller
         /// </summary>
-        /// <param name="duration">Duration of vibration, try 0.5f to 3.5f</param>
+        /// <param name="duration">Duration of vibration in seconds. If null, defaults to OpenXR's MIN_HAPTIC</param>
         /// <param name="frequency">Frequency of the duration. Defaults to 0, which is optimally picked by runtime. 3000hz is another option</param>
         /// <param name="amplitude">How big is the vibration? Defaults to 100%</param>
         /// <returns>true if successful</returns>
-        public abstract bool Vibrate(float duration = 1f, float frequency = 0f, float amplitude = 1f);
+        public abstract bool Vibrate(double? duration = null, float frequency = 0f, float amplitude = 1f);
 
         /// <summary>
         /// Returns true if in this frame the button switched to pressed state

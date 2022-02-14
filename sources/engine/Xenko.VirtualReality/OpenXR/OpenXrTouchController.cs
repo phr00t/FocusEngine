@@ -184,19 +184,19 @@ namespace Xenko.VirtualReality
             return false;
         }
 
-        public override unsafe bool Vibrate(float duration = 1f, float frequency = 0f, float amplitude = 1f)
+        public override unsafe bool Vibrate(double? duration = null, float frequency = 0f, float amplitude = 1f)
         {
             HapticActionInfo hai = new HapticActionInfo()
             {
                 Action = OpenXRInput.MappedActions[(int)myHand, (int)OpenXRInput.HAND_PATHS.HapticOut],
-                Type = StructureType.TypeHapticActionInfo
+                Type = StructureType.TypeHapticActionInfo               
             };
 
             HapticVibration hv = new HapticVibration()
             {
-                Amplitude = amplitude,
+                Amplitude = amplitude,                
                 Frequency = frequency,
-                Duration = (long)Math.Round(1000f * duration),
+                Duration = duration.HasValue ? (long)Math.Round(1000000000.0 * duration.Value) : -1,
                 Type = StructureType.TypeHapticVibration
             };
 
