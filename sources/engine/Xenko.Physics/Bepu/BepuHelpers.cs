@@ -18,6 +18,7 @@ namespace Xenko.Physics.Bepu
 {
     public class BepuHelpers
     {
+        internal static object creationLocker = new object();
         internal static PhysicsSystem physicsSystem;
 
         /// <summary>
@@ -25,21 +26,36 @@ namespace Xenko.Physics.Bepu
         /// </summary>
         public static void AssureBepuSystemCreated()
         {
+            // do we have the physics system already?
             if (physicsSystem == null)
             {
+                // is it already added somewhere else?
                 physicsSystem = ServiceRegistry.instance.GetService<PhysicsSystem>();
                 if (physicsSystem == null)
                 {
-                    physicsSystem = new PhysicsSystem(ServiceRegistry.instance);
-                    ServiceRegistry.instance.AddService<IPhysicsSystem>(physicsSystem);
-                    var gameSystems = ServiceRegistry.instance.GetSafeServiceAs<IGameSystemCollection>();
-                    gameSystems.Add(physicsSystem);
-                    ((IReferencable)physicsSystem).AddReference();
-                    physicsSystem.Create(null, PhysicsEngineFlags.None, true);
+                    // ok, appears we need to make it...
+                    lock (creationLocker)
+                    {
+                        // lock and check so we only make it once...
+                        if (physicsSystem == null)
+                        {
+                            physicsSystem = new PhysicsSystem(ServiceRegistry.instance);
+                            ServiceRegistry.instance.AddService<IPhysicsSystem>(physicsSystem);
+                            var gameSystems = ServiceRegistry.instance.GetSafeServiceAs<IGameSystemCollection>();
+                            gameSystems.Add(physicsSystem);
+                            ((IReferencable)physicsSystem).AddReference();
+                            physicsSystem.Create(null, PhysicsEngineFlags.None, true);
+                        }
+                    }
                 }
-                else if (physicsSystem.HasSimulation<BepuSimulation>() == false)
+                else
                 {
-                    physicsSystem.Create(null, PhysicsEngineFlags.None, true);
+                    // make sure we only do this once too
+                    lock (creationLocker)
+                    {
+                        if (physicsSystem.HasSimulation<BepuSimulation>() == false)
+                            physicsSystem.Create(null, PhysicsEngineFlags.None, true);
+                    }
                 }
             }
         }
