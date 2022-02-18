@@ -313,21 +313,15 @@ namespace Xenko.Physics.Bepu
         }
 
         //Note that the engine does not require any particular form of gravity- it, like all the contact callbacks, is managed by a callback.
-        public struct PoseIntegratorCallbacks : IPoseIntegratorCallbacks
+        private struct PoseIntegratorCallbacks : IPoseIntegratorCallbacks
         {
             System.Numerics.Vector3 gravityDt;
-            public System.Numerics.Vector3 Gravity;
             float indt;
 
             /// <summary>
             /// Gets how the pose integrator should handle angular velocity integration.
             /// </summary>
             public AngularIntegrationMode AngularIntegrationMode => AngularIntegrationMode.Nonconserving; //Don't care about fidelity in this demo!
-
-            public PoseIntegratorCallbacks(System.Numerics.Vector3 gravity) : this()
-            {
-                Gravity = gravity;
-            }
 
             /// <summary>
             /// Called prior to integrating the simulation's active bodies. When used with a substepping timestepper, this could be called multiple times per frame with different time step values.
@@ -336,7 +330,7 @@ namespace Xenko.Physics.Bepu
             public void PrepareForIntegration(float dt)
             {
                 //No reason to recalculate gravity * dt for every body; just cache it ahead of time.
-                gravityDt = Gravity * dt;
+                gravityDt = instance._gravity * dt;
                 indt = dt;
             }
 
@@ -391,7 +385,7 @@ namespace Xenko.Physics.Bepu
             GameService.SceneSystem.SceneInstance.EntityRemoved += EntityRemoved;
             GameService.SceneSystem.SceneInstance.ComponentChanged += ComponentChanged;
 
-            poseCallbacks = new PoseIntegratorCallbacks(new System.Numerics.Vector3(0f, -9.81f, 0f));
+            poseCallbacks = new PoseIntegratorCallbacks();
 
             // we will give the simulation its own bufferpool
             internalSimulation = BepuPhysics.Simulation.Create(new BufferPool(), new NarrowPhaseCallbacks(), poseCallbacks, new BepuPhysics.PositionLastTimestepper());
@@ -954,6 +948,8 @@ namespace Xenko.Physics.Bepu
             }
         }
 
+        private System.Numerics.Vector3 _gravity = new System.Numerics.Vector3(0f, -9.81f, 0f);
+
         /// <summary>
         /// Gets or sets the gravity.
         /// </summary>
@@ -969,13 +965,13 @@ namespace Xenko.Physics.Bepu
         {
             get
             {
-                return new Vector3(poseCallbacks.Gravity.X, poseCallbacks.Gravity.Y, poseCallbacks.Gravity.Z);
+                return new Vector3(_gravity.X, _gravity.Y, _gravity.Z);
             }
             set
             {
-                poseCallbacks.Gravity.X = value.X;
-                poseCallbacks.Gravity.Y = value.Y;
-                poseCallbacks.Gravity.Z = value.Z;
+                _gravity.X = value.X;
+                _gravity.Y = value.Y;
+                _gravity.Z = value.Z;
             }
         }
 
