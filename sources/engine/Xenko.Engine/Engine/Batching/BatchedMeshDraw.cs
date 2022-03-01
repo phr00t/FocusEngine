@@ -152,6 +152,11 @@ namespace Xenko.Engine
         public bool OptimizeForFrustum = true;
 
         /// <summary>
+        /// Returns how many objects this BatchedMeshDraw can maintain. If you go over this number, you'll get out-of-bound exceptions.
+        /// </summary>
+        public int Capacity => internalTransforms.Length;
+
+        /// <summary>
         /// Reference used on TransformComponent to automatically update as needed
         /// </summary>
         public class BatchedMeshDrawReference
