@@ -27,7 +27,7 @@ namespace Xenko.UI.Renderers
             if (sprite?.Texture == null)
                 return;
 
-            var color = new Color4(button.RenderOpacity);
+            var color = new Color4(button.ButtonTint.R, button.ButtonTint.G, button.ButtonTint.B, button.RenderOpacity);
             Batch.DrawImage(sprite.Texture, ref element.WorldMatrixInternal, ref sprite.RegionInternal, ref element.RenderSizeInternal, ref sprite.BordersInternal, ref color, context.DepthBias, sprite.Orientation);
         }
     }

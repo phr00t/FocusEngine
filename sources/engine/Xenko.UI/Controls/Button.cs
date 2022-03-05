@@ -110,6 +110,13 @@ namespace Xenko.UI.Controls
         }
 
         /// <summary>
+        /// Tints the button a certain color. Use Opacity to set alpha value
+        /// </summary>
+        [DataMember]
+        [Display(category: AppearanceCategory)]
+        public Color3 ButtonTint { get; set; } = Color3.White;
+
+        /// <summary>
         /// Gets or sets a value that describes how the button image should be stretched to fill the destination rectangle.
         /// </summary>
         /// <remarks>This property has no effect is <see cref="SizeToContent"/> is <c>true</c>.</remarks>
