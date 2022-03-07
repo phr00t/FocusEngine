@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
     <XenkoRuntimeNetStandard>true</XenkoRuntimeNetStandard>
@@ -23,10 +23,6 @@
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xenko.Core\Xenko.Core.csproj" />

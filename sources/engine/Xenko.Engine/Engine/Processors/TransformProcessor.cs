@@ -101,7 +101,7 @@ namespace Xenko.Engine.Processors
 
         internal void UpdateTransformations(FastCollection<TransformComponent> transformationComponents)
         {
-            Dispatcher.ForEach(transformationComponents, UpdateTransformationsRecursive);
+            Dispatcher.ForEach(transformationComponents, UpdateTransformationAndChildren);
 
             // Re-update model node links to avoid one frame delay compared reference model (ideally entity should be sorted to avoid this in future).
             if (ModelNodeLinkProcessor != null)
@@ -111,11 +111,11 @@ namespace Xenko.Engine.Processors
                 {
                     modelNodeLinkComponents.Add(ModelNodeLinkProcessor.ModelNodeLinkComponents[i].Entity.Transform);
                 }
-                Dispatcher.ForEach(modelNodeLinkComponents, UpdateTransformationsRecursive);
+                Dispatcher.ForEach(modelNodeLinkComponents, UpdateTransformationAndChildren);
             }
         }
 
-        private static void UpdateTransformationsRecursive(TransformComponent transformation)
+        private static void UpdateTransformationAndChildren(TransformComponent transformation)
         {
             // if we are an immobile transform, skip doing math/recusion on this
             switch (transformation.Immobile)
