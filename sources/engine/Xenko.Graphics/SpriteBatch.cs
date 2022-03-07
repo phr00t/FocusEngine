@@ -600,7 +600,7 @@ namespace Xenko.Graphics
         protected override void PrepareForRendering()
         {
             Matrix viewProjection;
-            Matrix.MultiplyTo(ref userViewMatrix, ref userProjectionMatrix, out viewProjection);
+            Matrix.Multiply(ref userViewMatrix, ref userProjectionMatrix, out viewProjection);
 
             // Setup effect states and parameters: SamplerState and MatrixTransform
             // Sets the sampler state
