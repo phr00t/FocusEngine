@@ -35,10 +35,11 @@ namespace Xenko.Graphics.Font
             return new OfflineRasterizedSpriteFont(size, glyphs, textures, baseOffset, defaultLineSpacing, kernings, extraSpacing, extraLineSpacing, defaultCharacter, margin);
         }
 
-        public SpriteFont NewDynamic(float defaultSize, string fontName, FontStyle style, FontAntiAliasMode antiAliasMode, bool useKerning, float extraSpacing, float extraLineSpacing, char defaultCharacter)
+        public SpriteFont NewDynamic(float defaultSize, string fontName, FontStyle style, FontAntiAliasMode antiAliasMode, bool useKerning, float extraSpacing, float extraLineSpacing, char defaultCharacter, float YOffset)
         {
             return new RuntimeRasterizedSpriteFont
             {
+                BaseOffsetY = YOffset,
                 Size = defaultSize,
                 DefaultCharacter = defaultCharacter,
                 FontName = fontName,

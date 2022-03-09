@@ -116,5 +116,13 @@ namespace Xenko.Assets.SpriteFont
         [DefaultValue(0)]
         [Display(null, "Rendering")]
         public int GlyphPackingMargin { get; set; } = 0;
+
+        /// <summary>
+        /// Adjust Y offset when rendering
+        /// </summary>
+        [DataMember]
+        [DefaultValue(0)]
+        [Display(null, "Rendering")]
+        public float YOffset { get; set; } = 0f;
     }
 }

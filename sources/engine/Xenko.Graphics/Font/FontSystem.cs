@@ -90,10 +90,11 @@ namespace Xenko.Graphics.Font
             return new SignedDistanceFieldSpriteFont(size, glyphs, textures, baseOffset, defaultLineSpacing, kernings, extraSpacing, extraLineSpacing, defaultCharacter) { FontSystem = this };
         }
 
-        public SpriteFont NewDynamic(float defaultSize, string fontName, FontStyle style, FontAntiAliasMode antiAliasMode = FontAntiAliasMode.Default, bool useKerning = false, float extraSpacing = 0, float extraLineSpacing = 0, char defaultCharacter = ' ')
+        public SpriteFont NewDynamic(float defaultSize, string fontName, FontStyle style, FontAntiAliasMode antiAliasMode = FontAntiAliasMode.Default, bool useKerning = false, float extraSpacing = 0, float extraLineSpacing = 0, char defaultCharacter = ' ', float YOffset = 0f)
         {
             var font = new RuntimeRasterizedSpriteFont
             {
+                BaseOffsetY = YOffset,
                 Size = defaultSize,
                 FontName = fontName,
                 Style = style,

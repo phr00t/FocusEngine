@@ -93,7 +93,7 @@ namespace Xenko.Assets.SpriteFont.Compiler
             var images = new[] { GetImage(options, bitmap) };
             var sizeInPixels = options.FontType.Size;
 
-            return fontFactory.NewScalable(sizeInPixels, fontGlyphs, images, baseLine, lineSpacing, null, options.Spacing, options.LineSpacing, options.DefaultCharacter);
+            return fontFactory.NewScalable(sizeInPixels, fontGlyphs, images, baseLine + options.YOffset, lineSpacing, null, options.Spacing, options.LineSpacing, options.DefaultCharacter);
         }
 
         static Graphics.Font.Glyph[] ConvertGlyphs(Glyph[] glyphs)

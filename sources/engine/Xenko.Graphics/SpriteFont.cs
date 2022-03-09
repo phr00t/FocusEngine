@@ -517,8 +517,7 @@ namespace Xenko.Graphics
             float rawYSpacing = GetTotalLineSpacing(requestedFontSize.Y);
             float yStart, ySpacing = rawYSpacing + lineSpaceAdjustment;
             if (textBoxSize.HasValue && vertAlign != TextVerticalAlignment.Top) {
-                int extraLines = text.LineCount - 1;
-                float lineHeight = rawYSpacing + extraLines * ySpacing;
+                float lineHeight = requestedFontSize.Y + (text.LineCount - 1) * ySpacing;
                 switch (vertAlign) {
                     default:
                     case TextVerticalAlignment.Center:

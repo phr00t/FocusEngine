@@ -192,7 +192,7 @@ namespace Xenko.Assets.SpriteFont
                 var dynamicFont = FontDataFactory.NewDynamic(
                     Parameters.FontType.Size, Parameters.FontSource.GetFontName(), Parameters.FontSource.Style, 
                     Parameters.FontType.AntiAlias, useKerning:false, extraSpacing:Parameters.Spacing, extraLineSpacing:Parameters.LineSpacing, 
-                    defaultCharacter:Parameters.DefaultCharacter);
+                    defaultCharacter:Parameters.DefaultCharacter, Parameters.YOffset);
 
                 var assetManager = new ContentManager(MicrothreadLocalDatabases.ProviderService);
                 assetManager.Save(Url, dynamicFont);

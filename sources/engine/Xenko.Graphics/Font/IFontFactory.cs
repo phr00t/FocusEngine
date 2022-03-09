@@ -59,7 +59,7 @@ namespace Xenko.Graphics.Font
         /// <param name="defaultCharacter">The default character fall-back.</param>
         /// <returns>The newly created dynamic font</returns>
         SpriteFont NewDynamic(float defaultSize, string fontName, FontStyle style, FontAntiAliasMode antiAliasMode = FontAntiAliasMode.Default,
-                              bool useKerning = false, float extraSpacing = 0f, float extraLineSpacing = 0f, char defaultCharacter = ' ');
+                              bool useKerning = false, float extraSpacing = 0f, float extraLineSpacing = 0f, char defaultCharacter = ' ', float YOffset = 0f);
 
         /// <summary>
         /// Create a new instance of a scalable font.
