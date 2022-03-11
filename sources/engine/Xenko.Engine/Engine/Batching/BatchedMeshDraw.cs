@@ -230,6 +230,10 @@ namespace Xenko.Engine
 
             // calculate what a single mesh looks like and store its original verts
             Model singleMesh = ModelBatcher.BatchModel(m);
+
+            if (singleMesh.Meshes.Count != 1)
+                throw new ArgumentException("Model couldn't be flattened into 1 mesh. Are you sure the vertex & index buffers have been captured?");
+
             StagedMeshDraw singleDraw = singleMesh.Meshes[0].Draw as StagedMeshDraw;
             if (singleDraw.Verticies is VertexPositionNormalTextureTangent[] vppntt)
                 origVerts0 = vppntt;
