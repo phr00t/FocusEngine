@@ -255,6 +255,7 @@ namespace Xenko.Engine
             Model batched = ModelBatcher.GenerateBatch(singleMesh, new List<Matrix>(internalTransforms));
             smd = (StagedMeshDraw)batched.Meshes[0].Draw;
             updateVerts = UpdateVertexBuffer;
+            uploadVerts = UploadNewVertexBuffers;
 
             singleDraw.Dispose();
         }
@@ -280,13 +281,35 @@ namespace Xenko.Engine
             }
         }
 
-        internal void UpdateVertexBuffer(CommandList commandList, BoundingFrustum frustum)
+        internal void UploadNewVertexBuffers(CommandList commandList)
+        {
+            // only update buffers if something changed
+            int uploadCount = Interlocked.Exchange(ref auCount, 0);
+
+            if (uploadCount > 0)
+            {
+                object origVerts = origVerts0 == null ? origVerts1 : origVerts0;
+                int len = origVerts0 == null ? origVerts1.Length : origVerts0.Length;
+
+                // find the actual range of the buffer we need to upload
+                Array.Sort(actuallyUpdated, 0, uploadCount);
+
+                int startIndex = actuallyUpdated[0] * len;
+                int endIndex = (1 + actuallyUpdated[uploadCount - 1]) * len;
+
+                if (origVerts is VertexPositionNormalTextureTangent[])
+                    smd.VertexBuffers[0].Buffer.FastRawSetData<VertexPositionNormalTextureTangent>(commandList, (VertexPositionNormalTextureTangent[])smd.Verticies, startIndex, endIndex);
+                else
+                    smd.VertexBuffers[0].Buffer.FastRawSetData<VertexPositionNormalColor>(commandList, (VertexPositionNormalColor[])smd.Verticies, startIndex, endIndex);
+            }
+        }
+
+        internal void UpdateVertexBuffer(BoundingFrustum frustum)
         {
             if (smd == null || (smd.VertexBuffers?[0].Buffer?.Ready ?? false) == false) return; // not ready yet
             int tUpdateCount = Interlocked.Exchange(ref tCount, 0);
             if (tUpdateCount == 0) return;
             if (tUpdateCount > indexUpdatesRequired.Length) tUpdateCount = indexUpdatesRequired.Length;
-            auCount = 0;
 
             // use a copy of this array, so we don't step over it during multithreaded events
             Array.Copy(indexUpdatesRequired, proccessingUpdates, tUpdateCount);
@@ -361,21 +384,6 @@ namespace Xenko.Engine
                     });
                 }
             });
-
-            // only update buffers if somethingn changed
-            if (auCount > 0)
-            {
-                // find the actual range of the buffer we need to upload
-                Array.Sort(actuallyUpdated, 0, auCount);
-
-                int startIndex = actuallyUpdated[0] * len;
-                int endIndex = (1 + actuallyUpdated[auCount - 1]) * len;
-
-                if (origVerts is VertexPositionNormalTextureTangent[])
-                    smd.VertexBuffers[0].Buffer.FastRawSetData<VertexPositionNormalTextureTangent>(commandList, (VertexPositionNormalTextureTangent[])smd.Verticies, startIndex, endIndex);
-                else
-                    smd.VertexBuffers[0].Buffer.FastRawSetData<VertexPositionNormalColor>(commandList, (VertexPositionNormalColor[])smd.Verticies, startIndex, endIndex);
-            }
         }
 
         public void Dispose()

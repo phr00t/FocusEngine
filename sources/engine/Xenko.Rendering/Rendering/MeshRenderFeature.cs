@@ -186,6 +186,9 @@ namespace Xenko.Rendering
                     for (int slot = 0; slot < drawData.VertexBuffers.Length; slot++)
                         if (drawData.VertexBuffers[slot].Buffer.Ready == false) goto skip_loop;
 
+                    if (drawData.uploadVerts != null)
+                        drawData.uploadVerts(commandList);
+
                     // ok, buffers ready, set
                     for (int slot = 0; slot < drawData.VertexBuffers.Length; slot++)
                     {

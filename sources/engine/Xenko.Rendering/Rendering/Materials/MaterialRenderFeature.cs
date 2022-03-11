@@ -173,7 +173,7 @@ namespace Xenko.Rendering.Materials
                         {
                             if (RenderSystem.Views[i].Camera != null)
                             {
-                                renderMesh.ActiveMeshDraw.updateVerts(context.CommandList, RenderSystem.Views[i].Frustum);
+                                renderMesh.ActiveMeshDraw.updateVerts(RenderSystem.Views[i].Frustum);
                                 break;
                             }
                         }

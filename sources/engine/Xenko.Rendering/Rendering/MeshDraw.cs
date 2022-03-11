@@ -25,7 +25,9 @@ namespace Xenko.Rendering
 
         virtual internal Action<GraphicsDevice, StagedMeshDraw> performStage { get; set; }
 
-        virtual internal Action<CommandList, BoundingFrustum> updateVerts { get; set; }
+        virtual internal Action<BoundingFrustum> updateVerts { get; set; }
+
+        virtual internal Action<CommandList> uploadVerts { get; set; }
 
         virtual internal StagedMeshDraw getStagedMeshDraw { get; set; }
     }
