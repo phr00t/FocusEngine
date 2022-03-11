@@ -166,6 +166,18 @@ namespace Xenko.Rendering.Materials
                 else
                 {
                     renderMesh.ActiveMeshDraw = renderMesh.Mesh.Draw;
+                   
+                    if (renderMesh.ActiveMeshDraw.updateVerts != null)
+                    {
+                        for (int i=0; i<RenderSystem.Views.Count; i++)
+                        {
+                            if (RenderSystem.Views[i].Camera != null)
+                            {
+                                renderMesh.ActiveMeshDraw.updateVerts(context.CommandList, RenderSystem.Views[i].Frustum);
+                                break;
+                            }
+                        }
+                    }
 
                     if (tessellationState.GeneratedIndicesAEN != null)
                     { 

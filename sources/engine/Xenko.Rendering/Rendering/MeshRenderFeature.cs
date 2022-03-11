@@ -186,10 +186,6 @@ namespace Xenko.Rendering
                     for (int slot = 0; slot < drawData.VertexBuffers.Length; slot++)
                         if (drawData.VertexBuffers[slot].Buffer.Ready == false) goto skip_loop;
 
-                    // is this a meshdraw that has an updateverts feature?
-                    if (drawData.updateVerts != null)
-                        drawData.updateVerts(commandList, renderView.Frustum);
-
                     // ok, buffers ready, set
                     for (int slot = 0; slot < drawData.VertexBuffers.Length; slot++)
                     {
