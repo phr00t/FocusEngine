@@ -90,7 +90,6 @@ namespace Xenko.Engine
 
         /// <summary>
         /// Returns the first child in the hierarchy with the provided name.
-        /// This function can be slow, do not use every frame!
         /// </summary>
         /// <param name="parentEntity">The parent Entity.</param>
         /// <param name="childName">The name of the child to look for.</param>
@@ -99,8 +98,50 @@ namespace Xenko.Engine
         [CanBeNull]
         public static Entity FindChild([NotNull] this Entity parentEntity, string childName)
         {
-            if (parentEntity == null) throw new ArgumentNullException(nameof(parentEntity));
-            return Utilities.IterateTree(parentEntity, entity => entity?.GetChildren()).FirstOrDefault(entity => entity != null && entity.Name == childName);
+            foreach(TransformComponent tc in parentEntity.Transform.Children)
+            {
+                if (tc.Entity.Name == childName)
+                    return tc.Entity;
+
+                if (tc.Children.Count > 0)
+                {
+                    Entity child = FindChild(tc.Entity, childName);
+                    if (child != null) return child;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the first child in the scene with the provided name.
+        /// </summary>
+        /// <param name="parentScene">The parent Scene.</param>
+        /// <param name="childName">The name of the child to look for.</param>
+        /// <returns>Null or the first child with the requested name.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="parentScene"/> is <c>null</c></exception>
+        [CanBeNull]
+        public static Entity FindChild([NotNull] this Scene parentScene, string childName)
+        {
+            foreach (Entity e in parentScene.Entities)
+            {
+                if (e.Name == childName)
+                    return e;
+
+                if (e.Transform.Children.Count > 0)
+                {
+                    Entity child = FindChild(e, childName);
+                    if (child != null) return child;
+                }
+            }
+
+            foreach (Scene s in parentScene.Children)
+            {
+                Entity child = FindChild(s, childName);
+                if (child != null) return child;
+            }
+
+            return null;
         }
 
         /// <summary>
