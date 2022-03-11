@@ -14,7 +14,7 @@ namespace Xenko.Engine
 {
     /// <summary>
     /// This is like GPU instancing, but handled on the CPU-side to make it easier to implement and use.
-    /// It tracks the mesh and moves parts only as needed.
+    /// It tracks the mesh and moves parts only as needed. Generally thread-safe, except don't make changes while rendering is happening.
     /// Can be linked with other TransformComponents for easy updating "instanced" copies via each TransformComponent's BatchedMeshDrawReference
     /// Needs one Entity with a ModelComponent to do drawing of all "instances", and you can use GenerateDynamicBatchedModel to provide the Model for dynamic batching
     /// </summary>
