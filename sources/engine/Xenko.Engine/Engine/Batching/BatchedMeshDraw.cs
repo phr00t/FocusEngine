@@ -248,7 +248,7 @@ namespace Xenko.Engine
                 internalTransforms[i] = dontdraw;
 
             tempHiding = new bool[capacity];
-            avoidDuplicates = new ConcurrentHashSet<int>(Xenko.Core.Threading.Dispatcher.MaxDegreeOfParallelism, capacity);
+            avoidDuplicates = new bool[capacity];
             indexUpdatesRequired = new int[capacity];
             proccessingUpdates = new int[capacity];
             actuallyUpdated = new int[capacity];
@@ -259,18 +259,31 @@ namespace Xenko.Engine
             singleDraw.Dispose();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private SpinLock duplicateChecker = new SpinLock();
+
         private void MarkUpdateNeeded(int index)
         {
-            if (avoidDuplicates.Add(index))
-                indexUpdatesRequired[Interlocked.Increment(ref tCount) - 1] = index;
+            bool lockTaken = false;
+            try
+            {
+                duplicateChecker.Enter(ref lockTaken);
+
+                if (!avoidDuplicates[index])
+                {
+                    avoidDuplicates[index] = true;
+                    indexUpdatesRequired[tCount++] = index;
+                }
+            }
+            finally
+            {
+                if (lockTaken) duplicateChecker.Exit();
+            }
         }
 
         internal void UpdateVertexBuffer(CommandList commandList, BoundingFrustum frustum)
         {
             if (smd == null || (smd.VertexBuffers?[0].Buffer?.Ready ?? false) == false) return; // not ready yet
             int tUpdateCount = Interlocked.Exchange(ref tCount, 0);
-            avoidDuplicates.Clear();
             if (tUpdateCount == 0) return;
             if (tUpdateCount > indexUpdatesRequired.Length) tUpdateCount = indexUpdatesRequired.Length;
             auCount = 0;
@@ -284,6 +297,7 @@ namespace Xenko.Engine
             Xenko.Core.Threading.Dispatcher.For(0, tUpdateCount, (i) =>
             {
                 int index = proccessingUpdates[i];
+                avoidDuplicates[index] = false;
                 Matrix tMatrix = internalTransforms[index];
                 if (OptimizeForFrustum)
                 {
@@ -401,7 +415,7 @@ namespace Xenko.Engine
         private StagedMeshDraw smd;
         private int tCount, auCount;
         private int[] indexUpdatesRequired, proccessingUpdates, actuallyUpdated;
-        private ConcurrentHashSet<int> avoidDuplicates;
+        private bool[] avoidDuplicates;
         private Vector2[] uvOffsets;
         private Color4[] colors;
 
