@@ -309,22 +309,20 @@ namespace Xenko.Engine
                     Xenko.Core.Threading.Dispatcher.For(0, Xenko.Core.Threading.Dispatcher.MaxDegreeOfParallelism, (t) =>
                     {
                         int start = vPos + t * vertsPerThread;
-                        for (int j=start; j<start + vertsPerThread && j < vPos + len; j++)
+                        for (int j = start; j < start + vertsPerThread && j < vPos + len; j++)
                         {
                             ref VertexPositionNormalTextureTangent ovr = ref ov[j - vPos];
+                            ref VertexPositionNormalTextureTangent endvert = ref ((VertexPositionNormalTextureTangent[])smd.Verticies)[j];
                             Vector3 origPos = ovr.Position;
                             Vector3 origNom = ovr.Normal;
-                            ((VertexPositionNormalTextureTangent[])smd.Verticies)[j] = new VertexPositionNormalTextureTangent()
-                            {
-                                Position = new Vector3((origPos.X * tMatrix.M11) + (origPos.Y * tMatrix.M21) + (origPos.Z * tMatrix.M31) + tMatrix.M41,
-                                                       (origPos.X * tMatrix.M12) + (origPos.Y * tMatrix.M22) + (origPos.Z * tMatrix.M32) + tMatrix.M42,
-                                                       (origPos.X * tMatrix.M13) + (origPos.Y * tMatrix.M23) + (origPos.Z * tMatrix.M33) + tMatrix.M43),
-                                Normal = new Vector3(((origNom.X * tMatrix.M11) + (origNom.Y * tMatrix.M21) + (origNom.Z * tMatrix.M31)) / tMatrixScale.X,
-                                                     ((origNom.X * tMatrix.M12) + (origNom.Y * tMatrix.M22) + (origNom.Z * tMatrix.M32)) / tMatrixScale.Y,
-                                                     ((origNom.X * tMatrix.M13) + (origNom.Y * tMatrix.M23) + (origNom.Z * tMatrix.M33)) / tMatrixScale.Z),
-                                Tangent = ovr.Tangent,
-                                TextureCoordinate = uvOffset.HasValue ? ovr.TextureCoordinate + uvOffset.Value : ovr.TextureCoordinate
-                            };
+                            endvert.Position.X = (origPos.X * tMatrix.M11) + (origPos.Y * tMatrix.M21) + (origPos.Z * tMatrix.M31) + tMatrix.M41;
+                            endvert.Position.Y = (origPos.X * tMatrix.M12) + (origPos.Y * tMatrix.M22) + (origPos.Z * tMatrix.M32) + tMatrix.M42;
+                            endvert.Position.Z = (origPos.X * tMatrix.M13) + (origPos.Y * tMatrix.M23) + (origPos.Z * tMatrix.M33) + tMatrix.M43;
+                            endvert.Normal.X = ((origNom.X * tMatrix.M11) + (origNom.Y * tMatrix.M21) + (origNom.Z * tMatrix.M31)) / tMatrixScale.X;
+                            endvert.Normal.Y = ((origNom.X * tMatrix.M12) + (origNom.Y * tMatrix.M22) + (origNom.Z * tMatrix.M32)) / tMatrixScale.Y;
+                            endvert.Normal.Z = ((origNom.X * tMatrix.M13) + (origNom.Y * tMatrix.M23) + (origNom.Z * tMatrix.M33)) / tMatrixScale.Z;
+                            endvert.Tangent = ovr.Tangent;
+                            endvert.TextureCoordinate = uvOffset.HasValue ? ovr.TextureCoordinate + uvOffset.Value : ovr.TextureCoordinate;
                         }
                     });
                 }
@@ -335,17 +333,16 @@ namespace Xenko.Engine
                         int start = vPos + t * vertsPerThread;
                         for (int j = start; j < start + vertsPerThread && j < vPos + len; j++) {
                             ref VertexPositionNormalColor ovr = ref opnc[j - vPos];
+                            ref VertexPositionNormalColor endvert = ref ((VertexPositionNormalColor[])smd.Verticies)[j];
                             Vector3 origPos = ovr.Position;
                             Vector3 origNom = ovr.Normal;
-                            ((VertexPositionNormalColor[])smd.Verticies)[j] = new VertexPositionNormalColor() {
-                                Position = new Vector3((origPos.X * tMatrix.M11) + (origPos.Y * tMatrix.M21) + (origPos.Z * tMatrix.M31) + tMatrix.M41,
-                                                       (origPos.X * tMatrix.M12) + (origPos.Y * tMatrix.M22) + (origPos.Z * tMatrix.M32) + tMatrix.M42,
-                                                       (origPos.X * tMatrix.M13) + (origPos.Y * tMatrix.M23) + (origPos.Z * tMatrix.M33) + tMatrix.M43),
-                                Normal = new Vector3(((origNom.X * tMatrix.M11) + (origNom.Y * tMatrix.M21) + (origNom.Z * tMatrix.M31)) / tMatrixScale.X,
-                                                     ((origNom.X * tMatrix.M12) + (origNom.Y * tMatrix.M22) + (origNom.Z * tMatrix.M32)) / tMatrixScale.Y,
-                                                     ((origNom.X * tMatrix.M13) + (origNom.Y * tMatrix.M23) + (origNom.Z * tMatrix.M33)) / tMatrixScale.Z),
-                                Color = specialColor.HasValue ? (UseColorTintMode == COLOR_MODE.MULTIPLY ? ovr.Color * specialColor.Value : specialColor.Value) : ovr.Color,
-                            };
+                            endvert.Position.X = (origPos.X * tMatrix.M11) + (origPos.Y * tMatrix.M21) + (origPos.Z * tMatrix.M31) + tMatrix.M41;
+                            endvert.Position.Y = (origPos.X * tMatrix.M12) + (origPos.Y * tMatrix.M22) + (origPos.Z * tMatrix.M32) + tMatrix.M42;
+                            endvert.Position.Z = (origPos.X * tMatrix.M13) + (origPos.Y * tMatrix.M23) + (origPos.Z * tMatrix.M33) + tMatrix.M43;
+                            endvert.Normal.X = ((origNom.X * tMatrix.M11) + (origNom.Y * tMatrix.M21) + (origNom.Z * tMatrix.M31)) / tMatrixScale.X;
+                            endvert.Normal.Y = ((origNom.X * tMatrix.M12) + (origNom.Y * tMatrix.M22) + (origNom.Z * tMatrix.M32)) / tMatrixScale.Y;
+                            endvert.Normal.Z = ((origNom.X * tMatrix.M13) + (origNom.Y * tMatrix.M23) + (origNom.Z * tMatrix.M33)) / tMatrixScale.Z;
+                            endvert.Color = specialColor.HasValue ? (UseColorTintMode == COLOR_MODE.MULTIPLY ? ovr.Color * specialColor.Value : specialColor.Value) : ovr.Color;
                         }
                     });
                 }
