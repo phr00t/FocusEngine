@@ -6,10 +6,6 @@ using System.IO;
 using System.Reflection;
 using Xenko.Core.Annotations;
 
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
-using System.Windows;
-#endif
-
 namespace Xenko.Core
 {
     /// <summary>
@@ -99,18 +95,7 @@ namespace Xenko.Core
         private static string GetApplicationLocalDirectory()
         {
             var directory = Path.Combine(GetApplicationBinaryDirectory(), "local");
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
-            try
-            {
-                Directory.CreateDirectory(directory);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Error writing to game directory. Check permissions, protected folders or virus protection settings for " + directory, "Couldn't Make Directory", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-#else
             Directory.CreateDirectory(directory);
-#endif
             return directory;
         }
 
@@ -118,18 +103,7 @@ namespace Xenko.Core
         private static string GetApplicationRoamingDirectory()
         {
             var directory = Path.Combine(GetApplicationBinaryDirectory(), "roaming");
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
-            try
-            {
-                Directory.CreateDirectory(directory);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Error writing to game directory. Check permissions, protected folders or virus protection settings for " + directory, "Couldn't Make Directory", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-#else
             Directory.CreateDirectory(directory);
-#endif
             return directory;
         }
 
@@ -137,18 +111,7 @@ namespace Xenko.Core
         private static string GetApplicationCacheDirectory()
         {
             var directory = Path.Combine(GetApplicationBinaryDirectory(), "cache");
-#if XENKO_PLATFORM_WINDOWS_DESKTOP
-            try
-            {
-                Directory.CreateDirectory(directory);
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show("Error writing to game directory. Check permissions, protected folders or virus protection settings for " + directory, "Couldn't Make Directory", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-#else
             Directory.CreateDirectory(directory);
-#endif
             return directory;
         }
 

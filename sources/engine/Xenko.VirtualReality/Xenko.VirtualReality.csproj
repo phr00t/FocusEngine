@@ -15,27 +15,23 @@
     <XenkoPublicApi>true</XenkoPublicApi>
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
   </PropertyGroup>
-  <Choose>
-    <When Condition=" '$(XenkoGraphicsApi)' == 'Direct3D11' Or '$(XenkoGraphicsApi)' == 'Vulkan' ">
-      <ItemGroup>
-        <XenkoNativeLib Include="..\..\..\deps\OpenVR\$(XenkoPlatform)\**\openvr_api.*">
-          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-          <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </XenkoNativeLib>
-        <XenkoNativeLib Include="..\..\..\deps\OpenXR\openxr_loader.dll">
-          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-          <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </XenkoNativeLib>
-        <XenkoNativeLib Include="..\..\..\deps\WindowsRegistry\Microsoft.Win32.Registry.dll">
-          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-          <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </XenkoNativeLib>
-      </ItemGroup>
-    </When>
-  </Choose>
+  <ItemGroup Condition="'$(XenkoGraphicsApi)' == 'Direct3D11' Or '$(XenkoGraphicsApi)' == 'Vulkan'">
+    <XenkoNativeLib Include="..\..\..\deps\OpenVR\$(XenkoPlatform)\**\openvr_api.*">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+	  <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </XenkoNativeLib>
+    <XenkoNativeLib Include="..\..\..\deps\OpenXR\openxr_loader.dll">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </XenkoNativeLib>
+    <XenkoNativeLib Include="..\..\..\deps\WindowsRegistry\Microsoft.Win32.Registry.dll">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </XenkoNativeLib>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>

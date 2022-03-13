@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28803.352
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 16.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "10-CoreRuntime", "10-CoreRuntime", "{2E93E2B5-4500-4E47-9B65-E705218AB578}"
 EndProject
@@ -9,7 +9,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "00-Targets.Private", "00-Targets.Private", "{97978864-95DD-43A6-9159-AA1C881BE99F}"
 	ProjectSection(SolutionItems) = preProject
 		..\store.config = ..\store.config
-		..\sources\targets\Xenko.Core.Android.CSharp.targets = ..\sources\targets\Xenko.Core.Android.CSharp.targets
 		..\sources\targets\Xenko.Core.CoreCLR.Cpp.targets = ..\sources\targets\Xenko.Core.CoreCLR.Cpp.targets
 		..\sources\targets\Xenko.Core.CoreCLR.CSharp.targets = ..\sources\targets\Xenko.Core.CoreCLR.CSharp.targets
 		..\sources\targets\Xenko.Core.Cpp.targets = ..\sources\targets\Xenko.Core.Cpp.targets
@@ -149,9 +148,9 @@ EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\sources\engine\Xenko.Shared\Refactor\Xenko.Refactor.projitems*{b33e576f-2279-4bfc-a438-d9b84343b56b}*SharedItemsImports = 13
-		..\sources\engine\Xenko.Shared\Refactor\Xenko.Refactor.projitems*{c121a566-555e-42b9-9b0a-1696529a9088}*SharedItemsImports = 4
-		..\sources\shared\Xenko.Core.ShellHelper\Xenko.Core.ShellHelper.projitems*{e8b3553f-a79f-4e50-b75b-acee771c320c}*SharedItemsImports = 4
-		..\sources\engine\Xenko.Shared\Refactor\Xenko.Refactor.projitems*{fb06c76a-6bb7-40be-9afa-fec13b045fb5}*SharedItemsImports = 4
+		..\sources\engine\Xenko.Shared\Refactor\Xenko.Refactor.projitems*{c121a566-555e-42b9-9b0a-1696529a9088}*SharedItemsImports = 5
+		..\sources\shared\Xenko.Core.ShellHelper\Xenko.Core.ShellHelper.projitems*{e8b3553f-a79f-4e50-b75b-acee771c320c}*SharedItemsImports = 5
+		..\sources\engine\Xenko.Shared\Refactor\Xenko.Refactor.projitems*{fb06c76a-6bb7-40be-9afa-fec13b045fb5}*SharedItemsImports = 5
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

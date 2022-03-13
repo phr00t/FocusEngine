@@ -62,7 +62,7 @@ namespace Xenko.Assets
                     Name = PlatformType.Windows.ToString(),
                     IsAvailable = true,
                     Alias = "Any CPU",
-                    TargetFramework = "net48",
+                    TargetFramework = "net6.0",
                     Type = PlatformType.Windows
                 };
             windowsPlatform.PlatformsPart.Add(new SolutionPlatformPart("Any CPU"));
@@ -70,7 +70,6 @@ namespace Xenko.Assets
             windowsPlatform.DefineConstants.Add("XENKO_PLATFORM_WINDOWS");
             windowsPlatform.DefineConstants.Add("XENKO_PLATFORM_WINDOWS_DESKTOP");
             windowsPlatform.Configurations.Add(new SolutionConfiguration("Testing"));
-            windowsPlatform.Configurations.Add(new SolutionConfiguration("AppStore"));
 
             // Currently disabled
             //windowsPlatform.Configurations.Add(coreClrDebug);
@@ -82,60 +81,12 @@ namespace Xenko.Assets
             }
             solutionPlatforms.Add(windowsPlatform);
 
-            // Universal Windows Platform (UWP)
-            var uwpPlatform = new SolutionPlatform()
-            {
-                Name = PlatformType.UWP.ToString(),
-                Type = PlatformType.UWP,
-                TargetFramework = "uap10.0.16299",
-                Templates =
-                {
-                    //new SolutionPlatformTemplate("ProjectExecutable.UWP/CoreWindow/ProjectExecutable.UWP.ttproj", "Core Window"),
-                    new SolutionPlatformTemplate("ProjectExecutable.UWP/Xaml/ProjectExecutable.UWP.ttproj", "Xaml")
-                },
-                IsAvailable = IsVSComponentAvailableAnyVersion(UniversalWindowsPlatformComponents),
-                UseWithExecutables = false,
-                IncludeInSolution = false,
-            };
-
-            uwpPlatform.DefineConstants.Add("XENKO_PLATFORM_WINDOWS");
-            uwpPlatform.DefineConstants.Add("XENKO_PLATFORM_UWP");
-            uwpPlatform.Configurations.Add(new SolutionConfiguration("Testing"));
-            uwpPlatform.Configurations.Add(new SolutionConfiguration("AppStore"));
-            uwpPlatform.Configurations["Release"].Properties.Add("<NoWarn>;2008</NoWarn>");
-            uwpPlatform.Configurations["Debug"].Properties.Add("<NoWarn>;2008</NoWarn>");
-            uwpPlatform.Configurations["Testing"].Properties.Add("<NoWarn>;2008</NoWarn>");
-            uwpPlatform.Configurations["AppStore"].Properties.Add("<NoWarn>;2008</NoWarn>");
-
-            uwpPlatform.Configurations["Release"].Properties.Add("<UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>");
-            uwpPlatform.Configurations["Testing"].Properties.Add("<UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>");
-            uwpPlatform.Configurations["AppStore"].Properties.Add("<UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>");
-
-            foreach (var cpu in new[] { "x86", "x64", "ARM" })
-            {
-                var uwpPlatformCpu = new SolutionPlatformPart(uwpPlatform.Name + "-" + cpu)
-                {
-                    LibraryProjectName = uwpPlatform.Name,
-                    ExecutableProjectName = cpu,
-                    Cpu = cpu,
-                    InheritConfigurations = true,
-                    UseWithLibraries = false,
-                    UseWithExecutables = true,
-                };
-                uwpPlatformCpu.Configurations.Clear();
-                uwpPlatformCpu.Configurations.AddRange(uwpPlatform.Configurations);
-
-                uwpPlatform.PlatformsPart.Add(uwpPlatformCpu);
-            }
-
-            solutionPlatforms.Add(uwpPlatform);
-
             // Linux
             var linuxPlatform = new SolutionPlatform()
             {
                 Name = PlatformType.Linux.ToString(),
                 IsAvailable = true,
-                TargetFramework = "net5.0",
+                TargetFramework = "net6.0",
                 RuntimeIdentifier = "linux-x64",
                 Type = PlatformType.Linux,
             };
@@ -148,100 +99,13 @@ namespace Xenko.Assets
             {
                 Name = PlatformType.macOS.ToString(),
                 IsAvailable = true,
-                TargetFramework = "net5.0-macos",
+                TargetFramework = "net6.0-macos",
                 RuntimeIdentifier = "osx-x64",
                 Type = PlatformType.macOS,
             };
             macOSPlatform.DefineConstants.Add("XENKO_PLATFORM_UNIX");
             macOSPlatform.DefineConstants.Add("XENKO_PLATFORM_MACOS");
             solutionPlatforms.Add(macOSPlatform);
-
-            // Android
-            var androidPlatform = new SolutionPlatform()
-            {
-                Name = PlatformType.Android.ToString(),
-                Type = PlatformType.Android,
-                TargetFramework = "monoandroid81",
-                IsAvailable = IsVSComponentAvailableAnyVersion(XamarinAndroidComponents)
-            };
-            androidPlatform.DefineConstants.Add("XENKO_PLATFORM_MONO_MOBILE");
-            androidPlatform.DefineConstants.Add("XENKO_PLATFORM_ANDROID");
-            androidPlatform.Configurations.Add(new SolutionConfiguration("Testing"));
-            androidPlatform.Configurations.Add(new SolutionConfiguration("AppStore"));
-            androidPlatform.Configurations["Debug"].Properties.AddRange(new[]
-                {
-                    "<AndroidUseSharedRuntime>True</AndroidUseSharedRuntime>",
-                    "<AndroidLinkMode>None</AndroidLinkMode>",
-                });
-            androidPlatform.Configurations["Release"].Properties.AddRange(new[]
-                {
-                    "<AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>",
-                    "<AndroidLinkMode>SdkOnly</AndroidLinkMode>",
-                });
-            androidPlatform.Configurations["Testing"].Properties.AddRange(androidPlatform.Configurations["Release"].Properties);
-            androidPlatform.Configurations["AppStore"].Properties.AddRange(androidPlatform.Configurations["Release"].Properties);
-            solutionPlatforms.Add(androidPlatform);
-
-            // iOS: iPhone
-            var iphonePlatform = new SolutionPlatform()
-            {
-                Name = PlatformType.iOS.ToString(),
-                SolutionName = "iPhone", // For iOS, we need to use iPhone as a solution name
-                Type = PlatformType.iOS,
-                TargetFramework = "xamarinios10",
-                IsAvailable = IsVSComponentAvailableAnyVersion(XamariniOSComponents)
-            };
-            iphonePlatform.PlatformsPart.Add(new SolutionPlatformPart("iPhoneSimulator"));
-            iphonePlatform.DefineConstants.Add("XENKO_PLATFORM_MONO_MOBILE");
-            iphonePlatform.DefineConstants.Add("XENKO_PLATFORM_IOS");
-            iphonePlatform.Configurations.Add(new SolutionConfiguration("Testing"));
-            iphonePlatform.Configurations.Add(new SolutionConfiguration("AppStore"));
-            var iPhoneCommonProperties = new List<string>
-                {
-                    "<ConsolePause>false</ConsolePause>",
-                    "<MtouchUseSGen>True</MtouchUseSGen>",
-                    "<MtouchArch>ARMv7, ARMv7s, ARM64</MtouchArch>"
-                };
-
-            iphonePlatform.Configurations["Debug"].Properties.AddRange(iPhoneCommonProperties);
-            iphonePlatform.Configurations["Debug"].Properties.AddRange(new []
-                {
-                    "<MtouchDebug>True</MtouchDebug>",
-                    "<CodesignKey>iPhone Developer</CodesignKey>",
-                    "<MtouchUseSGen>True</MtouchUseSGen>",
-                });
-            iphonePlatform.Configurations["Release"].Properties.AddRange(iPhoneCommonProperties);
-            iphonePlatform.Configurations["Release"].Properties.AddRange(new[]
-                {
-                    "<CodesignKey>iPhone Developer</CodesignKey>",
-                });
-            iphonePlatform.Configurations["Testing"].Properties.AddRange(iPhoneCommonProperties);
-            iphonePlatform.Configurations["Testing"].Properties.AddRange(new[]
-                {
-                    "<MtouchDebug>True</MtouchDebug>",
-                    "<CodesignKey>iPhone Distribution</CodesignKey>",
-                    "<BuildIpa>True</BuildIpa>",
-                });
-            iphonePlatform.Configurations["AppStore"].Properties.AddRange(iPhoneCommonProperties);
-            iphonePlatform.Configurations["AppStore"].Properties.AddRange(new[]
-                {
-                    "<CodesignKey>iPhone Distribution</CodesignKey>",
-                });
-            solutionPlatforms.Add(iphonePlatform);
-
-            // iOS: iPhoneSimulator
-            var iPhoneSimulatorPlatform = iphonePlatform.PlatformsPart["iPhoneSimulator"];
-            iPhoneSimulatorPlatform.Configurations["Debug"].Properties.AddRange(new[]
-                {
-                    "<MtouchDebug>True</MtouchDebug>",
-                    "<MtouchLink>None</MtouchLink>",
-                    "<MtouchArch>i386, x86_64</MtouchArch>"
-                });
-            iPhoneSimulatorPlatform.Configurations["Release"].Properties.AddRange(new[]
-                {
-                    "<MtouchLink>None</MtouchLink>",
-                    "<MtouchArch>i386, x86_64</MtouchArch>"
-                });
 
             AssetRegistry.RegisterSupportedPlatforms(solutionPlatforms);
         }

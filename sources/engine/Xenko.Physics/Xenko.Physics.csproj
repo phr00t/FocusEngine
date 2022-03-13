@@ -12,8 +12,7 @@
     <XenkoAssemblyProcessor>true</XenkoAssemblyProcessor>
     <XenkoAssemblyProcessorOptions>--serialization --parameter-key</XenkoAssemblyProcessorOptions>
     <XenkoBuildTags>*</XenkoBuildTags>
-    <XenkoBulletPlatform></XenkoBulletPlatform> <!--Empty by default, only iOS needs special care-->
-    <XenkoBulletPlatform Condition="'$(XenkoPlatform)' == 'iOS'">iOS</XenkoBulletPlatform>
+    <XenkoBulletPlatform></XenkoBulletPlatform>
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
     <XenkoPublicApi>true</XenkoPublicApi>
   </PropertyGroup>

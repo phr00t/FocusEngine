@@ -46,13 +46,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </XenkoNativeLib>
   </ItemGroup>
-  <ItemGroup Condition=" '$(XenkoPlatform)' == 'iOS' Or '$(XenkoPlatform)' == 'Linux'">
+  <ItemGroup Condition="'$(XenkoPlatform)' == 'Linux'">
     <Reference Include="SharpFont">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(XenkoDependenciesDir)SharpFont\$(XenkoPlatform)\SharpFont.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup Condition="'$(XenkoPlatform)' != 'iOS' And '$(XenkoPlatform)' != 'Linux'">
+  <ItemGroup Condition="'$(XenkoPlatform)' != 'Linux'">
     <Reference Include="SharpFont">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(XenkoDependenciesDir)SharpFont\Portable\SharpFont.dll</HintPath>
@@ -67,8 +67,8 @@
     <ProjectReference Include="..\Xenko.Native\Xenko.Native.csproj" />
     <ProjectReference Include="..\Xenko.Shaders\Xenko.Shaders.csproj" />
     <ProjectReference Include="..\Xenko\Xenko.csproj" />
-    <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'UWP'" />
-    <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'UWP'" />
+    <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
+    <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
     <PackageReference Include="Vortice.Vulkan" Version="1.2.170.2" />
     <PackageReference Include="Vortice.Mathematics" Version="1.4.1" />
   </ItemGroup>

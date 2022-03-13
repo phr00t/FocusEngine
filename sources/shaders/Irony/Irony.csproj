@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
     <XenkoRuntimeNetStandard>true</XenkoRuntimeNetStandard>
@@ -79,5 +79,4 @@
   
   <Import Project="$(XenkoPostSettingsTargets)" />
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-
 </Project>

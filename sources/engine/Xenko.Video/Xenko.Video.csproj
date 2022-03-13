@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
     <XenkoGraphicsApiDependent>true</XenkoGraphicsApiDependent>
@@ -13,9 +13,6 @@
     <XenkoCodeAnalysis>true</XenkoCodeAnalysis>
     <XenkoPackAssets>true</XenkoPackAssets>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(XenkoPlatform)' == 'Android'">
-    <DefineConstants>XENKO_VIDEO_MEDIACODEC;$(DefineConstants)</DefineConstants>
-  </PropertyGroup>
   <PropertyGroup Condition="('$(XenkoPlatform)' == 'Windows') and ('$(XenkoNETRuntime)' != 'CoreCLR')">
     <DefineConstants>XENKO_VIDEO_FFMPEG;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
@@ -26,28 +23,17 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Xenko.Engine\Xenko.Engine.csproj" />
-    <PackageReference Include="SharpDX.MediaFoundation" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'UWP'" />
-    <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'UWP'" />
+    <PackageReference Include="SharpDX.MediaFoundation" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
+    <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
     <PackageReference Include="SharpDX.Direct3D12" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
   </ItemGroup>
-  <Choose>
-    <When Condition="$(DefineConstants.Contains(XENKO_VIDEO_FFMPEG))">
-      <ItemGroup Condition="'$(XenkoPlatform)' == 'Android'">
-        <XenkoNativeLib Include="$(XenkoDependenciesDir)\FFmpeg\$(XenkoPlatform)\**\*.so">
-          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-          <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </XenkoNativeLib>
-      </ItemGroup>
-      <ItemGroup Condition="'$(XenkoPlatform)' == 'Windows'">
-        <XenkoNativeLib Include="$(XenkoDependenciesDir)\FFmpeg\$(XenkoPlatform)\**\*.dll">
-          <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-          <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </XenkoNativeLib>
-      </ItemGroup>
-    </When>
-  </Choose>
+  <ItemGroup Condition="$(DefineConstants.Contains(XENKO_VIDEO_FFMPEG)) and '$(XenkoPlatform)' == 'Windows'">
+    <XenkoNativeLib Include="$(XenkoDependenciesDir)\FFmpeg\$(XenkoPlatform)\**\*.dll">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <RelativePath>%(RecursiveDir)%(Filename)%(Extension)</RelativePath>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </XenkoNativeLib>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FFmpeg.AutoGen" Version="3.4.0.6" Condition="'$(XenkoPlatform)' == 'Windows'" />
   </ItemGroup>

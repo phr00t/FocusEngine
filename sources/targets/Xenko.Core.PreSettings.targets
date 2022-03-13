@@ -17,7 +17,7 @@
   <PropertyGroup>
     <!-- Using C# version 9.0 -->
     <LangVersion>9.0</LangVersion>
-    <XenkoRuntimeTargetFramework>net48</XenkoRuntimeTargetFramework>
+    <XenkoRuntimeTargetFramework>net6.0</XenkoRuntimeTargetFramework>
     <TargetFrameworkTool>net48</TargetFrameworkTool>
     <TargetFrameworkVersionTool>v4.8</TargetFrameworkVersionTool>
     <XenkoPlatformDefines>XENKO_PLATFORM_WINDOWS;XENKO_PLATFORM_WINDOWS_DESKTOP;NET45</XenkoPlatformDefines>
@@ -28,23 +28,11 @@
     <XenkoPlatforms>$([MSBuild]::Unescape('$(XenkoPlatforms)'))</XenkoPlatforms>
     <_XenkoPlatforms>;$(XenkoPlatforms);</_XenkoPlatforms>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('uap10.0'))">
-    <!-- Reset runtime identifier by default (otherwise GetPackagingOutputs fail) -->
-    <RuntimeIdentifier></RuntimeIdentifier>
-    <RuntimeIdentifiers></RuntimeIdentifiers>
-    <WindowsAppContainer>false</WindowsAppContainer>
-    <AppxPackage>false</AppxPackage>
-    <Platform>AnyCPU</Platform>
-  </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(XenkoRuntime)' == 'true' And '$(XenkoRuntimeNetStandard)' != 'true' ">
+  <PropertyGroup Condition="'$(XenkoRuntime)' == 'true' And '$(XenkoRuntimeNetStandard)' != 'true'">
     <!-- Add netstandard2.0 no matter what (needed for references) -->
     <XenkoRuntimeTargetFrameworks>netstandard2.0</XenkoRuntimeTargetFrameworks>
     <XenkoRuntimeTargetFrameworks Condition="$(_XenkoPlatforms.Contains(';Windows;')) And '$(XenkoRuntimeWindowsDotNet)' == 'true'">$(XenkoRuntimeTargetFrameworks);net48</XenkoRuntimeTargetFrameworks>
-    <XenkoRuntimeTargetFrameworks Condition="$(_XenkoPlatforms.Contains(';UWP;'))">$(XenkoRuntimeTargetFrameworks);uap10.0.16299</XenkoRuntimeTargetFrameworks>
-    <XenkoRuntimeTargetFrameworks Condition="$(_XenkoPlatforms.Contains(';Android;'))">$(XenkoRuntimeTargetFrameworks);monoandroid81</XenkoRuntimeTargetFrameworks>
-    <XenkoRuntimeTargetFrameworks Condition="$(_XenkoPlatforms.Contains(';iOS;'))">$(XenkoRuntimeTargetFrameworks);xamarinios10</XenkoRuntimeTargetFrameworks>
 
     <XenkoRuntimeIdentifiers Condition="'$(XenkoRuntimeNetStandardNoRuntimeIdentifiers)' != 'true' And '$(TargetFramework)' == 'netstandard2.0' And $(_XenkoPlatforms.Contains(';Windows;'))">$(XenkoRuntimeIdentifiers);win</XenkoRuntimeIdentifiers>
     <XenkoRuntimeIdentifiers Condition="'$(XenkoRuntimeNetStandardNoRuntimeIdentifiers)' != 'true' And '$(TargetFramework)' == 'netstandard2.0' And $(_XenkoPlatforms.Contains(';Linux;'))">$(XenkoRuntimeIdentifiers);linux</XenkoRuntimeIdentifiers>
@@ -79,7 +67,7 @@
     <!--<TargetFrameworks>net48;uap10.0.16299;monoandroid81;xamarinios10;netstandard2.0</TargetFrameworks>-->
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(XenkoRuntime)' == 'true' And '$(XenkoRuntimeNetStandard)' == 'true' ">
+  <PropertyGroup Condition="'$(XenkoRuntime)' == 'true' And '$(XenkoRuntimeNetStandard)' == 'true'">
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
@@ -116,7 +104,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="GetPackagingOutputs" Condition=" '$(XenkoRuntime)' == 'true' And '$(XenkoRuntimeNetStandard)' == 'true' " />
+  <Target Name="GetPackagingOutputs" Condition="'$(XenkoRuntime)' == 'true' And '$(XenkoRuntimeNetStandard)' == 'true'" />
 
   <!-- Use default runtime as ref assembly -->
   <PropertyGroup>
@@ -130,7 +118,7 @@
   </Target>
 
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <GenerateProjectSpecificOutputFolder>false</GenerateProjectSpecificOutputFolder>
 
     <!-- Defines the language of the project being compiled CSharp or Cpp - defined by default to CSharp, must be overriden to Cpp in a Cpp project -->
@@ -144,9 +132,6 @@
     <XenkoPlatform Condition=" ($(TargetFramework.StartsWith('net4')) Or '$(TargetFramework)' == 'netstandard2.0') And ('$(RuntimeIdentifier)' == '' Or $(RuntimeIdentifier.StartsWith('win'))) ">Windows</XenkoPlatform>
     <XenkoPlatform Condition=" ($(TargetFramework.StartsWith('net4')) Or '$(TargetFramework)' == 'netstandard2.0') And $(RuntimeIdentifier.StartsWith('linux')) ">Linux</XenkoPlatform>
     <XenkoPlatform Condition=" ($(TargetFramework.StartsWith('net4')) Or '$(TargetFramework)' == 'netstandard2.0') And $(RuntimeIdentifier.StartsWith('osx')) ">macOS</XenkoPlatform>
-    <XenkoPlatform Condition=" $(TargetFramework.StartsWith('uap10.0')) ">UWP</XenkoPlatform>
-    <XenkoPlatform Condition=" '$(TargetFramework)' == 'monoandroid81' ">Android</XenkoPlatform>
-    <XenkoPlatform Condition=" '$(TargetFramework)' == 'xamarinios10' ">iOS</XenkoPlatform>
     <!-- Default fallback -->
     <XenkoPlatform Condition=" '$(XenkoPlatform)' == '' ">Windows</XenkoPlatform>
 
@@ -155,17 +140,6 @@
     <XenkoGlobalSettingsTargets Condition="'$(XenkoGlobalSettingsTargets)' == ''">$(MSBuildThisFileDirectory)Xenko.Core.GlobalSettings.targets</XenkoGlobalSettingsTargets>
     <XenkoPostSettingsTargets Condition="'$(XenkoPostSettingsTargets)' == ''">$(MSBuildThisFileDirectory)Xenko.Core.PostSettings.targets</XenkoPostSettingsTargets>
   </PropertyGroup>
-
-  <!-- Ensure appropriate Solution Platform are available -->
-  <Choose>
-    <When  Condition=" '$(XenkoPlatform)' == 'Android' ">
-      <PropertyGroup Condition=" '$(Platform)' == 'Android' "/>
-    </When>
-    <When  Condition=" '$(XenkoPlatform)' == 'iOS' ">
-      <PropertyGroup Condition=" '$(Platform)' == 'iPhone' "/>
-      <PropertyGroup Condition=" '$(Platform)' == 'iPhoneSimulator' "/>
-    </When>
-  </Choose>
 
   <!--Import Global Settings-->
   <Import Project="$(XenkoGlobalSettingsTargets)"/>

@@ -1,5 +1,4 @@
 <Project>
-
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
     <XenkoNativeOutputName>libxenkonavigation</XenkoNativeOutputName>
@@ -45,5 +44,4 @@
 
   <Import Project="$(XenkoPostSettingsTargets)" />
   <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
-
 </Project>

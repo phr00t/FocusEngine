@@ -1,5 +1,4 @@
-﻿<Project>
-
+<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
     <XenkoRuntimeNetStandardNoRuntimeIdentifiers>true</XenkoRuntimeNetStandardNoRuntimeIdentifiers>
@@ -37,8 +36,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\core\Xenko.Core.Serialization\Xenko.Core.Serialization.csproj" />
     <ProjectReference Include="..\..\core\Xenko.Core.Mathematics\Xenko.Core.Mathematics.csproj" />
-    <!-- SharpDX is needed for WIC -->
-    <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'UWP'" />
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" Condition="'$(XenkoPlatform)' == 'Windows' Or '$(XenkoPlatform)' == 'Linux'" />
   </ItemGroup>
 
@@ -55,5 +52,4 @@
 
   <Import Project="$(XenkoPostSettingsTargets)" />
   <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
-
 </Project>

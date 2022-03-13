@@ -54,6 +54,7 @@ namespace Xenko.Core.Assets
             "netstandard1.1",
             "netstandard1.0",
             "net5.0",
+            "net6.0"
         };
         struct SortedFile
         {

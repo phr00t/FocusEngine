@@ -13,33 +13,16 @@
     <XenkoAssemblyProcessorOptions>--serialization</XenkoAssemblyProcessorOptions>
     <XenkoBuildTags>*</XenkoBuildTags>
   </PropertyGroup>
-  <Choose>
-    <When Condition="('$(XenkoPlatform)' == 'UWP')">
-      <ItemGroup>
-        <Reference Include="CppNet">
-          <HintPath>..\..\..\deps\CppNet\Store\CppNet.dll</HintPath>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <When Condition="'$(XenkoNETRuntime)' != ''">
-      <ItemGroup>
-        <Reference Include="CppNet">
-          <HintPath>..\..\..\deps\CppNet\$(XenkoNETRuntime)\CppNet.dll</HintPath>
-        </Reference>
-      </ItemGroup>
-    </When>
-    <Otherwise>
-      <ItemGroup>
-        <Reference Include="CppNet">
-          <HintPath>..\..\..\deps\CppNet\CppNet.dll</HintPath>
-        </Reference>
-      </ItemGroup>
-    </Otherwise>
-  </Choose>
-  <Choose>
-    <When Condition=" '$(AutoIncludeSystemAssembly)' != 'true'">
-    </When>
-  </Choose>
+  <ItemGroup Condition="'$(XenkoNETRuntime)' != ''">
+    <Reference Include="CppNet">
+      <HintPath>..\..\..\deps\CppNet\$(XenkoNETRuntime)\CppNet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup Condition="'$(XenkoNETRuntime)' == ''">
+    <Reference Include="CppNet">
+      <HintPath>..\..\..\deps\CppNet\CppNet.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\shared\SharedAssemblyInfo.cs">
       <Link>Properties\SharedAssemblyInfo.cs</Link>

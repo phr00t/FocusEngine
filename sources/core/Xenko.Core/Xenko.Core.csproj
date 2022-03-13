@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <PropertyGroup>
     <XenkoRuntime>true</XenkoRuntime>
   </PropertyGroup>
@@ -21,21 +21,7 @@
   </PropertyGroup>
   
   <Choose>
-    <When Condition=" '$(XenkoPlatform)' == 'Android' ">
-      <ItemGroup>
-        <Reference Include="Mono.Android" />
-      </ItemGroup>
-    </When>
-  </Choose>
-  <Choose>
-    <When Condition=" '$(XenkoPlatform)' == 'iOS' ">
-      <ItemGroup>
-        <Reference Include="Xamarin.iOS" />
-      </ItemGroup>
-    </When>
-  </Choose>
-  <Choose>
-    <When Condition=" '$(XenkoNETRuntime)' == 'CoreCLR' ">
+    <When Condition="'$(XenkoNETRuntime)' == 'CoreCLR'">
       <ItemGroup>
         <None Include="..\..\data\Linux\runtimeconfig.json">
           <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -111,16 +97,6 @@
       <LastGenOutput>TupleSerializer.cs</LastGenOutput>
     </None>
   </ItemGroup>
-
-  <Choose>
-    <When Condition=" '$(XenkoPlatform)' == 'Windows' ">
-      <ItemGroup>
-        <Reference Include="PresentationFramework">
-          <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\PresentationFramework.dll</HintPath>
-        </Reference>
-      </ItemGroup>
-    </When>
-  </Choose>
     
   <ItemGroup>
     <XenkoContent Condition="'$(XenkoPlatform)' == 'Linux'" Include="Xenko.Core.dll.config" />
