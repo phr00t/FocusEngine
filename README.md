@@ -52,9 +52,9 @@ Most of Focus is similar to Stride and there shouldn't be any loss of functional
 
 ## OK, show me something neat!
 
-![Lots of Boxes](https://i.imgur.com/XaOuMQH.png)
+![Lots of Boxes](https://i.imgur.com/E9J0skw.png)
 
-This is 6100+ physical boxes being rendered @ 50fps, which may not be the fastest thing out there, but it is pretty good! It is using BepuPhysics + Vulkan + https://github.com/phr00t/FocusEngine/blob/master/sources/engine/Xenko.Engine/Engine/Batching/BatchedMeshDraw.cs to draw all these boxes with 1 material, 1 mesh & 1 draw call. BatchedMeshDraw allows custom UV offsets per copy, hence why you see some boxes with different textures. Neat!
+This is 6700+ physical boxes being rendered @ 50fps, which may not be the fastest thing out there, but it is pretty good! It is using BepuPhysics + Vulkan + https://github.com/phr00t/FocusEngine/blob/master/sources/engine/Xenko.Engine/Engine/Batching/BatchedMeshDraw.cs to draw all these boxes with 1 material, 1 mesh & 1 draw call. BatchedMeshDraw allows custom UV offsets per copy, hence why you see some boxes with different textures. Neat!
 
 ## What is worse in this fork?
 
