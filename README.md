@@ -90,7 +90,7 @@ Ask for help or report issues:
 ### Prerequisites
 
 1. [Git](https://git-scm.com/downloads) (recent version that includes LFS, or install [Git LFS](https://git-lfs.github.com/) separately).
-2. [Visual Studio 2019](https://www.visualstudio.com/downloads/) (v16.11.8 works best for me) with the following workloads:
+2. [Visual Studio 2019](https://www.visualstudio.com/downloads/) with the following workloads:
   * `.NET desktop development` with `.NET Framework 4.8 targeting pack`
   * `Desktop development with C++` with `Windows 10 SDK (latest)`, and `VC++ 2019 latest v142 tools` or later (both should be enabled by default)
   * `.NET Core cross-platform development` with `.NET Core 6 SDK` (Will need to enable Preview SDKs via VS2019 Preview Options)
