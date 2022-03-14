@@ -32,6 +32,11 @@ namespace Xenko.Graphics
             var result = vkInitialize();
             result.CheckResult();
 
+#if DEBUG
+            if (!RuntimeInformation.FrameworkDescription.Contains("amework")) 
+                throw new Exception("Engine is running Vulkan in DEBUG with .NET Core. Debug output reports don't work. Try running with .NET Framework v4.8 or RELEASE. Later versions of Vortice.Vulkan might not have this problem, but I haven't gotten to fixing that yet.");    
+#endif
+
             // Create the default instance to enumerate physical devices
             defaultInstance = new GraphicsAdapterFactoryInstance(debug);
             var nativePhysicalDevices = vkEnumeratePhysicalDevices(defaultInstance.NativeInstance);
