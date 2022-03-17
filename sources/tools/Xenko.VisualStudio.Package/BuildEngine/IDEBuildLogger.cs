@@ -210,7 +210,7 @@ namespace Xenko.VisualStudio.BuildEngine
 
         private void NavigateTo(object sender, EventArgs arguments)
         {
-            Microsoft.VisualStudio.Shell.Task task = sender as Microsoft.VisualStudio.Shell.Task;
+            TaskListItem task = sender as TaskListItem;
             if (task == null)
                 throw new ArgumentException("Sender is not a Microsoft.VisualStudio.Shell.Task", "sender");
 
