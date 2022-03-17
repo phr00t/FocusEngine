@@ -62,7 +62,7 @@ Android/mobile support, different languages, and Universal Windows Platform supp
 
 Documentation is worse in this fork, as I don't have time to go back and properly document the new features I add. The list above isn't updated often enough to showcase the latest improvements. I try to comment new additions, but would require looking at the source to see them. Stride documentation is mostly still applicable, but there may be better ways to do things in this fork (VR for example).
 
-The engine and built applications runs on NET Framework 4.8 on Windows, and doesn't support NET 5/6 yet on that platform (NET5 is used for Linux/Mac applications, though). This has been attempted, but hasn't succeeded yet. There is an issue for it @ https://github.com/phr00t/FocusEngine/issues/106. Fortunately, there is no discernible performance loss or impact as Stride developers, which did get NET5/6 working, reported no improvements (many other things are holding that engine back).
+You can now export games and projects targeting .NET 6 & Visual Studio 2022 is now supported. However, GameStudio (the editor) is still running on .NET Framework 4.8 (not a big deal, in my humble opinion).
 
 Creating templates with this fork is semi broken (you'll get an error, but it still gets created). Just browse for it next time you open Focus. There is an issue for it on the issues tab.
 
