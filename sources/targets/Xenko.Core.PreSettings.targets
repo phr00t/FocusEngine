@@ -29,6 +29,10 @@
     <_XenkoPlatforms>;$(XenkoPlatforms);</_XenkoPlatforms>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <ValidateExecutableReferencesMatchSelfContained>false</ValidateExecutableReferencesMatchSelfContained>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(XenkoRuntime)' == 'true' And '$(XenkoRuntimeNetStandard)' != 'true'">
     <!-- Add netstandard2.0 no matter what (needed for references) -->
     <XenkoRuntimeTargetFrameworks>netstandard2.0</XenkoRuntimeTargetFrameworks>
