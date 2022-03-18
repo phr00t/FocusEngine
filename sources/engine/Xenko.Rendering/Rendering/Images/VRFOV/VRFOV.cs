@@ -21,6 +21,7 @@ namespace Xenko.Rendering.Images {
         /// </summary>
         public VRFOV()
             : this("VRFOVEffect") {
+            Enabled = false;
         }
 
         /// <summary>

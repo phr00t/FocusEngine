@@ -18,10 +18,11 @@ namespace Xenko.Rendering.Images {
         private float zMin, zMax;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CartoonFilter"/> class.
+        /// Initializes a new instance of the <see cref="Outline"/> class.
         /// </summary>
         public Outline()
             : this("OutlineEffect") {
+            Enabled = false;
         }
 
         [DataMember(10)]

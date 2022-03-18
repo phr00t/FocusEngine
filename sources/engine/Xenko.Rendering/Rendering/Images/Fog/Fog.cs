@@ -31,6 +31,7 @@ namespace Xenko.Rendering.Images {
         public Fog(string ShaderName) : base(ShaderName) {
             if (ShaderName == null) throw new ArgumentNullException("fogFilterName");
             fogFilter = new ImageEffectShader(ShaderName);
+            Enabled = false;
         }
 
         [DataMember(10)]
