@@ -79,7 +79,7 @@ namespace Xenko.Input
             capturedPosition = forceCenter ? new Vector2(0.5f) : Position;
         }
 
-        public override void UnlockPosition()
+        public override void UnlockPosition(bool restoreVisible = true)
         {
             positionLocked = false;
         }

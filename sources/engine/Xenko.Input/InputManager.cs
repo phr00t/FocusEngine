@@ -344,14 +344,14 @@ namespace Xenko.Input
         }
 
         /// <summary>
-        /// Unlock the mouse's position previously locked by calling <see cref="LockMousePosition"/> and restore the mouse visibility.
+        /// Unlock the mouse's position previously locked by calling <see cref="LockMousePosition"/>. By default restores mouse visibility.
         /// </summary>
         /// <remarks>This function has no effects on devices that does not have mouse</remarks>
-        public void UnlockMousePosition()
+        public void UnlockMousePosition(bool restoreVisibility = true)
         {
             if (HasMouse)
             {
-                Mouse.UnlockPosition();
+                Mouse.UnlockPosition(restoreVisibility);
             }
         }
 

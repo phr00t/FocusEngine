@@ -50,7 +50,7 @@ namespace Xenko.Input
         /// <summary>
         /// Unlocks the mouse position if it was locked
         /// </summary>
-        void UnlockPosition();
+        void UnlockPosition(bool restoreVisibility = true);
 
         /// <summary>
         /// Attempts to set the pointer position, this only makes sense for mouse pointers

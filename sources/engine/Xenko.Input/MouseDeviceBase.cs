@@ -38,6 +38,6 @@ namespace Xenko.Input
         
         public abstract void LockPosition(bool forceCenter = false);
         
-        public abstract void UnlockPosition();
+        public abstract void UnlockPosition(bool restoreVisibility = true);
     }
 }

@@ -83,13 +83,14 @@ namespace Xenko.Input
             }
         }
 
-        public override void UnlockPosition()
+        public override void UnlockPosition(bool restoreVisibility = true)
         {
             if (IsPositionLocked)
             {
-                uiControl.RelativeCursorPosition = relativeCapturedPosition;
                 isMousePositionLocked = false;
                 needsRelativeSync = true;
+                if (restoreVisibility) game.IsMouseVisible = true;
+                uiControl.RelativeCursorPosition = relativeCapturedPosition;
                 relativeCapturedPosition = Point.Zero;
             }
         }

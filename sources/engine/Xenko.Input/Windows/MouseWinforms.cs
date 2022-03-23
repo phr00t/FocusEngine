@@ -88,7 +88,7 @@ namespace Xenko.Input
             }
         }
 
-        public override void UnlockPosition()
+        public override void UnlockPosition(bool restoreVisible = true)
         {
             if (isPositionLocked)
             {
