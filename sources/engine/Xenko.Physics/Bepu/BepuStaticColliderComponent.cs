@@ -37,6 +37,20 @@ namespace Xenko.Physics.Bepu
 
         public override TypedIndex ShapeIndex { get => staticDescription.Collidable.Shape; }
 
+        /// <summary>
+        /// Generates a static collider for an Entity. Has a shortcut for setting the shape.
+        /// </summary>
+        /// <param name="collider_shape">Sets the shape. If null, one must be set later.</param>
+        public BepuStaticColliderComponent(IShape collider_shape = null) : base ()
+        {
+            staticDescription.Pose.Orientation.W = 1f;
+            myStaticHandle.Value = -1;
+            ColliderShape = collider_shape;
+        }
+
+        /// <summary>
+        /// Default constructor with no collider shape shortcut.
+        /// </summary>
         public BepuStaticColliderComponent() : base ()
         {
             staticDescription.Pose.Orientation.W = 1f;

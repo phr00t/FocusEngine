@@ -78,6 +78,8 @@ namespace Xenko.Physics.Bepu
 
         private static void PrepareDelegates()
         {
+            CachedDelegates = new Action<BepuRigidbodyComponent>[13];
+
             CachedDelegates[(int)RB_ACTION.CcdMotionThreshold] = (rb) =>
             {
                 rb.InternalBody.Collidable.Continuity = rb.bodyDescription.Collidable.Continuity;
@@ -329,12 +331,10 @@ namespace Xenko.Physics.Bepu
         private RigidBodyTypes type = RigidBodyTypes.Dynamic;
         private Vector3 gravity = Vector3.Zero;
 
-        public BepuRigidbodyComponent() : base()
+        private void setInternalBodyDefaults()
         {
-            if (CachedDelegates == null) {
-                CachedDelegates = new Action<BepuRigidbodyComponent>[13];
+            if (CachedDelegates == null)
                 PrepareDelegates();
-            }
 
             bodyDescription.Pose.Orientation.W = 1f;
             bodyDescription.LocalInertia.InverseMass = 1f;
@@ -342,6 +342,30 @@ namespace Xenko.Physics.Bepu
             bodyDescription.Activity.SleepThreshold = 0.01f;
             InternalBody.Bodies = BepuSimulation.instance.internalSimulation.Bodies;
             InternalBody.Handle.Value = -1;
+        }
+
+        /// <summary>
+        /// Generates a rigid body component for an Entity. Has shortcuts for setting the collidershape and mass.
+        /// </summary>
+        /// <param name="collider_shape">Sets a collider shape. If null, one must be set later.</param>
+        /// <param name="mass">Sets mass IF collider_shape is not null.</param>
+        public BepuRigidbodyComponent(IShape collider_shape = null, float mass = 1f) : base()
+        {
+            setInternalBodyDefaults();
+            
+            if (collider_shape != null)
+            {
+                ColliderShape = collider_shape;
+                Mass = mass;
+            }
+        }
+
+        /// <summary>
+        /// Default constructor with no shortcut for making a collider shape. Make sure to add one later!
+        /// </summary>
+        public BepuRigidbodyComponent() : base()
+        {
+            setInternalBodyDefaults();
         }
 
         public override TypedIndex ShapeIndex { get => bodyDescription.Collidable.Shape; }
