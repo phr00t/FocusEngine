@@ -1062,7 +1062,8 @@ MinimumVisualStudioVersion = {0}".ToFormat(DefaultVisualStudioVersion);
                                 }
                             }
 
-                            Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(assetPath, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                            if (File.Exists(assetPath))
+                                Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(assetPath, Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
                         }
                         catch (Exception ex)
                         {
