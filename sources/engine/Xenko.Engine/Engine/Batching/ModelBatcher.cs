@@ -45,6 +45,40 @@ namespace Xenko.Engine
         private static CacheConcurrentDictionary<Mesh, CachedData> CachedModelData = new Core.Collections.CacheConcurrentDictionary<Mesh, CachedData>(24);
 
         /// <summary>
+        /// Unpacks a mesh into raw arrays of data. Data could be later used to manipulate the mesh and make another using StagedMeshDraw, for example.
+        /// </summary>
+        /// <param name="m">Mesh to unpack</param>
+        /// <param name="positions">Output vert positions</param>
+        /// <param name="normals">Output normals</param>
+        /// <param name="uvs">Output UVs</param>
+        /// <param name="colors">Output vert colors</param>
+        /// <param name="tangents">Output vert tangents</param>
+        /// <returns>true if successful, false if not (e.g. mesh didn't have buffer information)</returns>
+        public static unsafe bool UnpackRawVertData(Mesh m, out Vector3[] positions, out Vector3[] normals, out Vector2[] uvs, out Color4[] colors, out Vector4[] tangents)
+        {
+            if (m.Draw is StagedMeshDraw)
+                throw new Exception("Mesh is a StagedMeshDraw. Get vert data straight from Mesh.Draw's Verticies and Indicies parameters.");
+
+            Xenko.Graphics.Buffer buf = m.Draw?.VertexBuffers[0].Buffer;
+            Xenko.Graphics.Buffer ibuf = m.Draw?.IndexBuffer.Buffer;
+            if (buf == null || buf.VertIndexData == null || ibuf == null || ibuf.VertIndexData == null)
+            {
+                positions = null;
+                normals = null;
+                uvs = null;
+                colors = null;
+                tangents = null;
+                return false;
+            }
+
+            if (UnpackRawVertData(buf.VertIndexData, m.Draw.VertexBuffers[0].Declaration,
+                                  out positions, out normals, out uvs, out colors, out tangents) == false)
+                return false;
+
+            return true;
+        }
+
+        /// <summary>
         /// Unpacks a raw buffer of vertex data into proper arrays
         /// </summary>
         /// <returns>Returns true if some data was successful in extraction</returns>
