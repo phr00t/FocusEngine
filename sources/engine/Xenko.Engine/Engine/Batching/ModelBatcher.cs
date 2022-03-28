@@ -53,8 +53,9 @@ namespace Xenko.Engine
         /// <param name="uvs">Output UVs</param>
         /// <param name="colors">Output vert colors</param>
         /// <param name="tangents">Output vert tangents</param>
+        /// <param name="indicies">Output mesh indicies</param>
         /// <returns>true if successful, false if not (e.g. mesh didn't have buffer information)</returns>
-        public static unsafe bool UnpackRawVertData(Mesh m, out Vector3[] positions, out Vector3[] normals, out Vector2[] uvs, out Color4[] colors, out Vector4[] tangents)
+        public static unsafe bool UnpackRawVertData(Mesh m, out Vector3[] positions, out Vector3[] normals, out Vector2[] uvs, out Color4[] colors, out Vector4[] tangents, out uint[] indicies)
         {
             if (m.Draw is StagedMeshDraw)
                 throw new Exception("Mesh is a StagedMeshDraw. Get vert data straight from Mesh.Draw's Verticies and Indicies parameters.");
@@ -68,12 +69,36 @@ namespace Xenko.Engine
                 uvs = null;
                 colors = null;
                 tangents = null;
+                indicies = null;
                 return false;
             }
 
             if (UnpackRawVertData(buf.VertIndexData, m.Draw.VertexBuffers[0].Declaration,
                                   out positions, out normals, out uvs, out colors, out tangents) == false)
+            {
+                indicies = null;
                 return false;
+            }
+
+            // indicies
+            fixed (byte* pdst = ibuf.VertIndexData)
+            {
+                int numIndices = m.Draw.IndexBuffer.Count;
+                indicies = new uint[numIndices];
+
+                if (m.Draw.IndexBuffer.Is32Bit)
+                {
+                    var dst = (uint*)(pdst + m.Draw.IndexBuffer.Offset);
+                    for (var k = 0; k < numIndices; k++)
+                        indicies[k] = dst[k];
+                }
+                else
+                {
+                    var dst = (ushort*)(pdst + m.Draw.IndexBuffer.Offset);
+                    for (var k = 0; k < numIndices; k++)
+                        indicies[k] = dst[k];
+                }
+            }
 
             return true;
         }
