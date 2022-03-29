@@ -1,4 +1,4 @@
-// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) .NET Foundation and Contributors (https://dotnetfoundation.org/ & https://stride3d.net) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Collections;
@@ -14,7 +14,7 @@ namespace Xenko.Core.Reflection
     /// </summary>
     public class DictionaryDescriptor : ObjectDescriptor
     {
-        private static readonly List<string> ListOfMembersToRemove = new List<string> {"Comparer", "Keys", "Values", "Capacity" };
+        private static readonly List<string> ListOfMembersToRemove = new List<string> { "Comparer", "Keys", "Values", "Capacity" };
 
         private readonly MethodInfo getEnumeratorGeneric;
         private readonly PropertyInfo getKeysMethod;
@@ -113,7 +113,7 @@ namespace Xenko.Core.Reflection
             if (dictionary == null) throw new ArgumentNullException(nameof(dictionary));
             if (IsGenericDictionary)
             {
-                foreach (var item in (IEnumerable<KeyValuePair<object, object>>)getEnumeratorGeneric.Invoke(null, new[] {dictionary}))
+                foreach (var item in (IEnumerable<KeyValuePair<object, object>>)getEnumeratorGeneric.Invoke(null, new[] { dictionary }))
                 {
                     yield return item;
                 }
@@ -274,7 +274,7 @@ namespace Xenko.Core.Reflection
                 return fastDictionary[key];
             }
 
-            return indexerProperty.GetValue(dictionary,new [] { key });
+            return indexerProperty.GetValue(dictionary, new[] { key });
         }
 
         /// <summary>
