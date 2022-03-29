@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation and Contributors (https://dotnetfoundation.org/ & https://stride3d.net) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Collections.Generic;
@@ -213,7 +213,7 @@ namespace Xenko.Core.Reflection
             }
 
             // TODO: we might want an option to disable non-public.
-            if (Category == DescriptorCategory.Object || Category == DescriptorCategory.NotSupportedObject)
+            if (Category == DescriptorCategory.Object)
                 bindingFlags |= BindingFlags.NonPublic;
 
             var memberList = (from propertyInfo in Type.GetProperties(bindingFlags)
@@ -366,9 +366,9 @@ namespace Xenko.Core.Reflection
                         var parentDefaultValue = parentTypeMemberDesc.DefaultValue;
                         if (parentDefaultValue != null)
                         {
-                            // The parent class holding this object type has defined it's own default value for this type
-                            var parentDefaultValueMemberValue = member.Get(parentDefaultValue); // This is the real default value for this object
-                            return !Equals(parentDefaultValueMemberValue, member.Get(obj));
+                                // The parent class holding this object type has defined it's own default value for this type
+                                var parentDefaultValueMemberValue = member.Get(parentDefaultValue); // This is the real default value for this object
+                                return !Equals(parentDefaultValueMemberValue, member.Get(obj));
                         }
                     }
                     return !Equals(defaultValue, member.Get(obj));
@@ -406,7 +406,7 @@ namespace Xenko.Core.Reflection
                 }
             }
 
-            if (memberType != null)
+            if (memberType  != null)
             {
                 if (typeof(Delegate).IsAssignableFrom(memberType))
                 {

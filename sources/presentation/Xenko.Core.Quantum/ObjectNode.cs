@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation and Contributors (https://dotnetfoundation.org/ & https://stride3d.net) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
@@ -40,7 +40,7 @@ namespace Xenko.Core.Quantum
         public IEnumerable<NodeIndex> Indices => GetIndices();
 
         /// <inheritdoc/>
-        public bool IsEnumerable => Descriptor is CollectionDescriptor || Descriptor is DictionaryDescriptor || Descriptor is ArrayDescriptor;
+        public bool IsEnumerable => Descriptor is CollectionDescriptor || Descriptor is DictionaryDescriptor;
 
         /// <inheritdoc/>
         public override bool IsReference => ItemReferences != null;
@@ -92,16 +92,9 @@ namespace Xenko.Core.Quantum
             var collectionDescriptor = Descriptor as CollectionDescriptor;
             if (collectionDescriptor != null)
             {
-                NodeIndex index = NodeIndex.Empty;
-                switch (collectionDescriptor.Category)
-                {
-                    case DescriptorCategory.List:
-                        index = new NodeIndex(collectionDescriptor.GetCollectionCount(value));
-                        break;
-                    case DescriptorCategory.Set:
-                        index = new NodeIndex(newItem);
-                        break;
-                }
+                // Some collection (such as sets) won't add item at the end but at an arbitrary location.
+                // Better send a null index in this case than sending a wrong value.
+                var index = collectionDescriptor.IsList ? new NodeIndex(collectionDescriptor.GetCollectionCount(value)) : NodeIndex.Empty;
                 var args = new ItemChangeEventArgs(this, index, ContentChangeType.CollectionAdd, null, newItem);
                 NotifyItemChanging(args);
                 collectionDescriptor.Add(value, newItem);
@@ -115,14 +108,14 @@ namespace Xenko.Core.Quantum
         /// <inheritdoc/>
         public void Add(object newItem, NodeIndex itemIndex)
         {
-            if (Descriptor is CollectionDescriptor collectionDescriptor)
+            var collectionDescriptor = Descriptor as CollectionDescriptor;
+            var dictionaryDescriptor = Descriptor as DictionaryDescriptor;
+            if (collectionDescriptor != null)
             {
-                var index = collectionDescriptor.Category == DescriptorCategory.Collection
-                    ? NodeIndex.Empty
-                    : itemIndex;
+                var index = collectionDescriptor.IsList ? itemIndex : NodeIndex.Empty;
                 var args = new ItemChangeEventArgs(this, index, ContentChangeType.CollectionAdd, null, newItem);
                 NotifyItemChanging(args);
-                if (!collectionDescriptor.HasInsert || collectionDescriptor.GetCollectionCount(value) == itemIndex.Int)
+                if (collectionDescriptor.GetCollectionCount(value) == itemIndex.Int || !collectionDescriptor.HasInsert)
                 {
                     collectionDescriptor.Add(value, newItem);
                 }
@@ -133,7 +126,7 @@ namespace Xenko.Core.Quantum
                 UpdateReferences();
                 NotifyItemChanged(args);
             }
-            else if (Descriptor is DictionaryDescriptor dictionaryDescriptor)
+            else if (dictionaryDescriptor != null)
             {
                 var args = new ItemChangeEventArgs(this, itemIndex, ContentChangeType.CollectionAdd, null, newItem);
                 NotifyItemChanging(args);
@@ -155,13 +148,16 @@ namespace Xenko.Core.Quantum
                 dictionaryDescriptor.Clear(value);
             }
         }
+
         /// <inheritdoc/>
         public void Remove(object item, NodeIndex itemIndex)
         {
             if (itemIndex.IsEmpty) throw new ArgumentException(@"The given index should not be empty.", nameof(itemIndex));
             var args = new ItemChangeEventArgs(this, itemIndex, ContentChangeType.CollectionRemove, item, null);
             NotifyItemChanging(args);
-            if (Descriptor is CollectionDescriptor collectionDescriptor)
+            var collectionDescriptor = Descriptor as CollectionDescriptor;
+            var dictionaryDescriptor = Descriptor as DictionaryDescriptor;
+            if (collectionDescriptor != null)
             {
                 if (collectionDescriptor.HasRemoveAt)
                 {
@@ -172,7 +168,7 @@ namespace Xenko.Core.Quantum
                     collectionDescriptor.Remove(value, item);
                 }
             }
-            else if (Descriptor is DictionaryDescriptor dictionaryDescriptor)
+            else if (dictionaryDescriptor != null)
             {
                 dictionaryDescriptor.Remove(value, itemIndex.Value);
             }
@@ -214,15 +210,6 @@ namespace Xenko.Core.Quantum
         {
             if (index == NodeIndex.Empty)
                 throw new ArgumentException("index cannot be empty.");
-
-            if (Descriptor is SetDescriptor setDescriptor)
-            {
-                if (setDescriptor.Contains(Value, newValue))
-                {
-                    return;
-                }
-            }
-
             var oldValue = Retrieve(index);
             ItemChangeEventArgs itemArgs = null;
             if (sendNotification)
@@ -230,17 +217,15 @@ namespace Xenko.Core.Quantum
                 itemArgs = new ItemChangeEventArgs(this, index, ContentChangeType.CollectionUpdate, oldValue, newValue);
                 NotifyItemChanging(itemArgs);
             }
-            if (Descriptor is CollectionDescriptor collectionDescriptor)
+            var collectionDescriptor = Descriptor as CollectionDescriptor;
+            var dictionaryDescriptor = Descriptor as DictionaryDescriptor;
+            if (collectionDescriptor != null)
             {
-                collectionDescriptor.SetValue(Value, index.Value, ConvertValue(newValue, collectionDescriptor.ElementType));
+                collectionDescriptor.SetValue(Value, index.Int, ConvertValue(newValue, collectionDescriptor.ElementType));
             }
-            else if (Descriptor is DictionaryDescriptor dictionaryDescriptor)
+            else if (dictionaryDescriptor != null)
             {
                 dictionaryDescriptor.SetValue(Value, index.Value, ConvertValue(newValue, dictionaryDescriptor.ValueType));
-            }
-            else if (Descriptor is ArrayDescriptor arrayDescriptor)
-            {
-                arrayDescriptor.SetValue(Value, (int)index.Value, ConvertValue(newValue, arrayDescriptor.ElementType));
             }
             else
                 throw new NotSupportedException("Unable to set the node value, the collection is unsupported");

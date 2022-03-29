@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation and Contributors (https://dotnetfoundation.org/ & https://stride3d.net) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Collections.Generic;
@@ -59,6 +59,9 @@ namespace Xenko.Core.Reflection
                 {
                     descriptor = Create(type);
 
+                    // if this descriptor failed for some reason, just return null
+                    if (descriptor == null) return null;
+
                     // Register this descriptor (before initializing!)
                     registeredDescriptors.Add(type, descriptor);
 
@@ -80,51 +83,28 @@ namespace Xenko.Core.Reflection
             ITypeDescriptor descriptor;
             // The order of the descriptors here is important
 
-            if (PrimitiveDescriptor.IsPrimitive(type))
-            {
-                descriptor = new PrimitiveDescriptor(this, type, emitDefaultValues, namingConvention);
-            }
-            else if (DictionaryDescriptor.IsDictionary(type)) // resolve dictionary before collections, as they are also collections
-            {
-                // IDictionary
-                descriptor = new DictionaryDescriptor(this, type, emitDefaultValues, namingConvention);
-            }
-            else if (ListDescriptor.IsList(type))
-            {
-                // IList
-                descriptor = new ListDescriptor(this, type, emitDefaultValues, namingConvention);
-            }
-            else if (SetDescriptor.IsSet(type))
-            {
-                // ISet
-                descriptor = new SetDescriptor(this, type, emitDefaultValues, namingConvention);
-            }
-            else if (OldCollectionDescriptor.IsCollection(type))
-            {
-                // ICollection
-                descriptor = new OldCollectionDescriptor(this, type, emitDefaultValues, namingConvention);
-            }
-            else if (type.IsArray)
-            {
-                if (type.GetArrayRank() == 1 && !type.GetElementType().IsArray)
-                {
-                    // array[] - only single dimension array is supported
+            try {
+                if (PrimitiveDescriptor.IsPrimitive(type)) {
+                    descriptor = new PrimitiveDescriptor(this, type, emitDefaultValues, namingConvention);
+                } else if (DictionaryDescriptor.IsDictionary(type)) // resolve dictionary before collections, as they are also collections
+                  {
+                    // IDictionary
+                    descriptor = new DictionaryDescriptor(this, type, emitDefaultValues, namingConvention);
+                } else if (CollectionDescriptor.IsCollection(type)) {
+                    // ICollection
+                    descriptor = new CollectionDescriptor(this, type, emitDefaultValues, namingConvention);
+                } else if (type.IsArray) {
+                    // array[]
                     descriptor = new ArrayDescriptor(this, type, emitDefaultValues, namingConvention);
+                } else if (NullableDescriptor.IsNullable(type)) {
+                    descriptor = new NullableDescriptor(this, type, emitDefaultValues, namingConvention);
+                } else {
+                    // standard object (class or value type)
+                    descriptor = new ObjectDescriptor(this, type, emitDefaultValues, namingConvention);
                 }
-                else
-                {
-                    // multi-dimension array to be treated as a 'standard' object
-                    descriptor = new NotSupportedObjectDescriptor(this, type, emitDefaultValues, namingConvention);
-                }
-            }
-            else if (NullableDescriptor.IsNullable(type))
-            {
-                descriptor = new NullableDescriptor(this, type, emitDefaultValues, namingConvention);
-            }
-            else
-            {
-                // standard object (class or value type)
-                descriptor = new ObjectDescriptor(this, type, emitDefaultValues, namingConvention);
+            } catch(Exception e) {
+                // failed to get a descriptor... instead of crashing, just return nothing
+                return null;
             }
 
             return descriptor;

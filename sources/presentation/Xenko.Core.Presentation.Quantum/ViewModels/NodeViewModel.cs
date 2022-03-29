@@ -1,4 +1,4 @@
-// Copyright (c) .NET Foundation and Contributors (https://dotnetfoundation.org/ & https://Xenko3d.net) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
 using System.Collections.Generic;
@@ -124,8 +124,7 @@ namespace Xenko.Core.Presentation.Quantum.ViewModels
         /// Gets the root of this node.
         /// </summary>
         [NotNull]
-        public NodeViewModel Root
-        {
+        public NodeViewModel Root {
             get
             {
                 var root = this;
@@ -173,18 +172,11 @@ namespace Xenko.Core.Presentation.Quantum.ViewModels
         public MemberInfo MemberInfo => null;
 
         /// <summary>
-        /// Gets whether this node contains a list.
-        /// </summary>
-        /// <remarks>Used mostly for sorting purpose.</remarks>
-        /// <seealso cref="HasList"/>
-        public bool HasList => ListDescriptor.IsList(Type);
-
-        /// <summary>
         /// Gets whether this node contains a collection.
         /// </summary>
         /// <remarks>Used mostly for sorting purpose.</remarks>
         /// <seealso cref="HasDictionary"/>
-        public bool HasCollection => OldCollectionDescriptor.IsCollection(Type);
+        public bool HasCollection => CollectionDescriptor.IsCollection(Type);
 
         /// <summary>
         /// Gets whether this node contains a dictionary.
@@ -192,13 +184,6 @@ namespace Xenko.Core.Presentation.Quantum.ViewModels
         /// <remarks>Usually a dictionary is also a collection.</remarks>
         /// <seealso cref="HasCollection"/>
         public bool HasDictionary => DictionaryDescriptor.IsDictionary(Type);
-
-        /// <summary>
-        /// Gets whether this node contains a set.
-        /// </summary>
-        /// <remarks>Usually a set is also a collection.</remarks>
-        /// <seealso cref="HasCollection"/>
-        public bool HasSet => SetDescriptor.IsSet(Type);
 
         /// <summary>
         /// Gets the number of visible children.
@@ -420,7 +405,7 @@ namespace Xenko.Core.Presentation.Quantum.ViewModels
                 foreach (var iType in Type.GetTypeInfo().ImplementedInterfaces)
                 {
                     var iTypeInfo = iType.GetTypeInfo();
-                    if (iTypeInfo.IsGenericType == false)
+                    if (iTypeInfo.IsGenericType == false) 
                         continue;
                     if (iTypeInfo.GetGenericTypeDefinition() != typeof(IDictionary<,>))
                         continue;
@@ -458,6 +443,7 @@ namespace Xenko.Core.Presentation.Quantum.ViewModels
                             throw new InvalidOperationException($"This node has a child which contains a period (.) in its name: {child.Name}");
                     }
                 }
+
 
                 if (memberNames.Contains(child.Name))
                     throw new InvalidOperationException($"This node contains several members named {child.Name}");
@@ -589,8 +575,7 @@ namespace Xenko.Core.Presentation.Quantum.ViewModels
             if (value == null)
                 return null;
             object convertedValue;
-            if (!TypeConverterHelper.TryConvert(value, Type, out convertedValue))
-                throw new InvalidCastException("Can not convert value to the required type");
+            if (!TypeConverterHelper.TryConvert(value, Type, out convertedValue)) return NodeValue;
             return convertedValue;
         }
 

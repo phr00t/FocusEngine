@@ -9,8 +9,11 @@ using Xenko.Core.Annotations;
 
 namespace Xenko.Core.Reflection
 {
+    // TODO: these methods should be compilant with collection/dictionary descriptors. Since they're used only for design-time, they should be removed from here anyway
+    [Obsolete("This class will be removed in a future version")]
     public static class TypeHelper
     {
+        [Obsolete("This method will be removed in a future version")]
         public static bool IsCollection([NotNull] this Type type)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
@@ -37,6 +40,7 @@ namespace Xenko.Core.Reflection
             return false;
         }
 
+        [Obsolete("This method will be removed in a future version")]
         public static bool IsDictionary([NotNull] this Type type)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
