@@ -122,8 +122,8 @@ namespace Xenko.Engine
             /// <inheritdoc/>
             protected override void InsertItem(int index, Entity item)
             {
-                // already in this scene, skip
-                if (item.Scene == scene) return;
+                // broken item or already in scene
+                if (item == null || item.Scene == scene) return;
 
                 item.SceneValue = scene;
                 base.InsertItem(index, item);
