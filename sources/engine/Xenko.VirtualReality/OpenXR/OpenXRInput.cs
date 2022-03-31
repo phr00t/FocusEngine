@@ -246,6 +246,26 @@ namespace Xenko.VirtualReality
             return floatresult.CurrentState;
         }
 
+        /// <summary>
+        /// Checks OpenXR to see what the current interaction profile is. Defaults to checking the left controller.
+        /// </summary>
+        /// <returns>String of the interaction path.</returns>
+        public static string GetCurrentInteractionProfile(string checkpath = "/user/hand/left")
+        {
+            if (baseHMD == null || baseHMD.Xr == null)
+                return "No HMD enabled or fully initialized yet!";
+
+            ulong path = 0;
+            InteractionProfileState state = new InteractionProfileState() { Type = StructureType.TypeInteractionProfileState };
+            OpenXRHmd.CheckResult(baseHMD.Xr.StringToPath(baseHMD.Instance, checkpath, ref path), "StringToPath");
+            OpenXRHmd.CheckResult(baseHMD.Xr.GetCurrentInteractionProfile(baseHMD.globalSession, path, ref state), "GetCurrentInteractionProfile");
+            byte[] buf = new byte[256];
+            uint outlen = 0;
+            OpenXRHmd.CheckResult(baseHMD.Xr.PathToString(baseHMD.Instance, state.InteractionProfile, (uint)buf.Length, ref outlen, ref buf[0]), "PathToString");
+            if (outlen == 0) return "Error getting Interaction Profile String";
+            return System.Text.Encoding.Default.GetString(buf, 0, (int)outlen - 1); // -1 to get rid of null character
+        }
+
         internal static unsafe void Initialize(OpenXRHmd hmd)
         {
             baseHMD = hmd;
