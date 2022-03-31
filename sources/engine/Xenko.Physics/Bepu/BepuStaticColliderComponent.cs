@@ -13,7 +13,7 @@ using Xenko.Engine;
 namespace Xenko.Physics.Bepu
 {
     [DataContract("BepuStaticColliderComponent")]
-    [Display("Bepu Static collider")]
+    [Display("Bepu StaticCollider (No GameStudio integration)")]
     public sealed class BepuStaticColliderComponent : BepuPhysicsComponent
     {
         public StaticDescription staticDescription;

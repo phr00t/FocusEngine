@@ -29,8 +29,11 @@ namespace Xenko.Physics.Bepu
             // do we have the physics system already?
             if (physicsSystem == null)
             {
+                // do we have a service registry ready to go?
+                if (ServiceRegistry.instance == null) return;
+
                 // is it already added somewhere else?
-                physicsSystem = ServiceRegistry.instance.GetService<PhysicsSystem>();
+                physicsSystem = ServiceRegistry.instance.GetService<IPhysicsSystem>() as PhysicsSystem;
                 if (physicsSystem == null)
                 {
                     // ok, appears we need to make it...
@@ -258,7 +261,7 @@ namespace Xenko.Physics.Bepu
         public static void SetBodiesInSimulation(Entity rootEntity, bool add = true)
         {
             foreach (BepuPhysicsComponent pc in rootEntity.GetAll<BepuPhysicsComponent>())
-                if (pc.AutomaticAdd) pc.AddedToScene = add;
+                if (pc.AutomaticAdd && pc.ColliderShape != null) pc.AddedToScene = add;
             foreach (Entity e in rootEntity.GetChildren())
                 SetBodiesInSimulation(e, add);
         }

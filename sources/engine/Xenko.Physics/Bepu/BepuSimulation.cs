@@ -396,7 +396,7 @@ namespace Xenko.Physics.Bepu
         private void EntityAdded(object sender, Entity e)
         {
             foreach (BepuPhysicsComponent bpc in e.GetAll<BepuPhysicsComponent>())
-                if (bpc.AutomaticAdd) bpc.AddedToScene = true;
+                if (bpc.AutomaticAdd && bpc.ColliderShape != null) bpc.AddedToScene = true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -410,7 +410,7 @@ namespace Xenko.Physics.Bepu
         private void ComponentChanged(object sender, EntityComponentEventArgs e)
         {
             if (e.PreviousComponent is BepuPhysicsComponent rem) rem.AddedToScene = false;
-            if (e.NewComponent is BepuPhysicsComponent add && add.AutomaticAdd) add.AddedToScene = true;
+            if (e.NewComponent is BepuPhysicsComponent add && add.AutomaticAdd && add.ColliderShape != null) add.AddedToScene = true;
         }
 
         /// <summary>

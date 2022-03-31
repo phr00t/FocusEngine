@@ -24,7 +24,7 @@ using System.Collections;
 namespace Xenko.Physics.Bepu
 {
     [DataContract("BepuRigidbodyComponent")]
-    [Display("Bepu Rigidbody")]
+    [Display("Bepu Rigidbody (No GameStudio integration)")]
     public sealed class BepuRigidbodyComponent : BepuPhysicsComponent
     {
         /// <summary>
@@ -340,7 +340,7 @@ namespace Xenko.Physics.Bepu
             bodyDescription.LocalInertia.InverseMass = 1f;
             bodyDescription.Activity.MinimumTimestepCountUnderThreshold = 32;
             bodyDescription.Activity.SleepThreshold = 0.01f;
-            InternalBody.Bodies = BepuSimulation.instance.internalSimulation.Bodies;
+            InternalBody.Bodies = BepuSimulation.instance?.internalSimulation?.Bodies;
             InternalBody.Handle.Value = -1;
         }
 
