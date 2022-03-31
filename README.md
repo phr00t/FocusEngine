@@ -99,4 +99,4 @@ Ask for help or report issues:
 ### Build Focus
 
 1. Clone Focus: `git clone https://github.com/phr00t/FocusEngine.git`
-2. Run `<FocusDir>\build\Xenko.PCPlatforms.bat`, which starts Visual Studio 2019, and build.
+2. Run `<FocusDir>\build\Xenko.PCPlatforms.bat`, which starts Visual Studio and build.
