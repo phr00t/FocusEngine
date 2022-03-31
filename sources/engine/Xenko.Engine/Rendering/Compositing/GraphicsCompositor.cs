@@ -185,7 +185,7 @@ namespace Xenko.Rendering.Compositing
         {
             if (r is ForwardRenderer fr)
             {
-                fr.VRSettings.Enabled = enable && fr.VRSettings.RequiredApis.Count > 0;
+                fr.VRSettings.Enabled = enable;
             }
             else if (r is SceneCameraRenderer scr)
             {

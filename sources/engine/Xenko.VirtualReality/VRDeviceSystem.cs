@@ -89,9 +89,9 @@ namespace Xenko.VirtualReality
             UpdateOrder = -100;
         }
 
-        public VRApi[] PreferredApis;
+        public VRApi PreferredApi;
 
-        public Dictionary<VRApi, float> PreferredScalings;
+        public float PreferredScalings;
 
         public VRDevice Device { get; private set; }
 
@@ -109,11 +109,6 @@ namespace Xenko.VirtualReality
         {
             if (Enabled && Device == null)
             {
-                if (PreferredApis == null)
-                {
-                    return;
-                }
-
                 double refreshRate = 90.0;
 
                 if (physicalDeviceInUse)
@@ -122,32 +117,25 @@ namespace Xenko.VirtualReality
                     goto postswitch;
                 }
 
-                foreach (var hmdApi in PreferredApis)
+                switch (PreferredApi)
                 {
-                    switch (hmdApi)
-                    {
-                        case VRApi.OpenXR:
+                    case VRApi.OpenXR:
 #if XENKO_GRAPHICS_API_VULKAN
-                            Device = new OpenXRHmd(Game);
+                        Device = new OpenXRHmd(Game);
 #endif
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
 
-                    if (Device != null)
+                if (Device != null)
+                {
+                    Device.Game = Game;
+
+                    if (Device != null && !Device.CanInitialize)
                     {
-                        Device.Game = Game;
-
-                        if (Device != null && !Device.CanInitialize)
-                        {
-                            Device.Dispose();
-                            Device = null;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        Device.Dispose();
+                        Device = null;
                     }
                 }
 
@@ -161,7 +149,7 @@ postswitch:
                     Game.IsFixedTimeStep = false;
                     deviceManager.SynchronizeWithVerticalRetrace = false;
 
-                    Device.RenderFrameScaling = PreferredScalings[Device.VRApi];
+                    Device.RenderFrameScaling = PreferredScalings;
                     Device.Enable(GraphicsDevice, deviceManager, RequireMirror);
                     Device.SetTrackingSpace(TrackingSpace.Standing);
                     physicalDeviceInUse = true;

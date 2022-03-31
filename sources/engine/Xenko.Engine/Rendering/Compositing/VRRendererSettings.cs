@@ -35,7 +35,7 @@ namespace Xenko.Rendering.Compositing
         public VRDeviceSystem.MIRROR_OPTION CopyMirror { get; set; } = VRDeviceSystem.MIRROR_OPTION.SINGLE_EYE;
 
         [DataMember(30)]
-        public List<VRDeviceDescription> RequiredApis { get; } = new List<VRDeviceDescription>();
+        public VRDeviceDescription RequiredApi { get; } = new VRDeviceDescription();
 
         [DataMemberIgnore]
         public RenderView[] RenderViews = { new RenderView(), new RenderView() };

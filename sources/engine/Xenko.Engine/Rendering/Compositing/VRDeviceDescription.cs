@@ -11,10 +11,11 @@ namespace Xenko.Rendering.Compositing
     [DataContract]
     public class VRDeviceDescription
     {
+        // defaults to OpenXR, the only supported VR API
         [DataMember(10)]
-        public VRApi Api { get; set; }
+        public VRApi Api { get; set; } = VRApi.OpenXR;
 
         [DataMember(20)]
-        public float ResolutionScale { get; set; } = 1.4f;
+        public float ResolutionScale { get; set; } = 1f;
     }
 }
