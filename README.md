@@ -83,7 +83,6 @@ Find explanations and information about Xenko:
 Ask for help or report issues:
 * [Chat with the community on Discord](https://discord.gg/k563cUH)
 * [Report engine issues](https://github.com/phr00t/xenko/issues)
-* [Donate to support the project](https://www.patreon.com/phr00tssoftware)
 
 ## Building from source
 
@@ -96,7 +95,12 @@ Ask for help or report issues:
   * .NET Core 6 Runtime should automatically be supported and configured to develop for
 3. [FBX SDK 2019.0 VS2015](https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-2019-0)
 
-### Build Focus
+### Build & Use Focus
 
 1. Clone Focus: `git clone https://github.com/phr00t/FocusEngine.git`
-2. Run `<FocusDir>\build\Xenko.PCPlatforms.bat`, which starts Visual Studio and build.
+2. Run `<FocusDir>\build\Xenko.PCPlatforms.bat`, which starts Visual Studio.
+3. Select building for "Release" for the best performance and compatibility.
+4. After building, find the GameStudio executable and run it (probably `<FocusDir>\sources\editor\Xenko.GameStudio\bin\Release\net48`).
+5. Some templates are outdated, especially the VR one... an empty game is your best bet.
+6. Use Focus Engine's GameStudio alongside Visual Studio for building the project (you can open projects from GameStudio into Visual Studio with a toolbar icon at the top)
+7. If using Bepu physics, make sure to add a reference to `BepuPhysics.dll` in `<FocusDir>\deps\bepuphysics2`
