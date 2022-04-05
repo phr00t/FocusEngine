@@ -16,6 +16,9 @@ using Xenko.Rendering.Rendering;
 
 namespace Xenko.Physics.Bepu
 {
+    /// <summary>
+    /// Useful class with lots of static functions to do common bepu physics things. Can help making collider shapes and all sorts of goodies here.
+    /// </summary>
     public class BepuHelpers
     {
         internal static object creationLocker = new object();
@@ -67,7 +70,8 @@ namespace Xenko.Physics.Bepu
         {
             ModelComponent mc = e.Get<ModelComponent>();
             center = new Vector3();
-            if (mc == null || mc.Model == null || mc.Model.Meshes.Count <= 0f) return Vector3.Zero;
+            if (mc == null || mc.Model == null || mc.Model.Meshes.Count <= 0f)
+                throw new ArgumentException("Entity '" + e.Name + "' has no valid mesh to get sizing from!");
 
             Vector3 biggest = new Vector3(0.05f, 0.05f, 0.05f);
             int count = mc.Model.Meshes.Count;
@@ -116,6 +120,9 @@ namespace Xenko.Physics.Bepu
             return shape != null;
         }
 
+        /// <summary>
+        /// Takes a shape and offsets it using compound shapes.
+        /// </summary>
         public static IShape OffsetSingleShape(IConvexShape shape, Vector3? offset = null, Quaternion? rotation = null, bool kinematic = false)
         {
             if (offset.HasValue == false && rotation.HasValue == false) return shape;
@@ -140,6 +147,9 @@ namespace Xenko.Physics.Bepu
             }
         }
 
+        /// <summary>
+        /// Generates a box collider shape of an entity. Entity must have a mesh to get sizing from. Make sure this object's WorldMatrix is up to date for proper scaling.
+        /// </summary>
         public static IShape GenerateBoxOfEntity(Entity e, Vector3? scale = null, bool allowOffsetCompound = true)
         {
             Vector3 b = getBounds(e, out Vector3 center) * 2f;
@@ -149,6 +159,9 @@ namespace Xenko.Physics.Bepu
             return box;
         }
 
+        /// <summary>
+        /// Generates a sphere collider shape of an entity. Entity must have a mesh to get sizing from. Make sure this object's WorldMatrix is up to date for proper scaling.
+        /// </summary>
         public static IShape GenerateSphereOfEntity(Entity e, float scale = 1f, bool allowOffsetCompound = true)
         {
             Vector3 b = getBounds(e, out Vector3 center);
@@ -157,6 +170,9 @@ namespace Xenko.Physics.Bepu
             return box;
         }
 
+        /// <summary>
+        /// Generates a capsule collider shape of an entity. Entity must have a mesh to get sizing from. Make sure this object's WorldMatrix is up to date for proper scaling.
+        /// </summary>
         public static IShape GenerateCapsuleOfEntity(Entity e, Vector3? scale = null, bool XZradius = true, bool allowOffsetCompound = true)
         {
             Vector3 b = getBounds(e, out Vector3 center);
@@ -166,6 +182,9 @@ namespace Xenko.Physics.Bepu
             return box;
         }
 
+        /// <summary>
+        /// Generates a cylinder collider shape of an entity. Entity must have a mesh to get sizing from. Make sure this object's WorldMatrix is up to date for proper scaling.
+        /// </summary>
         public static IShape GenerateCylinderOfEntity(Entity e, Vector3? scale = null, bool XZradius = true, bool allowOffsetCompound = true)
         {
             Vector3 b = getBounds(e, out Vector3 center);
@@ -415,6 +434,10 @@ namespace Xenko.Physics.Bepu
                 CollectMeshes(child, meshes, skipAlreadyDone);
         }
 
+        /// <summary>
+        /// Scans all BepuStaticColliderComponents in entity (and children) and repositions them to the Entity's transform world position.
+        /// </summary>
+        /// <param name="e"></param>
         public static void RepositionAllStatics(Entity e)
         {
             foreach (BepuStaticColliderComponent scc in e.GetAll<BepuStaticColliderComponent>())
@@ -423,6 +446,10 @@ namespace Xenko.Physics.Bepu
                 RepositionAllStatics(child);
         }
 
+        /// <summary>
+        /// Frees up memory used by mesh colliders in entity
+        /// </summary>
+        /// <param name="e"></param>
         public static void DisposeAllMeshes(Entity e)
         {
             foreach (BepuStaticColliderComponent scc in e.GetAll<BepuStaticColliderComponent>())
@@ -431,6 +458,9 @@ namespace Xenko.Physics.Bepu
                 DisposeAllMeshes(child);
         }
 
+        /// <summary>
+        /// Adds or removes all colliders in all entities from e
+        /// </summary>
         public static void SetAllColliders(Entity e, bool enabled)
         {
             foreach (BepuPhysicsComponent pc in e.GetAll<BepuPhysicsComponent>())
@@ -469,7 +499,7 @@ namespace Xenko.Physics.Bepu
         }
 
         /// <summary>
-        /// Generate a mesh collider from a given mesh. The mesh must have a readable buffer behind it to generate veriticies from
+        /// Generate a big mesh collider from a given mesh using multithreading. The mesh must have a readable buffer behind it to generate veriticies from
         /// </summary>
         /// <returns>Returns false if no mesh could be made</returns>
         public static unsafe bool GenerateBigMeshStaticColliders(Entity e, Xenko.Rendering.Mesh modelMesh, Vector3? scale = null,
@@ -481,6 +511,10 @@ namespace Xenko.Physics.Bepu
             return true;
         }
 
+        /// <summary>
+        /// Generate a mesh collider from a given mesh. The mesh must have a readable buffer behind it to generate veriticies from
+        /// </summary>
+        /// <returns>Returns false if no mesh could be made</returns>
         public static unsafe bool GenerateMeshShape(List<Vector3> positions, List<int> indicies, out BepuPhysics.Collidables.Mesh outMesh, out BepuUtilities.Memory.BufferPool poolUsed, Vector3? scale = null)
         {
             poolUsed = BepuSimulation.safeBufferPool;
@@ -510,6 +544,10 @@ namespace Xenko.Physics.Bepu
             return true;
         }
 
+        /// <summary>
+        /// Generate a big mesh collider from a given mesh using multithreading. The mesh must have a readable buffer behind it to generate veriticies from
+        /// </summary>
+        /// <returns>Returns false if no mesh could be made</returns>
         public static unsafe void GenerateBigMeshStaticColliders(Entity e, List<Vector3> positions, List<int> indicies, Vector3? scale = null,
                                                                  CollisionFilterGroups group = CollisionFilterGroups.DefaultFilter, CollisionFilterGroupFlags collidesWith = CollisionFilterGroupFlags.AllFilter,
                                                                  float friction = 0.5f, float maximumRecoverableVelocity = 1f, SpringSettings? springSettings = null, bool disposeOnDetach = false)
@@ -578,24 +616,36 @@ namespace Xenko.Physics.Bepu
             }
         }
 
+        /// <summary>
+        /// Helper function to convert from Focus Engine's Vector3 to Bepu Vector3
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe System.Numerics.Vector3 ToBepu(Xenko.Core.Mathematics.Vector3 v)
         {
             return *((System.Numerics.Vector3*)(void*)&v);
         }
 
+        /// <summary>
+        /// Helper function to convert from Bepu Vector3 to Focus Engine's Vector3
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Xenko.Core.Mathematics.Vector3 ToXenko(System.Numerics.Vector3 v)
         {
             return *((Xenko.Core.Mathematics.Vector3*)(void*)&v);
         }
 
+        /// <summary>
+        /// Helper function to convert from Bepu Vector3 to Focus Engine's Quaternion
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe Xenko.Core.Mathematics.Quaternion ToXenko(System.Numerics.Quaternion q)
         {
             return *((Xenko.Core.Mathematics.Quaternion*)(void*)&q);
         }
 
+        /// <summary>
+        /// Helper function to convert from Focus Engine's Vector3 to Bepu Quaternion
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe System.Numerics.Quaternion ToBepu(Xenko.Core.Mathematics.Quaternion q)
         {
