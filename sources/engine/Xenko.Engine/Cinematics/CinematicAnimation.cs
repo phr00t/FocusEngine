@@ -219,15 +219,15 @@ namespace Xenko.Cinematics
                     break;
                 case ACTION_TYPE.SMOOTH_MOVE:
                     if (ca.argument0 == null) ca.argument0 = ca.target.Position;
-                    ca.target.Position = positionInAction < 1f ? Vector3.Lerp((Vector3)ca.argument0, (Vector3)ca.argument1, Sigmoid(positionInAction * 12.0 - 6.0)) : (Vector3)ca.argument1;
+                    ca.target.Position = positionInAction < 1f ? Vector3.Lerp((Vector3)ca.argument0, (Vector3)ca.argument1, Sigmoid(positionInAction * 15.0 - 7.0)) : (Vector3)ca.argument1;
                     break;
                 case ACTION_TYPE.SMOOTH_ROTATE:
                     if (ca.argument0 == null) ca.argument0 = ca.target.Rotation;
-                    ca.target.Rotation = positionInAction < 1f ? Quaternion.Lerp((Quaternion)ca.argument0, (Quaternion)ca.argument1, Sigmoid(positionInAction * 12.0 - 6.0)) : (Quaternion)ca.argument1;
+                    ca.target.Rotation = positionInAction < 1f ? Quaternion.Lerp((Quaternion)ca.argument0, (Quaternion)ca.argument1, Sigmoid(positionInAction * 15.0 - 7.0)) : (Quaternion)ca.argument1;
                     break;
                 case ACTION_TYPE.SMOOTH_SCALE:
                     if (ca.argument0 == null) ca.argument0 = ca.target.Scale;
-                    ca.target.Scale = positionInAction < 1f ? Vector3.Lerp((Vector3)ca.argument0, (Vector3)ca.argument1, Sigmoid(positionInAction * 12.0 - 6.0)) : (Vector3)ca.argument1;
+                    ca.target.Scale = positionInAction < 1f ? Vector3.Lerp((Vector3)ca.argument0, (Vector3)ca.argument1, Sigmoid(positionInAction * 15.0 - 7.0)) : (Vector3)ca.argument1;
                     break;
             }
         }
