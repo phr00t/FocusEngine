@@ -227,7 +227,8 @@ namespace Xenko.Physics.Bepu
         /// <param name="offsets">Matching length list of offsets of bodies, can be null if nothing has an offset</param>
         /// <param name="rotations">Matching length list of rotations of bodies, can be null if nothing is rotated</param>
         /// <param name="isDynamic">True if intended to use in a dynamic situation, false if kinematic or static</param>
-        /// <returns></returns>
+        /// <param name="bigThreshold">How many compound shapes before we should use a "big" compound object internally? Defaults to 5, which is usually fine.</param>
+        /// <returns>Compound shape</returns>
         public static ICompoundShape MakeCompound(List<IConvexShape> shapes, List<Vector3> offsets = null, List<Quaternion> rotations = null, bool isDynamic = true, int bigThreshold = 5)
         {
             using (var compoundBuilder = new CompoundBuilder(BepuSimulation.safeBufferPool, BepuSimulation.instance.internalSimulation.Shapes, shapes.Count))
