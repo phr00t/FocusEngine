@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xenko.Engine;
 using Xenko.UI.Controls;
+using Xenko.UI.Events;
 using Xenko.UI.Panels;
 
 namespace Xenko.UI
@@ -56,7 +57,7 @@ namespace Xenko.UI
         /// Make a GridList for the given Grid
         /// </summary>
         /// <param name="grid">What grid will the list be in?</param>
-        /// <param name="entryTemplate">What template to use for entries?</param>
+        /// <param name="entryTemplate">What template to use for entries? Needs to include either a Button or Toggle</param>
         /// <param name="templateRootName">Optional specified name for the root UIElement in the entryTemplate</param>
         public GridList(Grid grid, UILibrary entryTemplate, string templateRootName = null)
         {
@@ -79,7 +80,7 @@ namespace Xenko.UI
         /// <summary>
         /// How many toggle buttons are checked?
         /// </summary>
-        public int GetCheckedCount()
+        virtual public int GetSelectedCount()
         {
             int cc = 0;
             foreach (Dictionary<string, UIElement> elements in entryElements.Values)
@@ -93,13 +94,13 @@ namespace Xenko.UI
         }
 
         /// <summary>
-        /// Clear all checked ToggleButtons
+        /// Clear all checked ToggleButtons and clears last button pressed, if any
         /// </summary>
-        public void ResetChecked(object ignoreValue = null)
+        virtual public void ResetSelected(object ignoreValue = null)
         {
             foreach (var pair in entryElements)
             {
-                if (pair.Key == ignoreValue) continue;
+                if (pair.Key.Equals(ignoreValue)) continue;
                 foreach (UIElement uie in pair.Value.Values)
                 {
                     if (uie is ToggleButton tb) tb.State = ToggleState.UnChecked;
@@ -129,13 +130,14 @@ namespace Xenko.UI
         /// </summary>
         /// <param name="value">Value of entry</param>
         /// <returns>togglestate of toggle button</returns>
-        public ToggleState GetToggledState(object value)
+        virtual public ToggleState GetSelectedState(object value)
         {
             if (entryElements.TryGetValue(value, out var uied))
             {
                 foreach (UIElement uie in uied.Values)
                 {
-                    if (uie is ToggleButton tb) return tb.State;
+                    if (uie is ToggleButton tb)
+                        return tb.State;
                 }
             }
             return ToggleState.Indeterminate;
@@ -172,9 +174,10 @@ namespace Xenko.UI
         /// Toggle an option on the list
         /// </summary>
         /// <param name="value">What option to select</param>
-        /// <param name="toggleState"></param>
+        /// <param name="toggleState">How to set the Toggle if it is found</param>
         /// <param name="deselectOthers">if true, deselect others</param>
-        virtual public void Select(object value, ToggleState toggleState = ToggleState.Checked, bool deselectOthers = false)
+        /// <param name="forceEntrySelectionAction">if true, call EntrySelectedAction with the value selected if found</param>
+        virtual public void Select(object value, ToggleState toggleState = ToggleState.Checked, bool deselectOthers = false, bool forceEntrySelectionAction = false)
         {
             foreach (var uie in entryElements)
             {
@@ -185,13 +188,53 @@ namespace Xenko.UI
                         if (uie.Key.Equals(value))
                         {
                             tb.State = toggleState;
+                            if (forceEntrySelectionAction)
+                                EntrySelectedAction?.Invoke(value);
                         }
                         else if (deselectOthers)
                         {
                             tb.State = ToggleState.UnChecked;
                         }
+                    } 
+                    else if (uie.Key.Equals(value))
+                    {
+                        if (forceEntrySelectionAction)
+                            EntrySelectedAction?.Invoke(value);
                     }
                 }
+            }
+        }
+
+        virtual protected void SetInternalClickAction(ButtonBase uie, object value)
+        {
+            if (uie is ToggleButton tbn)
+            {
+                tbn.Click += delegate {
+                    if (tbn.State == ToggleState.UnChecked) return;
+                    int alreadyChecked = GetSelectedCount();
+                    if (alreadyChecked == 2 && MaxCheckedAllowed == 1)
+                    {
+                        // effectively just change our choice
+                        ResetSelected(value);
+                        EntrySelectedAction?.Invoke(value);
+                    }
+                    else if (alreadyChecked > MaxCheckedAllowed)
+                    {
+                        // too many checked
+                        tbn.State = ToggleState.UnChecked;
+                    }
+                    else
+                    {
+                        // check made
+                        EntrySelectedAction?.Invoke(value);
+                    }
+                };
+            }
+            else if (uie is Button bn)
+            {
+                bn.Click += delegate {
+                    EntrySelectedAction?.Invoke(value);
+                };
             }
         }
 
@@ -213,36 +256,11 @@ namespace Xenko.UI
                 {
                     tb.Text = displayName;
                 }
-                else if (uie is ToggleButton tbn)
+                else if (uie is ButtonBase bb)
                 {
-                    if (FitEntriesToWidth) tbn.Width = entryWidth;
-                    tbn.Checked += delegate {
-                        int alreadyChecked = GetCheckedCount();
-                        if (alreadyChecked == 2 && MaxCheckedAllowed == 1)
-                        {
-                            // effectively just change our choice
-                            ResetChecked(value);
-                            EntrySelectedAction(value);
-                        }
-                        else if (alreadyChecked > MaxCheckedAllowed)
-                        {
-                            // too many checked
-                            tbn.State = ToggleState.UnChecked;
-                        }
-                        else
-                        {
-                            // check made
-                            EntrySelectedAction(value);
-                        }
-                    };
+                    if (FitEntriesToWidth) uie.Width = entryWidth;
+                    SetInternalClickAction(bb, value);
                 }
-                else if (uie is Button bn)
-                {
-                    if (FitEntriesToWidth) bn.Width = entryWidth;
-                    bn.Click += delegate {
-                        EntrySelectedAction(value);
-                    };
-                } 
                 else if (uie is Grid g)
                 {
                     if (FitEntriesToWidth) g.Width = entryWidth;
@@ -256,7 +274,7 @@ namespace Xenko.UI
         /// <summary>
         /// Get a dictionary of all UIElements for an entry, keys will be names of UIElements
         /// </summary>
-        public Dictionary<string, UIElement> GetEntry(string value)
+        public Dictionary<string, UIElement> GetEntry(object value)
         {
             if (entryElements.TryGetValue(value, out var uie)) return uie;
             return null;
@@ -268,7 +286,7 @@ namespace Xenko.UI
         /// <param name="value">value of entry to remove</param>
         /// <param name="rebuildVisualList">If you intend to remove more items and want to defer visually updating, set to false</param>
         /// <returns>true if successfully removed</returns>
-        public bool RemoveEntry(string value, bool rebuildVisualList = true)
+        virtual public bool RemoveEntry(object value, bool rebuildVisualList = true)
         {
             if (entryElements.Remove(value))
             {
@@ -283,7 +301,7 @@ namespace Xenko.UI
         /// <summary>
         /// Clears the list
         /// </summary>
-        public void RemoveAllEntries(bool rebuildVisualList = true)
+        virtual public void RemoveAllEntries(bool rebuildVisualList = true)
         {
             entryElements.Clear();
             if (rebuildVisualList)
@@ -293,14 +311,14 @@ namespace Xenko.UI
         /// <summary>
         /// Get list of entries added
         /// </summary>
-        /// <param name="onlyChecked">if true, only return ToggleButtons checked</param>
+        /// <param name="onlySelected">if true, only return ToggleButtons checked (or last button selected)</param>
         /// <returns></returns>
-        public List<object> GetEntries(bool onlyChecked = false)
+        virtual public List<object> GetEntries(bool onlySelected = false)
         {
             List<object> retList = new List<object>();
             foreach (var uie in entryElements)
             {
-                if (!onlyChecked)
+                if (!onlySelected)
                 {
                     retList.Add(uie.Key);
                 }
@@ -326,6 +344,9 @@ namespace Xenko.UI
             myGrid.Children.Add(uie);
         }
 
+        /// <summary>
+        /// Update the list visually with options
+        /// </summary>
         virtual public void RebuildVisualList()
         {
             if (UpdateEntryWidth()) RepairWidth();
