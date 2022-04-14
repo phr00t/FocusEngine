@@ -377,10 +377,11 @@ namespace Xenko.Importer.Assimp
             for (uint keyId = 0; keyId < nbKeys; ++keyId)
             {
                 var aiKey = keys[keyId];
+                var q = aiKey.MValue;
                 var key = new KeyFrameData<Quaternion>
                 {
                     Time = lastKeyTime = Utils.AiTimeToXkTimeSpan(aiKey.MTime, ticksPerSec),
-                    Value = aiKey.MValue.ToXenkoQuaternion()
+                    Value = new Quaternion(q.X, q.Y, q.Z, q.W)
                 };
 
                 key.Value = rootOrientationInverse * key.Value * rootOrientation;
