@@ -157,3 +157,5 @@ project.lock.json
 *.lock
 *.bak
 routerlog.txt
+hooks
+lfs
