@@ -14,6 +14,10 @@ using Xenko.Shaders;
 
 namespace Xenko.Rendering.Rendering.Materials
 {
+    /// <summary>
+    /// A fog system that is integrated into the shading of individual objects and does not use a post-processing filter. This can be important, as this doesn't rely on the depth buffer.
+    /// Takes in a global color and density that will be applied to all materials that have this feature enabled. Uses static methods to configure and modify at runtime.
+    /// </summary>
     [DataContract("MaterialFogFeature")]
     [Display("GlobalFog")]
     public class GlobalFog : MaterialFeature, IMaterialFogFeature
@@ -28,6 +32,7 @@ namespace Xenko.Rendering.Rendering.Materials
         private static Dictionary<RootEffectRenderFeature, ConstantBufferOffsetReference> effectReferences = new Dictionary<RootEffectRenderFeature, ConstantBufferOffsetReference>();
 
         private static FogData GlobalFogParameters;
+        private static bool UseLinear = true;
 
         public static void SetGlobalFog(Color3? color = null, float? density = null, float? fogstart = null)
         {
@@ -54,6 +59,12 @@ namespace Xenko.Rendering.Rendering.Materials
             color = ((Color4)GlobalFogParameters.FogColor).ToColor3();
             density = GlobalFogParameters.FogColor.W;
             fogstart = GlobalFogParameters.FogStart;
+        }
+
+        public static bool IsLinearColorspace
+        {
+            get => UseLinear;
+            set { UseLinear = value; }
         }
 
         [DataMember]
@@ -88,6 +99,12 @@ namespace Xenko.Rendering.Rendering.Materials
             }
         }
 
+        [DataMember]
+        public bool UseLinearColorSpace {
+            get => UseLinear;
+            set { UseLinear = value; }
+        }
+
         public bool Equals(IMaterialShadingModelFeature other)
         {
             return other is GlobalFog;
@@ -97,7 +114,13 @@ namespace Xenko.Rendering.Rendering.Materials
         {
             // adjust for differences in DirectX and Vulkan
             Vector4 usecolor = GlobalFogParameters.FogColor;
-            if (GraphicsDevice.Platform == GraphicsPlatform.Vulkan) usecolor.W = 1f / Math.Max(0.000001f, usecolor.W);
+            if (UseLinear)
+            {
+                usecolor.X = MathUtil.SRgbToLinear(usecolor.X);
+                usecolor.Y = MathUtil.SRgbToLinear(usecolor.Y);
+                usecolor.Z = MathUtil.SRgbToLinear(usecolor.Z);
+            }
+
             usecolor.W = -usecolor.W; // flip this here so we don't need to do it in the shader
 
             for (int i=0; i<context.RenderSystem.RenderFeatures.Count; i++)
