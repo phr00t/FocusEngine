@@ -77,6 +77,9 @@ namespace Xenko.Rendering.Compositing
         [DataMemberIgnore]
         private List<PostProcessingEffects> cachedProcessor;
 
+        [DataMemberIgnore]
+        private List<ForwardRenderer> forwardRenderers;
+
         private void gatherPostProcessors(ISceneRenderer renderer)
         {
             if (renderer is SceneCameraRenderer scr)
@@ -96,6 +99,42 @@ namespace Xenko.Rendering.Compositing
                 {
                     cachedProcessor.Add(c);
                 }
+            }
+        }
+
+        private void gatherForwardRenderers(ISceneRenderer renderer)
+        {
+            if (renderer is SceneCameraRenderer scr)
+            {
+                gatherForwardRenderers(scr.Child);
+            }
+            else if (renderer is SceneRendererCollection src)
+            {
+                List<ISceneRenderer> renderers = src.Children;
+                for (int i = 0; i < renderers.Count; i++)
+                    gatherForwardRenderers(renderers[i]);
+            }
+            else if (renderer is ForwardRenderer fr)
+            {
+                forwardRenderers.Add(fr);
+            }
+        }
+
+        /// <summary>
+        /// Shortcut to getting forward renderers
+        /// </summary>
+        [DataMemberIgnore]
+        public List<ForwardRenderer> ForwardRenderers
+        {
+            get
+            {
+                if (forwardRenderers == null)
+                {
+                    // find them
+                    forwardRenderers = new List<ForwardRenderer>();
+                    gatherForwardRenderers(Game);
+                }
+                return forwardRenderers;
             }
         }
 
