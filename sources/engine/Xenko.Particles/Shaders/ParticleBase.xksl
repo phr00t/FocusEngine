@@ -78,9 +78,16 @@ shader ParticleBase : DepthBase, ShaderBase, Texturing, ParticleUtilities
     // Override Pixel shader main method from the ShaderBase shader
     stage override void PSMain()
     {
-        float4 colorTarget = Shading() * streams.Color * ColorScale;
-
+        // properly deal with total alpha shading
+        float4 colorTarget = Shading();
+        float additional_alpha = streams.Color.a * ColorScale.a;
+        colorTarget.a *= additional_alpha;
+        
+        // clip now if we are too transparent
         clip(colorTarget.a - AlphaCutoff);
+
+        // apply all alpha to rgb channels
+        colorTarget.rgb *= streams.Color.rgb * ColorScale.rgb * additional_alpha;
 
         if (UsesSoftEdge > 0)
         {
