@@ -25,7 +25,7 @@ namespace Xenko.Core.Mathematics
         // We want to limit the maximum settable value to prevent such errors.
         private const uint UnderflowGuard = 0xFFFF;
 
-        private readonly uint seed;
+        public readonly uint seed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RandomSeed"/> struct from a target uint.

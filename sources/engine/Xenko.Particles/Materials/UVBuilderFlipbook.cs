@@ -98,12 +98,20 @@ namespace Xenko.Particles.Materials
             set { animationSpeedOverLife = value; }
         }
 
+        /// <summary>
+        /// Have this flipbook start on a shuffled frame?
+        /// </summary>
+        [DataMember(360)]
+        [Display("Shuffle Start Frame")]
+        public bool ShuffleStartFrame { get; set; } = false;
+
         /// <inheritdoc />
         public override unsafe void BuildUVCoordinates(ref ParticleBufferState bufferState, ref ParticleList sorter, AttributeDescription texCoordsDescription)
         {
             var lifeField = sorter.GetField(ParticleFields.RemainingLife);
+            var randomSeed = sorter.GetField(ParticleFields.RandomSeed);
 
-            if (!lifeField.IsValid())
+            if (!lifeField.IsValid() || !randomSeed.IsValid() && ShuffleStartFrame)
                 return;
 
             var texAttribute = bufferState.GetAccessor(texCoordsDescription);
@@ -118,12 +126,15 @@ namespace Xenko.Particles.Materials
                 return;
             }
 
-
             foreach (var particle in sorter)
             {
                 var normalizedTimeline = 1f - *(float*)(particle[lifeField]);
+                uint spriteId;
 
-                var spriteId = startingFrame + (int)(normalizedTimeline*animationSpeedOverLife);
+                if (ShuffleStartFrame)
+                    spriteId = ((*(RandomSeed*)(particle[randomSeed])).seed % (xDivisions * yDivisions)) + (uint)(normalizedTimeline * animationSpeedOverLife);
+                else
+                    spriteId = startingFrame + (uint)(normalizedTimeline*animationSpeedOverLife);
 
                 Vector4 uvTransform = new Vector4((spriteId%xDivisions)*xStep, (spriteId/xDivisions)*yStep, xStep, yStep);
 
