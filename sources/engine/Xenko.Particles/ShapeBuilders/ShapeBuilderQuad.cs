@@ -78,19 +78,19 @@ namespace Xenko.Particles.ShapeBuilders
                 if (hasRotation)
                 {
                     var particleRotation = GetParticleRotation(particle, rotField, lifeField);
-                    particleRotation.Rotate(ref unitX);
-                    particleRotation.Rotate(ref unitY);
+                    particleRotation.RotateVector(ref unitX);
+                    particleRotation.RotateVector(ref unitY);
                 }
 
                 // The TRS matrix is not an identity, so we need to transform the quad
                 if (!trsIdentity)
                 {
-                    spaceRotation.Rotate(ref centralPos);
+                    spaceRotation.RotateVector(ref centralPos);
                     centralPos = centralPos * spaceScale + spaceTranslation;
                     particleSize *= spaceScale;
 
-                    spaceRotation.Rotate(ref unitX);
-                    spaceRotation.Rotate(ref unitY);
+                    spaceRotation.RotateVector(ref unitX);
+                    spaceRotation.RotateVector(ref unitY);
                 }
 
                 // Use half size to make a Size = 1 result in a Billboard of 1m x 1m

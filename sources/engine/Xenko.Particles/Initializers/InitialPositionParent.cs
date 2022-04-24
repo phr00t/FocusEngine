@@ -89,10 +89,10 @@ namespace Xenko.Particles.Initializers
 
             if (!WorldRotation.IsIdentity)
             {
-                WorldRotation.Rotate(ref leftCorner);
-                WorldRotation.Rotate(ref xAxis);
-                WorldRotation.Rotate(ref yAxis);
-                WorldRotation.Rotate(ref zAxis);
+                WorldRotation.RotateVector(ref leftCorner);
+                WorldRotation.RotateVector(ref xAxis);
+                WorldRotation.RotateVector(ref yAxis);
+                WorldRotation.RotateVector(ref zAxis);
             }
 
             // Already inheriting from parent
@@ -172,7 +172,7 @@ namespace Xenko.Particles.Initializers
                     // Convert from Local -> World space if needed
                     if (Parent.SimulationSpace == EmitterSimulationSpace.Local)
                     {
-                        WorldRotation.Rotate(ref parentParticlePosition);
+                        WorldRotation.RotateVector(ref parentParticlePosition);
                         parentParticlePosition *= WorldScale.X;
                         parentParticlePosition += WorldPosition;
                     }

@@ -1116,7 +1116,7 @@ namespace Xenko.Particles
             {
                 var inverseRotation = drawTransform.WorldRotation;
                 inverseRotation.W *= -1;
-                inverseRotation.Rotate(ref depthVector);
+                inverseRotation.RotateVector(ref depthVector);
             }
             var sortedList = ParticleSorter.GetSortedList(depthVector);
 
@@ -1184,7 +1184,7 @@ namespace Xenko.Particles
                         position = position + negativeTranslation;
                         position = position * negativeScale;
 
-                        negativeRotation.Rotate(ref position);
+                        negativeRotation.RotateVector(ref position);
 
                         particle.Set(posField, position);
                     }
@@ -1201,7 +1201,7 @@ namespace Xenko.Particles
                         position = position + negativeTranslation;
                         position = position * negativeScale;
 
-                        negativeRotation.Rotate(ref position);
+                        negativeRotation.RotateVector(ref position);
 
                         particle.Set(posField, position);
                     }
@@ -1217,7 +1217,7 @@ namespace Xenko.Particles
 
                         velocity = velocity * negativeScale;
 
-                        negativeRotation.Rotate(ref velocity);
+                        negativeRotation.RotateVector(ref velocity);
 
                         particle.Set(velField, velocity);
                     }
@@ -1252,7 +1252,7 @@ namespace Xenko.Particles
                     {
                         var position = particle.Get(posField);
 
-                        drawTransform.WorldRotation.Rotate( ref position );
+                        drawTransform.WorldRotation.RotateVector( ref position );
 
                         position = position * drawTransform.WorldScale.X + drawTransform.WorldPosition;
 
@@ -1268,7 +1268,7 @@ namespace Xenko.Particles
                     {
                         var position = particle.Get(posField);
 
-                        drawTransform.WorldRotation.Rotate(ref position);
+                        drawTransform.WorldRotation.RotateVector(ref position);
 
                         position = position * drawTransform.WorldScale.X + drawTransform.WorldPosition;
 
@@ -1284,7 +1284,7 @@ namespace Xenko.Particles
                     {
                         var velocity = particle.Get(velField);
 
-                        drawTransform.WorldRotation.Rotate(ref velocity);
+                        drawTransform.WorldRotation.RotateVector(ref velocity);
 
                         velocity = velocity * drawTransform.WorldScale.X;
 

@@ -285,7 +285,7 @@ namespace Xenko.Core.Mathematics
         {
             Vector3 local = this - target;
             Quaternion q = Quaternion.RotationAxis(axis, angle);
-            q.Rotate(ref local);
+            q.RotateVector(ref local);
             var result = target + local;
 
             X = result.X;
@@ -1474,7 +1474,7 @@ namespace Xenko.Core.Mathematics
         {
             Vector3 local = source - target;
             Quaternion q = Quaternion.RotationAxis(axis, angle);
-            q.Rotate(ref local);
+            q.RotateVector(ref local);
             return target + local;
         }
 
@@ -1564,7 +1564,7 @@ namespace Xenko.Core.Mathematics
         /// Return the vector rotated by the quaternion.
         /// </summary>
         /// <remarks>
-        /// Shorthand for <see cref="Quaternion.Rotate(ref Vector3)"/>
+        /// Shorthand for <see cref="Quaternion.RotateVector(ref Vector3)"/>
         /// </remarks>
         public static Vector3 operator *(in Vector3 left, in Quaternion right)
         {

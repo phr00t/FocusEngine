@@ -58,7 +58,7 @@ namespace Xenko.Particles.Updaters.FieldShapes
             inverseRotation = new Quaternion(-rotation.X, -rotation.Y, -rotation.Z, rotation.W);
 
             mainAxis = new Vector3(0, 1, 0);
-            rotation.Rotate(ref mainAxis);
+            rotation.RotateVector(ref mainAxis);
         }
 
         public override float GetDistanceToCenter(
@@ -76,7 +76,7 @@ namespace Xenko.Particles.Updaters.FieldShapes
             aroundAxis = Vector3.Cross(alongAxis, awayAxis);
 
             particlePosition -= fieldPosition;
-            inverseRotation.Rotate(ref particlePosition);
+            inverseRotation.RotateVector(ref particlePosition);
             particlePosition /= fieldSize;
 
             // Start of code for Sphere
@@ -89,7 +89,7 @@ namespace Xenko.Particles.Updaters.FieldShapes
         public override bool IsPointInside(Vector3 particlePosition, out Vector3 surfacePoint, out Vector3 surfaceNormal)
         {
             particlePosition -= fieldPosition;
-            inverseRotation.Rotate(ref particlePosition);
+            inverseRotation.RotateVector(ref particlePosition);
             particlePosition /= fieldSize;
 
             var maxDist = particlePosition.Length() / radius;
@@ -104,11 +104,11 @@ namespace Xenko.Particles.Updaters.FieldShapes
 
             surfacePoint = surfaceNormal;
             surfacePoint *= fieldSize;
-            fieldRotation.Rotate(ref surfacePoint);
+            fieldRotation.RotateVector(ref surfacePoint);
             surfacePoint += fieldPosition;
 
             surfaceNormal /= fieldSize;
-            fieldRotation.Rotate(ref surfaceNormal);
+            fieldRotation.RotateVector(ref surfaceNormal);
             surfaceNormal.Normalize();
 
             return (maxDist <= 1);

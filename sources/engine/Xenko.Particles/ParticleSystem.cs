@@ -46,7 +46,7 @@ namespace Xenko.Particles
 
             rotation *= Rotation;
 
-            Rotation.Rotate(ref translation);
+            Rotation.RotateVector(ref translation);
             translation *= UniformScale;
             translation += Translation;
 

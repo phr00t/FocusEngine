@@ -152,7 +152,7 @@ namespace Xenko.Particles.ShapeBuilders
 
                 if (!trsIdentity)
                 {
-                    spaceRotation.Rotate(ref centralPos);
+                    spaceRotation.RotateVector(ref centralPos);
                     centralPos = centralPos * spaceScale + spaceTranslation;
                     particleSize *= spaceScale;
                 }
@@ -261,7 +261,7 @@ namespace Xenko.Particles.ShapeBuilders
                 var unitX = axis0 + axis1;
                 unitX -= Vector3.Dot(invViewZ, unitX) * invViewZ;
                 var rotationQuaternion = Quaternion.RotationAxis(invViewZ, -MathUtil.PiOverTwo);
-                rotationQuaternion.Rotate(ref unitX);
+                rotationQuaternion.RotateVector(ref unitX);
                 unitX.Normalize();
 
                 return unitX * (particleSize * 0.5f);

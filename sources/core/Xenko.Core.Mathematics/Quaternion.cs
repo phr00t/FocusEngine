@@ -749,7 +749,7 @@ namespace Xenko.Core.Mathematics
         /// Rotates a Vector3 by the specified quaternion rotation.
         /// </summary>
         /// <param name="vector">The vector to rotate.</param>
-        public void Rotate(ref Vector3 vector)
+        public void RotateVector(ref Vector3 vector)
         {
             var pureQuaternion = new Quaternion(vector, 0);
             pureQuaternion = Conjugate(this) * pureQuaternion * this;
@@ -757,6 +757,59 @@ namespace Xenko.Core.Mathematics
             vector.X = pureQuaternion.X;
             vector.Y = pureQuaternion.Y;
             vector.Z = pureQuaternion.Z;
+        }
+
+        /// <summary>
+        /// Rotate myself by yaw, pitch, roll angles in radians
+        /// </summary>
+        /// <returns>Returns myself</returns>
+        public Quaternion Rotate(float yaw, float pitch, float roll)
+        {
+            MultiplyMyself(Quaternion.RotationYawPitchRoll(yaw, pitch, roll));
+            return this;
+        }
+
+        /// <summary>
+        /// Rotate myself by another quaternion with the option to scale the rotation. This is faster than rotating by individual yaw, pitch and roll values.
+        /// </summary>
+        /// <param name="other">Other quaternion to rotate by</param>
+        /// <param name="scale">Shortcut to scale how much of the rotation is applied</param>
+        /// <returns>Returns myself</returns>
+        public Quaternion Rotate(Quaternion other, float scale = 1f)
+        {
+            if (scale == 1f)
+                MultiplyMyself(other);
+            else
+                MultiplyMyself(Quaternion.Lerp(Quaternion.Identity, other, scale));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Rotate myself by yaw, pitch, roll angles in degrees
+        /// </summary>
+        /// <returns>Returns myself</returns>
+        public Quaternion RotateDeg(float yaw, float pitch, float roll)
+        {
+            MultiplyMyself(Quaternion.RotationYawPitchRollDeg(yaw, pitch, roll));
+            return this;
+        }
+
+        private void MultiplyMyself(Quaternion right)
+        {
+            float lx = X;
+            float ly = Y;
+            float lz = Z;
+            float lw = W;
+            float rx = right.X;
+            float ry = right.Y;
+            float rz = right.Z;
+            float rw = right.W;
+
+            X = (rx * lw + lx * rw + ry * lz) - (rz * ly);
+            Y = (ry * lw + ly * rw + rz * lx) - (rx * lz);
+            Z = (rz * lw + lz * rw + rx * ly) - (ry * lx);
+            W = (rw * lw) - (rx * lx + ry * ly + rz * lz);
         }
 
         /// <summary>

@@ -74,7 +74,7 @@ namespace Xenko.Particles
 
             if (notNull && InheritRotation)
             {
-                parentTransform.WorldRotation.Rotate(ref offsetTranslation);
+                parentTransform.WorldRotation.RotateVector(ref offsetTranslation);
             }
 
             WorldPosition = (notNull && InheritPosition) ? parentTransform.WorldPosition + offsetTranslation : offsetTranslation;

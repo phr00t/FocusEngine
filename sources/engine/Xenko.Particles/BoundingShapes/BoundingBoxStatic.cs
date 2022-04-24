@@ -36,7 +36,7 @@ namespace Xenko.Particles.BoundingShapes
 
         private static void AddCornerToAabb(Vector3 corner, Quaternion rotation, ref Vector3 min, ref Vector3 max)
         {
-            rotation.Rotate(ref corner);
+            rotation.RotateVector(ref corner);
             min.X = (corner.X < min.X) ? corner.X : min.X;
             min.Y = (corner.Y < min.Y) ? corner.Y : min.Y;
             min.Z = (corner.Z < min.Z) ? corner.Z : min.Z;

@@ -74,7 +74,7 @@ namespace Xenko.Particles.Updaters.FieldShapes
             inverseRotation = new Quaternion(-rotation.X, -rotation.Y, -rotation.Z, rotation.W);
 
             mainAxis = new Vector3(0, 1, 0);
-            rotation.Rotate(ref mainAxis);
+            rotation.RotateVector(ref mainAxis);
         }
 
 
@@ -94,7 +94,7 @@ namespace Xenko.Particles.Updaters.FieldShapes
             aroundAxis = Vector3.Cross(alongAxis, awayAxis);
 
             particlePosition -= fieldPosition;
-            inverseRotation.Rotate(ref particlePosition);
+            inverseRotation.RotateVector(ref particlePosition);
             particlePosition /= fieldSize;
 
             // Start of code for Cylinder
@@ -115,7 +115,7 @@ namespace Xenko.Particles.Updaters.FieldShapes
         public override bool IsPointInside(Vector3 particlePosition, out Vector3 surfacePoint, out Vector3 surfaceNormal)
         {
             particlePosition -= fieldPosition;
-            inverseRotation.Rotate(ref particlePosition);
+            inverseRotation.RotateVector(ref particlePosition);
 //            particlePosition /= fieldSize;
 
             var maxDist = (float)Math.Sqrt(particlePosition.X * particlePosition.X + particlePosition.Z * particlePosition.Z);
@@ -177,10 +177,10 @@ namespace Xenko.Particles.Updaters.FieldShapes
 
             // Fix the surface point and normal to world space
             surfaceNormal /= fieldSize;
-            fieldRotation.Rotate(ref surfaceNormal);
+            fieldRotation.RotateVector(ref surfaceNormal);
             surfaceNormal.Normalize();
    
-            fieldRotation.Rotate(ref surfacePoint);
+            fieldRotation.RotateVector(ref surfacePoint);
 //            surfacePoint *= fieldSize;
             surfacePoint += fieldPosition;
 

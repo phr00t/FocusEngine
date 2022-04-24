@@ -136,7 +136,7 @@ namespace Xenko.Editor.Thumbnails
 
             // rotate a bit the camera to have a nice viewing angle.
             var rotationQuaternion = Quaternion.RotationX(-MathUtil.Pi / 6) * Quaternion.RotationY(-MathUtil.Pi / 4);
-            rotationQuaternion.Rotate(ref cameraEntity.Transform.Position);
+            rotationQuaternion.RotateVector(ref cameraEntity.Transform.Position);
             cameraEntity.Transform.Rotation = Quaternion.RotationX(-MathUtil.Pi / 6) * Quaternion.RotationY(-MathUtil.Pi / 4);
 
             cameraComponent.NearClipPlane = cameraDistanceFromCenter / 50f;

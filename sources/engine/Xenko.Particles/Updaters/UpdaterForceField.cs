@@ -196,7 +196,7 @@ namespace Xenko.Particles.Modules
             scale *= WorldScale;
 
             translation *= WorldScale;
-            rotation.Rotate(ref translation);
+            rotation.RotateVector(ref translation);
             translation += WorldPosition;
 
             return true;

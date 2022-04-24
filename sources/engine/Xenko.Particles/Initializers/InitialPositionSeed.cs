@@ -52,10 +52,10 @@ namespace Xenko.Particles.Initializers
 
             if (!WorldRotation.IsIdentity)
             {
-                WorldRotation.Rotate(ref leftCorner);
-                WorldRotation.Rotate(ref xAxis);
-                WorldRotation.Rotate(ref yAxis);
-                WorldRotation.Rotate(ref zAxis);
+                WorldRotation.RotateVector(ref leftCorner);
+                WorldRotation.RotateVector(ref xAxis);
+                WorldRotation.RotateVector(ref yAxis);
+                WorldRotation.RotateVector(ref zAxis);
             }
 
             leftCorner += WorldPosition;
@@ -188,7 +188,7 @@ namespace Xenko.Particles.Initializers
             translation = (PositionMax + PositionMin) * 0.5f * WorldScale;
 
             scale *= WorldScale;
-            rotation.Rotate(ref translation);
+            rotation.RotateVector(ref translation);
             translation += WorldPosition;
 
             return true;

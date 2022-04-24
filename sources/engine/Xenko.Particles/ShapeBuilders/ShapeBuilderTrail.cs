@@ -162,11 +162,11 @@ namespace Xenko.Particles.ShapeBuilders
 
                 if (!trsIdentity)
                 {
-                    spaceRotation.Rotate(ref centralPos);
+                    spaceRotation.RotateVector(ref centralPos);
                     centralPos = centralPos * spaceScale + spaceTranslation;
 
                     // Direction
-                    spaceRotation.Rotate(ref particleDirection);
+                    spaceRotation.RotateVector(ref particleDirection);
                     particleDirection *= spaceScale;
                 }
 

@@ -123,7 +123,7 @@ namespace Xenko.Particles.Initializers
             var arcOffset = new Vector3(0, ArcHeight, 0);
             if (!WorldRotation.IsIdentity)
             {
-                WorldRotation.Rotate(ref arcOffset);
+                WorldRotation.RotateVector(ref arcOffset);
             }
 
             var leftCorner = PositionMin * WorldScale;
@@ -133,10 +133,10 @@ namespace Xenko.Particles.Initializers
 
             if (!WorldRotation.IsIdentity)
             {
-                WorldRotation.Rotate(ref leftCorner);
-                WorldRotation.Rotate(ref xAxis);
-                WorldRotation.Rotate(ref yAxis);
-                WorldRotation.Rotate(ref zAxis);
+                WorldRotation.RotateVector(ref leftCorner);
+                WorldRotation.RotateVector(ref xAxis);
+                WorldRotation.RotateVector(ref yAxis);
+                WorldRotation.RotateVector(ref zAxis);
             }
 
             var targetCornerAdd = Target?.WorldMatrix.TranslationVector - WorldPosition ?? FallbackTarget;

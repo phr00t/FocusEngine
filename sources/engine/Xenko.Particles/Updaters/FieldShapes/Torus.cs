@@ -77,7 +77,7 @@ namespace Xenko.Particles.Updaters.FieldShapes
             alongAxis = new Vector3(0, 1, 0);
 
             particlePosition -= fieldPosition;            
-            inverseRotation.Rotate(ref particlePosition);
+            inverseRotation.RotateVector(ref particlePosition);
             particlePosition /= fieldSize;
 
             // Start by positioning hte particle on the torus' plane
@@ -89,14 +89,14 @@ namespace Xenko.Particles.Updaters.FieldShapes
 
             // Fix the field's axis back to world space
             var forceAxis = Vector3.Cross(alongAxis, projectedPosition);
-            fieldRotation.Rotate(ref forceAxis);
+            fieldRotation.RotateVector(ref forceAxis);
             forceAxis.Normalize();
             alongAxis = forceAxis;
 
             projectedPosition = (distanceFromOrigin > 0) ? (projectedPosition/(float)distanceFromOrigin) : projectedPosition;
             projectedPosition -= particlePosition;
             projectedPosition *= fieldSize;
-            fieldRotation.Rotate(ref projectedPosition);
+            fieldRotation.RotateVector(ref projectedPosition);
             awayAxis = -projectedPosition;
             awayAxis.Normalize();
 
@@ -108,7 +108,7 @@ namespace Xenko.Particles.Updaters.FieldShapes
         public override bool IsPointInside(Vector3 particlePosition, out Vector3 surfacePoint, out Vector3 surfaceNormal)
         {
             particlePosition -= fieldPosition;
-            inverseRotation.Rotate(ref particlePosition);
+            inverseRotation.RotateVector(ref particlePosition);
             particlePosition /= fieldSize;
 
             var projectedPosition = new Vector3(particlePosition.X, 0, particlePosition.Z);
@@ -129,11 +129,11 @@ namespace Xenko.Particles.Updaters.FieldShapes
 
             // Fix the surface point and normal to world space
             surfaceNormal /= fieldSize;
-            fieldRotation.Rotate(ref surfaceNormal);
+            fieldRotation.RotateVector(ref surfaceNormal);
             surfaceNormal.Normalize();
 
             surfacePoint *= fieldSize;
-            fieldRotation.Rotate(ref surfacePoint);
+            fieldRotation.RotateVector(ref surfacePoint);
             surfacePoint += fieldPosition;
 
             return isInside;
