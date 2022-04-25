@@ -795,16 +795,16 @@ namespace Xenko.Core.Mathematics
             return this;
         }
 
-        private void MultiplyMyself(Quaternion right)
+        private void MultiplyMyself(Quaternion left)
         {
-            float lx = X;
-            float ly = Y;
-            float lz = Z;
-            float lw = W;
-            float rx = right.X;
-            float ry = right.Y;
-            float rz = right.Z;
-            float rw = right.W;
+            float lx = left.X;
+            float ly = left.Y;
+            float lz = left.Z;
+            float lw = left.W;
+            float rx = X;
+            float ry = Y;
+            float rz = Z;
+            float rw = W;
 
             X = (rx * lw + lx * rw + ry * lz) - (rz * ly);
             Y = (ry * lw + ly * rw + rz * lx) - (rx * lz);
