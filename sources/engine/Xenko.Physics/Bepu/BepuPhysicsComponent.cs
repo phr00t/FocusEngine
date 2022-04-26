@@ -53,7 +53,7 @@ namespace Xenko.Engine
 
         // are we safe to make changes to bodies (e.g. not simulating)
         internal static volatile bool safeRun;
-
+        public int collisionID;
         public BepuPhysicsComponent()
         {
             BepuHelpers.AssureBepuSystemCreated();

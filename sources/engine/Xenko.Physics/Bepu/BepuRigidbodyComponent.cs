@@ -20,6 +20,7 @@ using System.Threading;
 using System.Collections.Concurrent;
 using BulletSharp.SoftBody;
 using System.Collections;
+using Xenko.Physics.Salvage;
 
 namespace Xenko.Physics.Bepu
 {
@@ -35,7 +36,7 @@ namespace Xenko.Physics.Bepu
 
         [DataMemberIgnore]
         public BodyReference InternalBody;
-
+        
         public override int HandleIndex => InternalBody.Handle.Value;
 
         /// <summary>
@@ -333,6 +334,8 @@ namespace Xenko.Physics.Bepu
 
         private void setInternalBodyDefaults()
         {
+            //I'm initializing the object ID here just cause it seems convient
+            collisionID = SalvageIDMaker.getNextID();
             if (CachedDelegates == null)
                 PrepareDelegates();
 

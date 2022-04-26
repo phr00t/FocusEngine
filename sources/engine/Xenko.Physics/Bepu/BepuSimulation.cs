@@ -42,7 +42,7 @@ namespace Xenko.Physics.Bepu
         public ConcurrentQueue<Action<float>> ActionsBeforeSimulationStep = new ConcurrentQueue<Action<float>>();
         public ConcurrentQueue<Action<float>> ActionsAfterSimulationStep = new ConcurrentQueue<Action<float>>();
         internal ConcurrentQueue<RBCriticalAction> CriticalActions = new ConcurrentQueue<RBCriticalAction>();
-
+        
         internal struct RBCriticalAction
         {
             public BepuRigidbodyComponent.RB_ACTION Action;
@@ -169,7 +169,8 @@ namespace Xenko.Physics.Bepu
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static bool CanCollide(CollidableReference a, CollidableReference b)
         {
-            return ((uint)getFromReference(a).CollisionGroup & (uint)getFromReference(b).CanCollideWith) != 0;
+            //Collision ID Checking added by Salvage Engine
+            return ((uint)getFromReference(a).CollisionGroup & (uint)getFromReference(b).CanCollideWith) != 0/**begin salvage additions**/&& instance.AllRigidbodies[a.BodyHandle.Value].collisionID != instance.AllRigidbodies[b.BodyHandle.Value].collisionID;
         }
 
         unsafe struct NarrowPhaseCallbacks : INarrowPhaseCallbacks
@@ -200,6 +201,7 @@ namespace Xenko.Physics.Bepu
                 //The engine won't generate static-static pairs, but it will generate kinematic-kinematic pairs.
                 //That's useful if you're trying to make some sort of sensor/trigger object, but since kinematic-kinematic pairs
                 //can't generate constraints (both bodies have infinite inertia), simple simulations can just ignore such pairs.
+
                 return (a.Mobility == CollidableMobility.Dynamic || b.Mobility == CollidableMobility.Dynamic) && CanCollide(a, b);
             }
 
