@@ -49,8 +49,15 @@ public static class EntityPool {
         /// Spawn an object from our pool
         /// </summary>
         public Entity Spawn(Vector3? pos = null, Quaternion? rot = null) {
-            Entity obj;
-            if (inactive.Count == 0) {
+            Entity obj = null;
+
+            lock (inactive)
+            {
+                if (inactive.Count > 0)
+                    obj = inactive.Pop();
+            }
+
+            if (obj == null) {
                 // We don't have an object in our pool, so we
                 // instantiate a whole new object.
                 obj = prefab.Clone();
@@ -59,32 +66,30 @@ public static class EntityPool {
                 // we belong to.
                 obj.UsingPool = new PoolMember();
                 obj.UsingPool.myPool = this;
-                obj.UsingPool.active = true;
-            } else {
-                // Grab the last object in the inactive array
-                obj = inactive.Pop();
-
-                if (obj == null ||
-                    obj.UsingPool == null ||
-                    obj.UsingPool.active ||
-                    obj.Scene != null) {
-                    // something weird happened... we didn't get an entity
-                    // or it isn't really inactive...
-                    // Just get another one, then...
-                    return Spawn(pos, rot);
-                }
-
-                obj.UsingPool.active = true;
+            } else if (obj.UsingPool == null || obj.UsingPool.active || obj.Scene != null) {
+                // something weird happened...
+                // it isn't really inactive...
+                // Just get another one, then...
+                return Spawn(pos, rot);
             }
+
+            obj.UsingPool.active = true;
             obj.Transform.Position = pos ?? Vector3.Zero;
             obj.Transform.Rotation = rot ?? Quaternion.Identity;
+
             return obj;
         }
 
         // Return an object to the inactive pool.
         public void ReturnToPool(Entity obj, ref bool active) {
             if (Xenko.Engine.SceneSystem.DoNotDisposeOnNextRemoval) return;
-            if (active) inactive.Push(obj);
+            if (active)
+            {
+                lock (inactive)
+                {
+                    inactive.Push(obj);
+                }
+            }
             obj.Scene = null;
             active = false;
         }
