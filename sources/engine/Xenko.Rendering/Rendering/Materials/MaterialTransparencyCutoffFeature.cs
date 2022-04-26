@@ -18,7 +18,6 @@ namespace Xenko.Rendering.Materials
         private const float DefaultAlpha = 0.5f;
 
         private static readonly MaterialStreamDescriptor AlphaDiscardStream = new MaterialStreamDescriptor("Alpha Discard", "matAlphaDiscard", MaterialKeys.AlphaDiscardValue.PropertyType);
-        private static readonly MaterialStreamDescriptor AlphaBlendColorStream = new MaterialStreamDescriptor("DiffuseSpecularAlphaBlend - Color", "matAlphaBlendColor", MaterialKeys.AlphaBlendColorValue.PropertyType);
 
         private static readonly PropertyKey<bool> HasFinalCallback = new PropertyKey<bool>("MaterialTransparencyCutoffFeature.HasFinalCallback", typeof(MaterialTransparencyCutoffFeature));
 
@@ -28,7 +27,6 @@ namespace Xenko.Rendering.Materials
         public MaterialTransparencyCutoffFeature()
         {
             Alpha = new ComputeFloat(DefaultAlpha);
-            Tint = Color4.White;
         }
 
         /// <summary>
@@ -42,26 +40,11 @@ namespace Xenko.Rendering.Materials
         [DataMemberRange(0.0, 1.0, 0.01, 0.1, 2)]
         public IComputeScalar Alpha { get; set; }
 
-        /// <summary>
-        /// Gets or sets the alpha.
-        /// </summary>
-        /// <value>The alpha.</value>
-        /// <userdoc>The alpha threshold of the cutoff. All alpha values above this threshold are considered as fully transparent.
-        /// All alpha values under this threshold are considered as fully opaque.</userdoc>
-        [NotNull]
-        [DataMember(20)]
-        public Color4 Tint { get; set; }
-
         public override void GenerateShader(MaterialGeneratorContext context)
         {
             var alpha = Alpha ?? new ComputeFloat(DefaultAlpha);
             
             context.SetStream(AlphaDiscardStream.Stream, alpha, MaterialKeys.AlphaDiscardMap, MaterialKeys.AlphaDiscardValue, new Color(DefaultAlpha));
-            
-            if (Tint != Color4.White )
-            {
-                context.SetStream(AlphaBlendColorStream.Stream, new ComputeColor(Tint), MaterialKeys.AlphaBlendColorMap, MaterialKeys.AlphaBlendColorValue, Color.White);
-            }
 
             context.MaterialPass.Parameters.Set(MaterialKeys.UsePixelShaderWithDepthPass, true);
 

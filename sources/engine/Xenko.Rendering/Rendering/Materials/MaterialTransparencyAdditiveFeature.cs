@@ -19,8 +19,6 @@ namespace Xenko.Rendering.Materials
     {
         private static readonly MaterialStreamDescriptor AlphaBlendStream = new MaterialStreamDescriptor("DiffuseSpecularAlphaBlend", "matDiffuseSpecularAlphaBlend", MaterialKeys.DiffuseSpecularAlphaBlendValue.PropertyType);
 
-        private static readonly MaterialStreamDescriptor AlphaBlendColorStream = new MaterialStreamDescriptor("DiffuseSpecularAlphaBlend - Color", "matAlphaBlendColor", MaterialKeys.AlphaBlendColorValue.PropertyType);
-
         private static readonly PropertyKey<bool> HasFinalCallback = new PropertyKey<bool>("MaterialTransparencyAdditiveFeature.HasFinalCallback", typeof(MaterialTransparencyAdditiveFeature));
 
         /// <summary>
@@ -29,7 +27,6 @@ namespace Xenko.Rendering.Materials
         public MaterialTransparencyAdditiveFeature()
         {
             Alpha = new ComputeFloat(0.5f);
-            Tint = new ComputeColor(Color.White);
         }
 
         /// <summary>
@@ -42,15 +39,6 @@ namespace Xenko.Rendering.Materials
         [DataMemberRange(0.0, 1.0, 0.01, 0.1, 2)]
         public IComputeScalar Alpha { get; set; }
 
-        /// <summary>
-        /// Gets or sets the tint color.
-        /// </summary>
-        /// <value>The tint.</value>
-        /// <userdoc>The tint color to apply on the material during the blend.</userdoc>
-        [NotNull]
-        [DataMember(20)]
-        public IComputeColor Tint { get; set; }
-
         /// <userdoc>
         /// Dither shadows cast by this object to simulate semi-transparent shadows, works best at higher PCF filtering levels.
         /// </userdoc>
@@ -60,7 +48,6 @@ namespace Xenko.Rendering.Materials
         public override void GenerateShader(MaterialGeneratorContext context)
         {
             var alpha = Alpha ?? new ComputeFloat(0.5f);
-            var tint = Tint ?? new ComputeColor(Color.White);
 
             alpha.ClampFloat(0, 1);
 
@@ -80,7 +67,6 @@ namespace Xenko.Rendering.Materials
             mixin.AddComposition("color", alphaColor);
 
             context.SetStream(MaterialShaderStage.Pixel, AlphaBlendStream.Stream, MaterialStreamType.Float2, mixin);
-            context.SetStream(AlphaBlendColorStream.Stream, tint, MaterialKeys.AlphaBlendColorMap, MaterialKeys.AlphaBlendColorValue, Color.White);
 
             context.MaterialPass.Parameters.Set(MaterialKeys.UsePixelShaderWithDepthPass, true);
             if (DitheredShadows)

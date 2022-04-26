@@ -27,6 +27,12 @@ namespace Xenko.Rendering
         }
 
         /// <summary>
+        /// Shortcut to getting the first pass's parameters
+        /// </summary>
+        [DataMemberIgnore]
+        public ParameterCollection BaseParameters => Passes[0].Parameters;
+
+        /// <summary>
         /// The passes contained in this material (usually one).
         /// </summary>
         public MaterialPassCollection Passes { get; }

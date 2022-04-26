@@ -42,7 +42,6 @@ namespace Xenko.Rendering.Materials
         public static readonly ValueParameterKey<float> DiffuseSpecularAlphaBlendValue = ParameterKeys.NewValue<float>();
 
         public static readonly ObjectParameterKey<Texture> AlphaBlendColorMap = ParameterKeys.NewObject<Texture>();
-        public static readonly ValueParameterKey<Color3> AlphaBlendColorValue = ParameterKeys.NewValue<Color3>();
 
         public static readonly ObjectParameterKey<Texture> AlphaDiscardMap = ParameterKeys.NewObject<Texture>();
         public static readonly ValueParameterKey<float> AlphaDiscardValue = ParameterKeys.NewValue<float>();
@@ -105,6 +104,11 @@ namespace Xenko.Rendering.Materials
         /// Texture UV offset
         /// </summary>
         public static readonly ValueParameterKey<Vector2> TextureOffset = ParameterKeys.NewValue<Vector2>();
+
+        /// <summary>
+        /// Texture color tint
+        /// </summary>
+        public static readonly ValueParameterKey<Color3> TextureTint = ParameterKeys.NewValue<Color3>();
 
         /// <summary>
         /// Generic texture key used by a material

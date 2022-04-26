@@ -181,15 +181,15 @@ namespace Xenko.Graphics
 
             textureUpdater = null;
             if (Effect.Effect.HasParameter(TexturingKeys.Texture0))
-                textureUpdater = Effect.Parameters.GetAccessor(TexturingKeys.Texture0);
+                textureUpdater = Effect.Parameters.GetObjectAccessor(TexturingKeys.Texture0);
             if (Effect.Effect.HasParameter(TexturingKeys.TextureCube0))
-                textureUpdater = Effect.Parameters.GetAccessor(TexturingKeys.TextureCube0);
+                textureUpdater = Effect.Parameters.GetObjectAccessor(TexturingKeys.TextureCube0);
             if (Effect.Effect.HasParameter(TexturingKeys.Texture3D0))
-                textureUpdater = Effect.Parameters.GetAccessor(TexturingKeys.Texture3D0);
+                textureUpdater = Effect.Parameters.GetObjectAccessor(TexturingKeys.Texture3D0);
 
             samplerUpdater = null;
             if (Effect.Effect.HasParameter(TexturingKeys.Sampler))
-                samplerUpdater = Effect.Parameters.GetAccessor(TexturingKeys.Sampler);
+                samplerUpdater = Effect.Parameters.GetObjectAccessor(TexturingKeys.Sampler);
 
             // Immediate mode, then prepare for rendering here instead of End()
             if (sessionSortMode == SpriteSortMode.Immediate)

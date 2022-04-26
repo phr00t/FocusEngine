@@ -36,7 +36,7 @@ namespace Xenko.Shaders
 
         public bool Contains(KeyValuePair<ParameterKey, object> item)
         {
-            var accessor = GetObjectParameterHelper(item.Key);
+            var accessor = GetObjectParameterHelper(item.Key, true);
             if (accessor.Offset == -1)
                 return false;
 

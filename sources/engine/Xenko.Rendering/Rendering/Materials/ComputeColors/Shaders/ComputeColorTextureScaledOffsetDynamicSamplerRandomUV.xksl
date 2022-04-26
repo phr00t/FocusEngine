@@ -15,7 +15,8 @@ shader ComputeColorTextureScaledOffsetDynamicSamplerRandomUV<LinkType TTextureNa
                                              LinkType TSampler, 
                                              MemberName TRgba, 
                                              LinkType TScale, 
-                                             LinkType TOffset> : ComputeColor, 
+                                             LinkType TOffset,
+                                             LinkType TTint> : ComputeColor, 
                                                                DynamicTexture<TTextureName, PerMaterial>, 
                                                                DynamicSampler<TSampler, PerMaterial>, 
                                                                DynamicTextureStream<TStream>
@@ -27,6 +28,9 @@ shader ComputeColorTextureScaledOffsetDynamicSamplerRandomUV<LinkType TTextureNa
 
         [Link("TOffset")]
         stage float2 offset;
+        
+        [Link("TTint")]
+        stage float3 tint;
     }
     
     //------------------------------------------------------------------------------
@@ -84,6 +88,6 @@ shader ComputeColorTextureScaledOffsetDynamicSamplerRandomUV<LinkType TTextureNa
     }
 
     override float4 Compute() {
-        return Texture.Sample(Sampler, RandomUV(streams.TexCoord * scale + offset)).TRgba;
+        return Texture.Sample(Sampler, RandomUV(streams.TexCoord * scale + offset)).TRgba * float4(tint, 1.0);
     }
 };

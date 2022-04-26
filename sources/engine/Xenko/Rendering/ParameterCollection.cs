@@ -95,9 +95,9 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameterKey"></param>
         /// <returns></returns>
-        public ObjectParameterAccessor<T> GetAccessor<T>(ObjectParameterKey<T> parameterKey, bool createIfNew = true)
+        public ObjectParameterAccessor<T> GetObjectAccessor<T>(ObjectParameterKey<T> parameterKey, bool createIfNew = true, int index = 0)
         {
-            var accessor = GetObjectParameterHelper(parameterKey, createIfNew);
+            var accessor = GetObjectParameterHelper(parameterKey, createIfNew, index);
             return new ObjectParameterAccessor<T>(accessor.Offset, accessor.Count);
         }
 
@@ -107,10 +107,10 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameterKey"></param>
         /// <returns></returns>
-        public PermutationParameter<T> GetAccessor<T>(PermutationParameterKey<T> parameterKey, bool createIfNew = true)
+        public PermutationParameter<T> GetPermutationAccessor<T>(PermutationParameterKey<T> parameterKey, bool createIfNew = true, int index = 0)
         {
             // Remap it as PermutationParameter
-            var accessor = GetObjectParameterHelper(parameterKey, createIfNew);
+            var accessor = GetObjectParameterHelper(parameterKey, createIfNew, index);
             return new PermutationParameter<T>(accessor.Offset, accessor.Count);
         }
 
@@ -120,19 +120,23 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameterKey"></param>
         /// <returns></returns>
-        public ValueParameter<T> GetAccessor<T>(ValueParameterKey<T> parameterKey, int elementCount = 1) where T : struct
+        public ValueParameter<T> GetValueAccessor<T>(ValueParameterKey<T> parameterKey, int elementCount = 1, int index = 0) where T : struct
         {
-            var accessor = GetValueAccessorHelper(parameterKey, elementCount);
+            var accessor = GetValueAccessorHelper(parameterKey, elementCount, index);
             return new ValueParameter<T>(accessor.Offset, accessor.Count);
         }
 
-        private unsafe Accessor GetValueAccessorHelper(ParameterKey parameterKey, int elementCount = 1)
+        private unsafe Accessor GetValueAccessorHelper(ParameterKey parameterKey, int elementCount = 1, int index = 0)
         {
             // Find existing first
+            bool multiindex = index > 0;
             for (int i = 0; i < parameterKeyInfos.Count; ++i)
             {
-                if (parameterKeyInfos.Items[i].Key == parameterKey)
+                var pk = parameterKeyInfos.Items[i].Key;
+                if (pk == parameterKey || multiindex && pk.BaseType == parameterKey.BaseType)
                 {
+                    if (index-- != 0) continue;
+
                     return parameterKeyInfos.Items[i].GetValueAccessor();
                 }
             }
@@ -181,9 +185,10 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
         /// <param name="value"></param>
-        public void Set<T>(ObjectParameterKey<T> parameter, T value)
+        /// <param name="index">Which parameter index? 0 is the first found for material pass</param>
+        public void Set<T>(ObjectParameterKey<T> parameter, T value, int index = 0)
         {
-            Set(GetAccessor(parameter), value);
+            Set(GetObjectAccessor(parameter, true, index), value);
         }
 
         /// <summary>
@@ -191,10 +196,11 @@ namespace Xenko.Rendering
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
+        /// <param name="index">Which parameter index? 0 is the first found for material pass</param>
         /// <returns></returns>
-        public T Get<T>(ObjectParameterKey<T> parameter, bool createIfNew = false)
+        public T Get<T>(ObjectParameterKey<T> parameter, bool createIfNew = false, int index = 0)
         {
-            var accessor = GetAccessor(parameter, createIfNew);
+            var accessor = GetObjectAccessor(parameter, createIfNew, index);
             if (accessor.BindingSlot == -1)
                 return parameter.DefaultValueMetadataT.DefaultValue;
 
@@ -207,9 +213,9 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
         /// <param name="value"></param>
-        public void Set<T>(PermutationParameterKey<T> parameter, T value)
+        public void Set<T>(PermutationParameterKey<T> parameter, T value, int index = 0)
         {
-            Set(GetAccessor(parameter), value);
+            Set(GetPermutationAccessor(parameter, true, index), value);
         }
 
         /// <summary>
@@ -218,9 +224,9 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public T Get<T>(PermutationParameterKey<T> parameter, bool createIfNew = false)
+        public T Get<T>(PermutationParameterKey<T> parameter, bool createIfNew = false, int index = 0)
         {
-            var accessor = GetAccessor(parameter, createIfNew);
+            var accessor = GetPermutationAccessor(parameter, createIfNew, index);
             if (accessor.BindingSlot == -1)
                 return parameter.DefaultValueMetadataT.DefaultValue;
 
@@ -233,9 +239,9 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
         /// <param name="value"></param>
-        public void Set<T>(ValueParameterKey<T> parameter, T value) where T : struct
+        public void Set<T>(ValueParameterKey<T> parameter, T value, int index = 0) where T : struct
         {
-            Set(GetAccessor(parameter), ref value);
+            Set(GetValueAccessor(parameter, 1, index), ref value);
         }
 
         /// <summary>
@@ -244,9 +250,9 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
         /// <param name="value"></param>
-        public void Set<T>(ValueParameterKey<T> parameter, ref T value) where T : struct
+        public void Set<T>(ValueParameterKey<T> parameter, ref T value, int index = 0) where T : struct
         {
-            Set(GetAccessor(parameter), ref value);
+            Set(GetValueAccessor(parameter, 1, index), ref value);
         }
 
         /// <summary>
@@ -255,9 +261,9 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
         /// <param name="values"></param>
-        public void Set<T>(ValueParameterKey<T> parameter, T[] values) where T : struct
+        public void Set<T>(ValueParameterKey<T> parameter, T[] values, int index = 0) where T : struct
         {
-            Set(GetAccessor(parameter, values.Length), values.Length, ref values[0]);
+            Set(GetValueAccessor(parameter, values.Length, index), values.Length, ref values[0]);
         }
 
         /// <summary>
@@ -266,9 +272,9 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
         /// <param name="values"></param>
-        public void Set<T>(ValueParameterKey<T> parameter, int count, ref T firstValue) where T : struct
+        public void Set<T>(ValueParameterKey<T> parameter, int count, ref T firstValue, int index = 0) where T : struct
         {
-            Set(GetAccessor(parameter, count), count, ref firstValue);
+            Set(GetValueAccessor(parameter, count, index), count, ref firstValue);
         }
 
         /// <summary>
@@ -277,9 +283,9 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="parameter"></param>
         /// <returns></returns>
-        public T Get<T>(ValueParameterKey<T> parameter) where T : struct
+        public T Get<T>(ValueParameterKey<T> parameter, int index = 0) where T : struct
         {
-            return Get(GetAccessor(parameter));
+            return Get(GetValueAccessor(parameter, 1, index));
         }
 
         /// <summary>
@@ -288,9 +294,9 @@ namespace Xenko.Rendering
         /// <typeparam name="T"></typeparam>
         /// <param name="key"></param>
         /// <returns></returns>
-        public unsafe T[] GetValues<T>(ValueParameterKey<T> key) where T : struct
+        public unsafe T[] GetValues<T>(ValueParameterKey<T> key, int index = 0) where T : struct
         {
-            var parameter = GetAccessor(key);
+            var parameter = GetValueAccessor(key, 1, index);
 
             // Align to float4
             var stride = (Utilities.SizeOf<T>() + 15) / 16 * 16;
@@ -317,10 +323,10 @@ namespace Xenko.Rendering
         /// <param name="key">The key for the values to copy.</param>
         /// <param name="destination">The collection to copy the values to.</param>
         /// <param name="destinationKey">The key for the values of the destination collection.</param>
-        public unsafe void CopyTo<T>(ValueParameterKey<T> key, ParameterCollection destination, ValueParameterKey<T> destinationKey) where T : struct
+        public unsafe void CopyTo<T>(ValueParameterKey<T> key, ParameterCollection destination, ValueParameterKey<T> destinationKey, int index = 0) where T : struct
         {
-            var sourceParameter = GetAccessor(key);
-            var destParameter = destination.GetAccessor(destinationKey, sourceParameter.Count);
+            var sourceParameter = GetValueAccessor(key, 1, index);
+            var destParameter = destination.GetValueAccessor(destinationKey, sourceParameter.Count, index);
             if (sourceParameter.Count > destParameter.Count)
             {
                 throw new IndexOutOfRangeException();
@@ -461,12 +467,12 @@ namespace Xenko.Rendering
             return (T)ObjectValues[parameterAccessor.BindingSlot];
         }
 
-        public void SetObject(ParameterKey key, object value)
+        public void SetObject(ParameterKey key, object value, int index = 0)
         {
             if (key.Type != ParameterKeyType.Permutation && key.Type != ParameterKeyType.Object)
                 throw new InvalidOperationException("SetObject can only be used for Permutation or Object keys");
 
-            var accessor = GetObjectParameterHelper(key);
+            var accessor = GetObjectParameterHelper(key, true, index);
 
             if (key.Type == ParameterKeyType.Permutation)
             {
@@ -478,12 +484,12 @@ namespace Xenko.Rendering
             ObjectValues[accessor.Offset] = value;
         }
 
-        public object GetObject(ParameterKey key)
+        public object GetObject(ParameterKey key, int index = 0)
         {
             if (key.Type != ParameterKeyType.Permutation && key.Type != ParameterKeyType.Object)
                 throw new InvalidOperationException("GetObject can only be used for Permutation or Object keys");
 
-            var accessor = GetObjectParameterHelper(key, false);
+            var accessor = GetObjectParameterHelper(key, false, index);
             if (accessor.Offset == -1)
                 return null;
 
@@ -649,13 +655,17 @@ namespace Xenko.Rendering
             ObjectValues = newResourceValues;
         }
 
-        protected Accessor GetObjectParameterHelper(ParameterKey parameterKey, bool createIfNew = true)
+        protected Accessor GetObjectParameterHelper(ParameterKey parameterKey, bool createIfNew = true, int index = 0)
         {
             // Find existing first
+            bool multiindex = index > 0;
             for (int i = 0; i < parameterKeyInfos.Count; ++i)
             {
-                if (parameterKeyInfos.Items[i].Key == parameterKey)
+                var pk = parameterKeyInfos.Items[i].Key;
+                if (pk == parameterKey || multiindex && pk.BaseType == parameterKey.BaseType)
                 {
+                    if (index-- != 0) continue;
+
                     return parameterKeyInfos.Items[i].GetObjectAccessor();
                 }
             }

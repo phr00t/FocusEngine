@@ -155,6 +155,13 @@ namespace Xenko.Rendering.Materials.ComputeColors
         public Vector2 Offset { get; set; }
 
         /// <summary>
+        /// Is this texture being tinted?
+        /// </summary>
+        [NotNull]
+        [DataMember(65)]
+        public Color3 Tint { get; set; } = Color3.White;
+
+        /// <summary>
         /// Uses random texture coordinates.
         /// </summary>
         /// <userdoc>
@@ -235,20 +242,22 @@ namespace Xenko.Rendering.Materials.ComputeColors
                 // Try to avoid shader permutations, by putting UV scaling/offset in shader parameters
                 var textureScale = (ValueParameterKey<Vector2>)context.GetParameterKey(MaterialKeys.TextureScale);
                 var textureOffset = (ValueParameterKey<Vector2>)context.GetParameterKey(MaterialKeys.TextureOffset);
+                var textureTint = (ValueParameterKey<Color3>)context.GetParameterKey(MaterialKeys.TextureTint);
 
                 context.Parameters.Set(textureScale, scale);
                 context.Parameters.Set(textureOffset, Offset);
+                context.Parameters.Set(textureTint, Tint);
 
                 if (context.IsNotPixelStage)
                 {
-                    shaderSource = new ShaderClassSource("ComputeColorTextureLodScaledOffsetDynamicSampler", textureKey, usedTexcoord, samplerKey, channelStr, textureScale, textureOffset, 0.0f);
+                    shaderSource = new ShaderClassSource("ComputeColorTextureLodScaledOffsetDynamicSampler", textureKey, usedTexcoord, samplerKey, channelStr, textureScale, textureOffset, textureTint, 0.0f);
                 }
                 else
                 {
                     if (UseRandomTextureCoordinates)
-                        shaderSource = new ShaderClassSource("ComputeColorTextureScaledOffsetDynamicSamplerRandomUV", textureKey, usedTexcoord, samplerKey, channelStr, textureScale, textureOffset);
+                        shaderSource = new ShaderClassSource("ComputeColorTextureScaledOffsetDynamicSamplerRandomUV", textureKey, usedTexcoord, samplerKey, channelStr, textureScale, textureOffset, textureTint);
                     else
-                        shaderSource = new ShaderClassSource("ComputeColorTextureScaledOffsetDynamicSampler", textureKey, usedTexcoord, samplerKey, channelStr, textureScale, textureOffset);
+                        shaderSource = new ShaderClassSource("ComputeColorTextureScaledOffsetDynamicSampler", textureKey, usedTexcoord, samplerKey, channelStr, textureScale, textureOffset, textureTint);
                 }
             }
 

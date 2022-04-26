@@ -15,7 +15,7 @@ namespace Xenko.Rendering
     /// </summary>
     public abstract class ParameterKey : PropertyKey
     {
-        public ulong HashCode;
+        public ulong HashCode, BaseType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ParameterKey" /> class.
@@ -127,6 +127,29 @@ namespace Xenko.Rendering
                 var objIdData = (ulong*)&objId;
                 HashCode = objIdData[0] ^ objIdData[1];
             }
+
+            // calculate fast basetype
+            var btBuilder = new ObjectIdBuilder();
+            int dots = 0;
+            string baseType = Name;
+            for (int i=0; i<Name.Length; i++)
+            {
+                var name = Name[i];
+                if (name == '.')
+                {
+                    dots++;
+                    if (dots == 2)
+                    {
+                        baseType = Name.Substring(0, i);
+                        break;
+                    }
+                }
+            }
+
+            btBuilder.Write(baseType);
+            var objId2 = btBuilder.ComputeHash();
+            var objIdData2 = (ulong*)&objId2;
+            BaseType = objIdData2[0] ^ objIdData2[1];
         }
 
         /// <summary>
