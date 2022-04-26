@@ -11,7 +11,7 @@ namespace Xenko.Rendering.Materials
 
         override void Compute()
         {
-            float alpha = max(streams.matEmissive.a, streams.matDiffuse.a);
+            float alpha = max(streams.matEmissive.a, streams.matDiffuse.a) * streams.matDiffuseSpecularAlphaBlend.r;
             streams.shadingColorAlpha = alpha;
 #if XENKO_GRAPHICS_API_DIRECT3D
             float fogAmount = clamp(exp((streams.ShadingPosition.w - FogStart) * FogColor.a), 0.0, 1.0);
