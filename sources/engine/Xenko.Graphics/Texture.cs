@@ -514,9 +514,8 @@ namespace Xenko.Graphics
 
             if (IsMultisample)
             {
-                var maxCount = GraphicsDevice.Features[Format].MultisampleCountMax;
-                if (maxCount < MultisampleCount)
-                    throw new NotSupportedException($"Cannot create a texture with format {Format} and multisample level {MultisampleCount}. Maximum supported level is {maxCount}");
+                // limit multisample count to graphic device max
+                textureDescription.MultisampleCount = (MultisampleCount)Math.Min((int)GraphicsDevice.Features[Format].MultisampleCountMax, (int)MultisampleCount);
             }
 
             InitializeFromImpl(textureDatas);
