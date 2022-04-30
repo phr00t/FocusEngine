@@ -66,7 +66,6 @@ namespace Xenko.Editor.Preview
             loggerDebugPage = EditorDebugTools.CreateLogDebugPage(Logger, "Preview");
 
             previewGameSettings = GameSettingsFactory.Create();
-            previewGameSettings.GetOrCreate<RenderingSettings>().DefaultGraphicsProfile = GraphicsProfile.Level_11_0;
             UpdateGameSettings(gameSettingsProvider.CurrentGameSettings);
             previewCompileContext.SetGameSettingsAsset(previewGameSettings);
             previewCompileContext.CompilationContext = typeof(PreviewCompilationContext);
@@ -179,10 +178,7 @@ namespace Xenko.Editor.Preview
 
         private void GraphicsDeviceManagerDeviceCreated(object sender, EventArgs e)
         {
-            // Transmit actual GraphicsProfile to preview and thumbnail builder context
-            var graphicsProfile = PreviewGame.GraphicsDeviceManager.GraphicsDevice.Features.CurrentProfile;
-            //ThumbnailService.ThumbnailBuilderContext.GetGameSettingsAsset().Get<RenderingSettings>().DefaultGraphicsProfile = graphicsProfile;
-            previewCompileContext.GetGameSettingsAsset().GetOrCreate<RenderingSettings>().DefaultGraphicsProfile = graphicsProfile;
+
         }
 
         public void SetAssetToPreview(AssetViewModel asset)

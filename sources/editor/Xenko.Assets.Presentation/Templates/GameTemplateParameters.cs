@@ -22,16 +22,11 @@ namespace Xenko.Assets.Presentation.Templates
 
     public class GameTemplateParameters : XenkoTemplateParameters
     {
-        public GameTemplateParameters()
-        {
-            GraphicsProfile = GraphicsProfile.Level_10_0;
-        }
-
         public List<SolutionPlatform> Platforms { get; set; }
 
         public bool IsHDR { get; set; }
 
-        public GraphicsProfile GraphicsProfile { get; set; }
+        public GraphicsProfile GraphicsProfile => GraphicsProfile.Level_11_2;
 
         public bool ForcePlatformRegeneration { get; set; }
 

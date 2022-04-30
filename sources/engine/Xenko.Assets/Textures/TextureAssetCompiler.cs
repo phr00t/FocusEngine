@@ -124,7 +124,6 @@ namespace Xenko.Assets.Textures
             IsStreamable = texture.IsStreamable;
             Platform = platform;
             GraphicsPlatform = graphicsPlatform;
-            GraphicsProfile = graphicsProfile;
             TextureQuality = textureQuality;
             ColorSpace = colorSpace;
         }
@@ -139,7 +138,7 @@ namespace Xenko.Assets.Textures
 
         public GraphicsPlatform GraphicsPlatform;
 
-        public GraphicsProfile GraphicsProfile;
+        public GraphicsProfile GraphicsProfile => GraphicsProfile.Level_11_2;
 
         public TextureQuality TextureQuality;
 

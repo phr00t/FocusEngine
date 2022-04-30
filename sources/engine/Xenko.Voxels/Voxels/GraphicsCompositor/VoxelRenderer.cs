@@ -46,11 +46,6 @@ namespace Xenko.Rendering.Voxels
             if (renderVoxelVolumes == null || renderVoxelVolumes.Count == 0)
                 return;
 
-            if (Context.RenderSystem.GraphicsDevice.Features.CurrentProfile < GraphicsProfile.Level_11_0)
-            {
-                throw new ArgumentOutOfRangeException("Graphics Profile Level 11 or higher required for Voxelization.");
-            }
-
             //Setup per volume passes and texture allocations
             foreach ( var pair in renderVoxelVolumes )
             {

@@ -105,7 +105,7 @@ namespace Xenko.Graphics
         /// </summary>
         /// <userdoc>The graphics feature level this game require.</userdoc>
         [DataMember(20)]
-        public GraphicsProfile DefaultGraphicsProfile = GraphicsProfile.Level_10_0;
+        public GraphicsProfile DefaultGraphicsProfile => GraphicsProfile.Level_11_2;
 
         /// <summary>
         /// Gets or sets the colorspace.

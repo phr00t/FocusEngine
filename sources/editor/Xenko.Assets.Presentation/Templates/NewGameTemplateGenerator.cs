@@ -208,7 +208,6 @@ namespace Xenko.Assets.Presentation.Templates
             gameSettingsAsset.GraphicsCompositor = AttachedReferenceManager.CreateProxyObject<GraphicsCompositor>(graphicsCompositor.ToReference());
 
             var renderingSettings = gameSettingsAsset.GetOrCreate<RenderingSettings>();
-            renderingSettings.DefaultGraphicsProfile = parameters.GetTag(GraphicsProfileKey);
             renderingSettings.DisplayOrientation = (RequiredDisplayOrientation)orientation;
 
             var gameSettingsAssetItem = new AssetItem(GameSettingsAsset.GameSettingsLocation, gameSettingsAsset);

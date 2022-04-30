@@ -451,7 +451,6 @@ namespace Xenko.Assets.Sprite
                 SheetAsset = sheetAsset;
                 Platform = platform;
                 GraphicsPlatform = graphicsPlatform;
-                GraphicsProfile = graphicsProfile;
                 TextureQuality = textureQuality;
                 ColorSpace = colorSpace;
             }
@@ -462,7 +461,7 @@ namespace Xenko.Assets.Sprite
 
             public GraphicsPlatform GraphicsPlatform;
 
-            public GraphicsProfile GraphicsProfile;
+            public GraphicsProfile GraphicsProfile => GraphicsProfile.Level_11_2;
 
             public TextureQuality TextureQuality;
 

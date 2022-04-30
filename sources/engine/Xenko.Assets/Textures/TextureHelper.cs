@@ -57,7 +57,7 @@ namespace Xenko.Assets.Textures
 
             public GraphicsPlatform GraphicsPlatform;
 
-            public GraphicsProfile GraphicsProfile;
+            public GraphicsProfile GraphicsProfile => GraphicsProfile.Level_11_2;
 
             public PlatformType Platform;
 
@@ -81,7 +81,6 @@ namespace Xenko.Assets.Textures
                 ColorKeyEnabled = asset.Type.ColorKeyEnabled;
                 TextureQuality = textureParameters.TextureQuality;
                 GraphicsPlatform = textureParameters.GraphicsPlatform;
-                GraphicsProfile = textureParameters.GraphicsProfile;
                 Platform = textureParameters.Platform;
             }
 
@@ -104,7 +103,6 @@ namespace Xenko.Assets.Textures
                 ColorKeyEnabled = asset.ColorKeyEnabled;
                 TextureQuality = spriteSheetParameters.TextureQuality;
                 GraphicsPlatform = spriteSheetParameters.GraphicsPlatform;
-                GraphicsProfile = spriteSheetParameters.GraphicsProfile;
                 Platform = spriteSheetParameters.Platform;
             }
         }

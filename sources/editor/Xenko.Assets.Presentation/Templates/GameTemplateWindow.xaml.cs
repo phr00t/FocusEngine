@@ -61,7 +61,7 @@ namespace Xenko.Assets.Presentation.Templates
             Orientation = DisplayOrientation.LandscapeRight;
             InitializeComponent();
             DataContext = this;
-            SelectedGraphicsProfile = GraphicsProfile.Level_10_0;
+            SelectedGraphicsProfile = GraphicsProfile.Level_11_2;
             IsHDR = true;
         }
 
@@ -77,7 +77,7 @@ namespace Xenko.Assets.Presentation.Templates
 
         public IEnumerable<UDirectory> SelectedPackages { get { return AssetPackages.Where(x => x.IsSelected).Select(x => x.PackageLocation); } }
 
-        public GraphicsProfile SelectedGraphicsProfile { get { return selectedGraphicsProfile; } set { selectedGraphicsProfile = value; if (value < GraphicsProfile.Level_10_0) IsHDR = false; OnPropertyChanged(); } }
+        public GraphicsProfile SelectedGraphicsProfile { get { return selectedGraphicsProfile; } set { selectedGraphicsProfile = GraphicsProfile.Level_11_2; if (value < GraphicsProfile.Level_10_0) IsHDR = false; OnPropertyChanged(); } }
 
         public bool IsHDR { get { return isHDR; } set { isHDR = value; OnPropertyChanged(); } }
 
