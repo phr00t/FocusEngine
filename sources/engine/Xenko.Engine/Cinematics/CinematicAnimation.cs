@@ -28,7 +28,7 @@ namespace Xenko.Cinematics
     /// <summary>
     /// An action to be stored and played in a CinematicAnimation
     /// </summary>
-    public class CinematicAction
+    public class CinematicAction : IComparable<CinematicAction>
     {
         public ACTION_TYPE Type;
         public object argument0, argument1;
@@ -36,6 +36,14 @@ namespace Xenko.Cinematics
         public float startTime, endTime;
         public Action<ActionInfo> method;
         public bool relativeStartArgument;
+
+        public int CompareTo(CinematicAction other)
+        {
+            if (startTime == other.startTime)
+                return 1;
+
+            return startTime.CompareTo(other.startTime);
+        }
     }
 
     /// <summary>
@@ -52,7 +60,6 @@ namespace Xenko.Cinematics
     /// </summary>
     public class CinematicAnimation
     {
-
         /// <summary>
         /// Should we play this when Play is called? Also gets set to True at the end of the Cinematic
         /// </summary>
@@ -69,14 +76,14 @@ namespace Xenko.Cinematics
         public float CurrentTime { get; private set; }
 
         /// <summary>
-        /// All actions added to this CinematicAction
+        /// All actions added to this CinematicAction. If you change this directly, you'll have to Reset() the animation to sort it in
         /// </summary>
         public List<CinematicAction> AllActions { get; private set; } = new List<CinematicAction>();
 
         /// <summary>
-        /// Actions remaining to be played
+        /// Actions remaining to be played, sorted internally by start time
         /// </summary>
-        public List<CinematicAction> RemainingActions { get; private set; } = new List<CinematicAction>();
+        private List<CinematicAction> RemainingActions = new List<CinematicAction>();
 
         /// <summary>
         /// Returns true if this cinematic is finished
@@ -105,6 +112,7 @@ namespace Xenko.Cinematics
         {
             if (Paused) return;
             if (Looping && RemainingActions.Count == 0 && AllActions.Count > 0) Reset();
+            CurrentTime += time_delta;
             for (int i = 0; i < RemainingActions.Count; i++)
             {
                 CinematicAction ca = RemainingActions[i];
@@ -121,8 +129,8 @@ namespace Xenko.Cinematics
                         i--;
                     }
                 }
+                else break; // since we are sorted, once we are past CurrentTime, everything else will be too
             }
-            CurrentTime += time_delta;
         }
 
         /// <summary>
@@ -147,7 +155,11 @@ namespace Xenko.Cinematics
                 relativeStartArgument = startArgument == null
             };
             AllActions.Add(ca);
-            if (CurrentTime <= startTime) RemainingActions.Add(ca);
+            if (CurrentTime <= startTime)
+            {
+                RemainingActions.Add(ca);
+                RemainingActions.Sort();
+            }
         }
 
         /// <summary>
@@ -166,7 +178,11 @@ namespace Xenko.Cinematics
                 endTime = endTime
             };
             AllActions.Add(ca);
-            if (CurrentTime <= startTime) RemainingActions.Add(ca);
+            if (CurrentTime <= startTime)
+            {
+                RemainingActions.Add(ca);
+                RemainingActions.Sort();
+            }
         }
 
         private float Sigmoid(double value)
@@ -233,6 +249,34 @@ namespace Xenko.Cinematics
         }
 
         /// <summary>
+        /// Calculates and provides the total length of this cinematic animation
+        /// </summary>
+        public float Length
+        {
+            get
+            {
+                float len = 0f;
+                for (int i=0; i<AllActions.Count; i++)
+                {
+                    var action = AllActions[i];
+                    float time = Math.Max(action.startTime, action.endTime);
+                    if (time > len) len = time;
+                }
+                return len;
+            }
+        }
+
+        /// <summary>
+        /// Simple shortcut to immediately play the remaining animation to the end
+        /// </summary>
+        public void PlayToEnd()
+        {
+            float timeToPlay = Length - CurrentTime;
+            if (timeToPlay > 0f)
+                Play(Length - CurrentTime);
+        }
+
+        /// <summary>
         /// Sets the animation to a certain time by resetting the whole animation, then jumping to this time
         /// </summary>
         /// <param name="time">What time to set the animation to</param>
@@ -259,6 +303,7 @@ namespace Xenko.Cinematics
                 if (ca.relativeStartArgument) ca.argument0 = null;
                 RemainingActions.Add(ca);
             }
+            RemainingActions.Sort();
         }
     }
 }
