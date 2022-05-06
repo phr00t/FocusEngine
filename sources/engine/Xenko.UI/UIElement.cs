@@ -10,7 +10,9 @@ using Xenko.Core;
 using Xenko.Core.Annotations;
 using Xenko.Core.Collections;
 using Xenko.Core.Mathematics;
+using Xenko.Engine;
 using Xenko.Games;
+using Xenko.UI.Controls;
 using Xenko.UI.Panels;
 
 namespace Xenko.UI
@@ -901,6 +903,59 @@ namespace Xenko.UI
         /// </summary>
         public float ActualDepth => RenderSize.Z;
 
+        /// <summary>
+        /// Lots of size/width/height functions return 0 or NaN. This returns something useful more reliably! Provide a uiComponent for better default resolution/sizing
+        /// </summary>
+        public Vector2 GetNoBullshitSize(UIComponent uiComponent = null)
+        {
+            // try to get quick sizes
+            float xsize = RenderSize.X > 0f || float.IsNaN(Width) ? RenderSize.X : Width;
+            float ysize = RenderSize.Y > 0f || float.IsNaN(Height) ? RenderSize.Y : Height;
+
+            if (xsize == 0f)
+            {
+                // got bullshit xsize
+                UIElement parent = Parent;
+                while (parent != null)
+                {
+                    float pwidth = parent.RenderSize.X > 0f || float.IsNaN(parent.Width) ? parent.RenderSize.X : parent.Width;
+                    if (pwidth > 0f)
+                    {
+                        xsize = pwidth;
+                        break;
+                    }
+                    parent = parent.Parent;
+                }
+
+                // still got trash? default it is!
+                if (xsize == 0f)
+                    xsize = uiComponent?.Resolution.X ?? 1280f;
+            }
+
+            if (ysize == 0f)
+            {
+                // got bullshit ysize
+                UIElement parent = Parent;
+                while (parent != null)
+                {
+                    float pheight = parent.RenderSize.Y > 0f || float.IsNaN(parent.Height) ? parent.RenderSize.Y : parent.Height;
+                    if (pheight > 0f)
+                    {
+                        ysize = pheight;
+                        break;
+                    }
+                    parent = parent.Parent;
+                }
+
+                // still got trash? default it is!
+                if (ysize == 0f)
+                    ysize = uiComponent?.Resolution.Y ?? 720f;
+            }
+
+            // god that was terrible
+            return new Vector2(xsize, ysize);
+        }
+
         /// <inheritdoc/>
         IEnumerable<IUIElementChildren> IUIElementChildren.Children => EnumerateChildren();
 
@@ -1470,6 +1525,24 @@ namespace Xenko.UI
             }
 
             return offsets;
+        }
+
+        /// <summary>
+        /// Shortcut function to set first TextBlock child of this to a certain text (can easily update button text, for example)
+        /// </summary>
+        /// <param name="text">What text to set?</param>
+        public void SetChildText(string text)
+        {
+            for(int i=0; i<VisualChildren.Count; i++)
+            {
+                var child = VisualChildren[i];
+
+                if (child is TextBlock tb)
+                {
+                    tb.Text = text;
+                    break;
+                }
+            }
         }
     }
 }
