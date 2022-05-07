@@ -259,73 +259,78 @@ namespace Xenko.UI.Panels
         public ScrollViewer ScrollOwner { get; set; }
 
         /// <summary>
-        /// Resizes UIElements in Grid to fit their interior contents (like trims up Buttons etc.)
+        /// Resizes ButtonBases in Grid/Panel to fit their interior contents
+        /// Uses ButtonBase.TrimToContent to do this
         /// </summary>
         /// <typeparam name="T">What type of UIElements do you want to resize?</typeparam>
         /// <param name="XMargin">How much padding should the UIElements have left/right?</param>
         /// <param name="YMargin">How much padding should the UIElements have up/down?</param>
-        public void ResizeChildren<T>(float XMargin = 10f, float YMargin = 10f) where T : UIElement
+        public void ResizeButtons(float XMargin = 10f, float YMargin = 10f)
         {
             foreach (UIElement uie in Children)
             {
-                if (uie is T bb)
-                {
-                    float maxX = 0f, maxY = 0f;
-                    foreach (UIElement bbc in bb.VisualChildren)
-                    {
-                        var size = bbc is TextBlock tb ? tb.CalculateTextSize() : bbc.GetNoBullshitSize();
-
-                        if (size.X > maxX)
-                            maxX = size.X;
-                        if (size.Y > maxY)
-                            maxY = size.Y;
-                    }
-
-                    if (maxX > 0f && maxY > 0f)
-                    {
-                        uie.Width = maxX + XMargin;
-                        uie.Height = maxY + YMargin;
-                    }
-                }
+                if (uie is ButtonBase bb)
+                    bb.ResizeToChild(XMargin, YMargin);
             }
         }
 
         /// <summary>
-        /// Neatly and automatically organizes all UIElements within this Grid
+        /// Sorting options used for OrganizeChildren
+        /// </summary>
+        public enum ORGANIZE_SORT_OPTIONS
+        {
+            NORMAL_SORT = 0,
+            REVERSE_SORT = 1,
+            NO_SORTING = 2
+        };
+
+        /// <summary>
+        /// Neatly and automatically organizes all UIElements within this Grid/Panel
         /// </summary>
         /// <param name="XMargin">How much left/right space to put between UIElements?</param>
         /// <param name="YMargin">How much up/down space to put between UIElements?</param>
-        /// <param name="reverseSort">Should we reverse the organizing sort function?</param>
-        /// <param name="sorter">Function to sort UIElements. Use null to default to sorting by size</param>
+        /// <param name="typesToCenter">What types should we center? Provide list with UIElement type included to center everything, null to center nothing</param>
+        /// <param name="sort_options">How should sorting UIElements work?</param>
+        /// <param name="sorter">Function to sort UIElements. Use null to default to sorting by UIElement's area</param>
+        /// <param name="newlineForThese">If the organizer comes across a UIelement in this list, start a newline for placing it</param>
         /// <param name="uiComponent">Provide the uiComponent for better default resolution sizing/fitting, not required for default 1280x720 UI components</param>
-        public void OrganizeChildren(float XMargin = 10f, float YMargin = 10f, bool reverseSort = false, Comparison<UIElement> sorter = null, UIComponent uiComponent = null)
+        /// <returns>Returns a Vector2 of the TopLeft position after all UIElements have been placed</returns>
+        public Vector2 OrganizeChildren(float XMargin = 10f, float YMargin = 10f, List<Type> typesToCenter = null,
+                                        ORGANIZE_SORT_OPTIONS sort_options = ORGANIZE_SORT_OPTIONS.NORMAL_SORT,
+                                        Comparison<UIElement> sorter = null, List<UIElement> newlineForThese = null, UIComponent uiComponent = null)
         {
             var allChildren = new List<UIElement>(Children);
 
-            // sort children by size
-            if (sorter == null)
+            if (sort_options != ORGANIZE_SORT_OPTIONS.NO_SORTING)
             {
-                allChildren.Sort((a, b) =>
+                // sort children by size
+                if (sorter == null)
                 {
-                    var asize = a.GetNoBullshitSize(uiComponent);
-                    var bsize = b.GetNoBullshitSize(uiComponent);
+                    allChildren.Sort((a, b) =>
+                    {
+                        var asize = a.GetNoBullshitSize(uiComponent);
+                        var bsize = b.GetNoBullshitSize(uiComponent);
 
-                    float aarea = asize.X * asize.Y;
-                    float barea = bsize.X * bsize.Y;
+                        float aarea = asize.X * asize.Y;
+                        float barea = bsize.X * bsize.Y;
 
-                    return aarea.CompareTo(barea);
-                });
+                        return aarea.CompareTo(barea);
+                    });
+                }
+                else
+                {
+                    allChildren.Sort(sorter);
+                }
             }
-            else
-            {
-                allChildren.Sort(sorter);
-            }
 
-            int startPosition = reverseSort ? allChildren.Count - 1 : 0;
-            int dir = reverseSort ? -1 : 1;
+            int startPosition = sort_options == ORGANIZE_SORT_OPTIONS.REVERSE_SORT ? allChildren.Count - 1 : 0;
+            int dir = sort_options == ORGANIZE_SORT_OPTIONS.REVERSE_SORT ? -1 : 1;
 
             float px = 0f, py = 0f;
             float biggestY = 0f;
+
+            List<UIElement> elementsInLine = typesToCenter != null ? new List<UIElement>() : null;
+            bool centerThisLine = true, centerEverything = typesToCenter?.Contains(typeof(UIElement)) ?? false;
 
             var mySize = GetNoBullshitSize(uiComponent);
             for (int i = startPosition; i < allChildren.Count && i >= 0; i += dir)
@@ -333,15 +338,57 @@ namespace Xenko.UI.Panels
                 var child = allChildren[i];
                 var csize = child.GetNoBullshitSize(uiComponent);
 
-                if (px + csize.X > mySize.X)
+                // go to next line?
+                if (px + csize.X > mySize.X || (newlineForThese?.Contains(child) ?? false))
                 {
+                    if (elementsInLine != null)
+                    {
+                        // center all of the last line?
+                        if (centerThisLine && elementsInLine.Count > 0)
+                            centerUIElements(elementsInLine, mySize.X, XMargin);
+
+                        elementsInLine.Clear();
+                        centerThisLine = true;
+                    }
+
+                    // reset
                     px = 0f;
                     py += biggestY + YMargin;
                     biggestY = 0f;
                 }
+                
+                // should this be considered for centering?
+                if (elementsInLine != null)
+                {
+                    if (centerEverything || typesToCenter.Contains(child.GetType()))
+                        elementsInLine.Add(child);
+                    else
+                        centerThisLine = false;
+                }
+
                 child.LeftTopPosition = new Vector2(px, py);
                 if (csize.Y > biggestY) biggestY = csize.Y;
                 px += csize.X + XMargin;
+            }
+
+            // finalize any centering remaining
+            if (centerThisLine && (elementsInLine?.Count ?? 0) > 0)
+                centerUIElements(elementsInLine, mySize.X, XMargin);
+
+            return new Vector2(px, py + biggestY);
+        }
+
+        private void centerUIElements(List<UIElement> elements, float width, float XPadding)
+        {
+            // we know this list is coming in left to right already
+            float elements_width = (elements[elements.Count - 1].LeftTopPosition.X + elements[elements.Count - 1].GetNoBullshitSize().X) - elements[0].LeftTopPosition.X + (XPadding * (elements.Count - 1));
+            float place_x = width * 0.5f - elements_width * 0.5f;
+
+            for (int i = 0; i < elements.Count; i++)
+            {
+                UIElement element = elements[i];
+                element.LeftTopPosition = new Vector2(place_x, element.LeftTopPosition.Y);
+                place_x += XPadding + element.GetNoBullshitSize().X;
             }
         }
     }

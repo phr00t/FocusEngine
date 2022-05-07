@@ -118,6 +118,31 @@ namespace Xenko.UI.Controls
             buttonBase.OnClick(args);
         }
 
+        /// <summary>
+        /// Shortcut function to resize this UIElement to fit internal content (like resizing a button to fit its text)
+        /// </summary>
+        /// <param name="XMargin">How much X padding?</param>
+        /// <param name="YMargin">How much Y padding?</param>
+        public void ResizeToChild(float XMargin = 10f, float YMargin = 10f)
+        {
+            float maxX = 0f, maxY = 0f;
+            foreach (UIElement bbc in VisualChildren)
+            {
+                var size = bbc is TextBlock tb ? tb.CalculateTextSize() : bbc.GetNoBullshitSize();
+
+                if (size.X > maxX)
+                    maxX = size.X;
+                if (size.Y > maxY)
+                    maxY = size.Y;
+            }
+
+            if (maxX > 0f && maxY > 0f)
+            {
+                Width = maxX + XMargin;
+                Height = maxY + YMargin;
+            }
+        }
+
         private class ButtonBaseMetadata
         {
             [DefaultValue(true)]
