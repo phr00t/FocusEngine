@@ -26,7 +26,6 @@ namespace Xenko.Audio
         /// Reference to the <see cref="AudioSystem"/> of the game instance.
         /// </summary>
         private AudioSystem audioSystem;
-        private TransformComponent primaryTransform;
 
         /// <summary>
         /// Create a new instance of AudioListenerProcessor.
@@ -48,28 +47,18 @@ namespace Xenko.Audio
         protected override void OnEntityComponentAdding(Entity entity, AudioListenerComponent component, AudioListenerComponent data)
         {
             if (!entity.Transform.IsMovingInsideRootScene)
-                primaryTransform = entity.Transform;
+                audioSystem.primaryTransform = entity.Transform;
         }
 
         protected override void OnEntityComponentRemoved(Entity entity, AudioListenerComponent component, AudioListenerComponent data)
         {
             if (!entity.Transform.IsMovingInsideRootScene)
-                primaryTransform = null;
+                audioSystem.primaryTransform = null;
         }
 
         public override void Draw(RenderContext context)
         {
-            if (primaryTransform == null) return;
 
-            var listener = AudioEngine.DefaultListener;
-            listener.WorldTransform = primaryTransform.WorldMatrix;
-            var newPosition = listener.WorldTransform.TranslationVector;
-            listener.Velocity = newPosition - listener.Position; // estimate velocity from last and new position
-            listener.Position = newPosition;
-            listener.Forward = Vector3.Normalize((Vector3)listener.WorldTransform.Row3);
-            listener.Up = Vector3.Normalize((Vector3)listener.WorldTransform.Row2);
-
-            listener.Update();
         }
     }
 }

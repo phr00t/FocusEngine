@@ -15,22 +15,29 @@ namespace Xenko.Engine
     /// <summary>
     /// Efficiently plays and manages sound effects for an entire project
     /// </summary>
-    [Display("Global Sound Manager", Expand = ExpandRule.Once)]
-    [DataContract("GlobalSoundManager")]
-    [ComponentOrder(7500)]
-    [ComponentCategory("Audio")]
-    public sealed class GlobalSoundManager : ActivableEntityComponent
+    public sealed class GlobalSoundManager
     {
-        [DataMember]
-        public float MaxSoundDistance = 48f;
+        /// <summary>
+        /// How far can sounds be heard?
+        /// </summary>
+        public static float MaxSoundDistance = 48f;
 
-        [DataMember]
-        public int MaxSameSoundOverlaps = 8;
+        /// <summary>
+        /// How many sounds can overlap with eachother?
+        /// </summary>
+        public static int MaxSameSoundOverlaps = 8;
 
-        [DataMember]
-        public float MasterVolume = 1f;
+        /// <summary>
+        /// Master volume
+        /// </summary>
+        public static float MasterVolume = 1f;
 
-        public SoundInstance PlayCentralSound(string url, float pitch = 1f, float volume = 1f, float pan = 0f, bool looped = false)
+        /// <summary>
+        /// Sounds really close to the listener can cause jarring pan issues, so this will scoot sounds away to this distance. 0 to disable.
+        /// </summary>
+        public static float MinimumDistanceToListener = 1f;
+
+        public static SoundInstance PlayCentralSound(string url, float pitch = 1f, float volume = 1f, float pan = 0f, bool looped = false)
         {
             SoundInstance s = getFreeInstance(url, false);
             if (s != null)
@@ -45,7 +52,24 @@ namespace Xenko.Engine
             return s;
         }
 
-        public SoundInstance PlayPositionSound(string url, Vector3 position, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
+        private static Vector3 ProcessMinDistPosition(Vector3 desiredPos)
+        {
+            if (MinimumDistanceToListener <= 0f) return desiredPos;
+            Vector3 diff = desiredPos - AudioEngine.DefaultListener.Position;
+            float dist = diff.Length();
+            if (dist < MinimumDistanceToListener)
+            {
+                if (dist <= float.Epsilon)
+                    diff = AudioEngine.DefaultListener.Forward;
+                else
+                    diff.Normalize();
+
+                return diff * MinimumDistanceToListener + desiredPos;
+            }
+            else return desiredPos;
+        }
+
+        public static SoundInstance PlayPositionSound(string url, Vector3 position, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
         {
             if (MaxSoundDistance > 0f)
             {
@@ -58,12 +82,12 @@ namespace Xenko.Engine
             s.Volume = volume * MasterVolume;
             s.IsLooping = looped;
             s.Pan = 0f;
-            s.Apply3D(position, null, null, distanceScale);
+            s.Apply3D(ProcessMinDistPosition(position), null, null, distanceScale);
             s.Play();
             return s;
         }
 
-        public SoundInstance PlayAttachedSound(string url, Entity parent, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
+        public static SoundInstance PlayAttachedSound(string url, Entity parent, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
         {
             Vector3 pos = parent.Transform.WorldPosition(true);
             if (MaxSoundDistance > 0f)
@@ -77,7 +101,7 @@ namespace Xenko.Engine
             s.Volume = volume * MasterVolume;
             s.IsLooping = looped;
             s.Pan = 0f;
-            s.Apply3D(pos, null, null, distanceScale);
+            s.Apply3D(ProcessMinDistPosition(pos), null, null, distanceScale);
             s.Play();
             var posSnd = new PositionalSound() {
                 pos = pos,
@@ -91,7 +115,7 @@ namespace Xenko.Engine
             return s;
         }
 
-        public Task<SoundInstance> PlayCentralSoundTask(string url, float pitch = 1f, float volume = 1f, float pan = 0f, bool looped = false)
+        public static Task<SoundInstance> PlayCentralSoundTask(string url, float pitch = 1f, float volume = 1f, float pan = 0f, bool looped = false)
         {
             return Task.Factory.StartNew<SoundInstance>(() =>
             {
@@ -99,7 +123,7 @@ namespace Xenko.Engine
             });
         }
 
-        public Task<SoundInstance> PlayPositionSoundTask(string url, Vector3 position, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
+        public static Task<SoundInstance> PlayPositionSoundTask(string url, Vector3 position, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
         {
             return Task.Factory.StartNew<SoundInstance>(() =>
             {
@@ -107,7 +131,7 @@ namespace Xenko.Engine
             });
         }
 
-        public Task<SoundInstance> PlayAttachedSoundTask(string url, Entity parent, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
+        public static Task<SoundInstance> PlayAttachedSoundTask(string url, Entity parent, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
         {
             return Task.Factory.StartNew<SoundInstance>(() =>
             {
@@ -115,7 +139,7 @@ namespace Xenko.Engine
             });
         }
 
-        public void UpdatePlayingSoundPositions(float? overrideTimePerFrame = null)
+        public static void UpdatePlayingSoundPositions(float? overrideTimePerFrame = null)
         {
             for (int i = 0; i < currentAttached.Count; i++)
             {
@@ -135,12 +159,12 @@ namespace Xenko.Engine
                 }
                 Vector3 newpos = ps.entity.Transform.WorldPosition();
                 float timePerFrame = overrideTimePerFrame ?? ((float)internalGame.UpdateTime.Elapsed.Ticks / TimeSpan.TicksPerSecond);
-                ps.soundInstance.Apply3D(newpos, (newpos - ps.pos) / timePerFrame, null, ps.distance_scale);
+                ps.soundInstance.Apply3D(ProcessMinDistPosition(newpos), (newpos - ps.pos) / timePerFrame, null, ps.distance_scale);
                 ps.pos = newpos;
             }
         }
 
-        public void StopAllSounds()
+        public static void StopAllSounds()
         {
             foreach (List<SoundInstance> si in instances.Values)
             {
@@ -155,7 +179,7 @@ namespace Xenko.Engine
             }
         }
 
-        public void StopSound(string url)
+        public static void StopSound(string url)
         {
             if (instances.TryGetValue(url, out var snds))
             {
@@ -166,13 +190,13 @@ namespace Xenko.Engine
             }
         }
 
-        public float RandomPitch(float range = 0.2f, float middle = 1f)
+        public static float RandomPitch(float range = 0.2f, float middle = 1f)
         {
             if (rand == null) rand = new Random(Environment.TickCount);
             return (float)rand.NextDouble() * range * 2f + middle - range;
         }
 
-        public void Reset()
+        public static void Reset()
         {
             StopAllSounds();
             Sounds.Clear();
@@ -187,20 +211,20 @@ namespace Xenko.Engine
             instances.Clear();
         }
 
-        public GlobalSoundManager()
+        static GlobalSoundManager()
         {
             // global sound manager relies on listeners being shared, so everything can be
             // safely reused
             internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
         }
 
-        private ConcurrentDictionary<string, Sound> Sounds = new ConcurrentDictionary<string, Sound>();
-        private ConcurrentDictionary<string, List<SoundInstance>> instances = new ConcurrentDictionary<string, List<SoundInstance>>();
-        private List<PositionalSound> currentAttached = new List<PositionalSound>();
-        private System.Random rand;
-        private Game internalGame;
+        private static ConcurrentDictionary<string, Sound> Sounds = new ConcurrentDictionary<string, Sound>();
+        private static ConcurrentDictionary<string, List<SoundInstance>> instances = new ConcurrentDictionary<string, List<SoundInstance>>();
+        private static List<PositionalSound> currentAttached = new List<PositionalSound>();
+        private static System.Random rand;
+        private static Game internalGame;
 
-        private SoundInstance getFreeInstance(string url, bool spatialized)
+        private static SoundInstance getFreeInstance(string url, bool spatialized)
         {
             if (url == null) return null;
 

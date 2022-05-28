@@ -69,10 +69,7 @@ namespace Xenko.Audio
             }
             set
             {
-                if (value == Vector3.Zero)
-                    throw new InvalidOperationException("The value of the Up vector can not be (0,0,0)");
-
-                up = Vector3.Normalize(value);
+                up = value == Vector3.Zero ? Vector3.UnitY : value;
             }
         }
 
@@ -97,10 +94,7 @@ namespace Xenko.Audio
             }
             set
             {
-                if (value == Vector3.Zero)
-                    throw new InvalidOperationException("The value of the Forward vector can not be (0,0,0)");
-
-                forward = Vector3.Normalize(value);
+                forward = value == Vector3.Zero ? Vector3.UnitZ : value;
             }
         }
 
