@@ -32,6 +32,11 @@ namespace Xenko.Audio
         float Pitch { get; set; }
 
         /// <summary>
+        /// How does distance attenuation scale for this sound? 1 is default, 0 is disabling attenuation
+        /// </summary>
+        float DistanceScale { get; set; }
+
+        /// <summary>
         /// Applies 3D positioning to the sound. 
         /// More precisely adjust the channel volumes and pitch of the sound, 
         /// such that the sound source seems to come from the <paramref name="emitter"/> to the listener/>.
@@ -47,6 +52,6 @@ namespace Xenko.Audio
         /// The final resulting channel volumes depend on the listener and emitter relative positions and the value of <see cref="IPlayableSound.Volume"/>. 
         /// </para>
         /// </remarks>
-        void Apply3D(Vector3 Position, Vector3? velocity = null, Quaternion? direction = null, float distanceScale = 1f);
+        void Apply3D(Vector3 Position, Vector3? velocity = null, Quaternion? direction = null);
     }
 }

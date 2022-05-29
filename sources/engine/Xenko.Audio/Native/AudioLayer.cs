@@ -156,6 +156,10 @@ namespace Xenko.Audio
         public static extern void SourceSetGain(Source source, float gain);
 
         [SuppressUnmanagedCodeSecurity]
+        [DllImport(NativeInvoke.Library, EntryPoint = "xnAudioSourceSetRolloff", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void SourceSetRolloff(Source source, float rolloff);
+
+        [SuppressUnmanagedCodeSecurity]
         [DllImport(NativeInvoke.Library, EntryPoint = "xnAudioSourceSetPitch", CallingConvention = CallingConvention.Cdecl)]
         public static extern void SourceSetPitch(Source source, float pitch);
 

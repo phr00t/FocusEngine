@@ -444,6 +444,11 @@ extern "C" {
 			if (playing == AL_PLAYING) SourcePlay(source->source);
 		}
 
+		DLL_EXPORT_API void xnAudioSourceSetRolloff(xnAudioSource* source, float rolloff)
+		{
+			SourceF(source->source, AL_ROLLOFF_FACTOR, rolloff);
+		}
+
 		DLL_EXPORT_API void xnAudioSourceSetGain(xnAudioSource* source, float gain)
 		{
 			SourceF(source->source, AL_GAIN, gain);

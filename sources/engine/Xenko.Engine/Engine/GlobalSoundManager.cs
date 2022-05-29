@@ -82,7 +82,8 @@ namespace Xenko.Engine
             s.Volume = volume * MasterVolume;
             s.IsLooping = looped;
             s.Pan = 0f;
-            s.Apply3D(ProcessMinDistPosition(position), null, null, distanceScale);
+            s.DistanceScale = distanceScale;
+            s.Apply3D(ProcessMinDistPosition(position), null, null);
             s.Play();
             return s;
         }
@@ -101,7 +102,8 @@ namespace Xenko.Engine
             s.Volume = volume * MasterVolume;
             s.IsLooping = looped;
             s.Pan = 0f;
-            s.Apply3D(ProcessMinDistPosition(pos), null, null, distanceScale);
+            s.DistanceScale = distanceScale;
+            s.Apply3D(ProcessMinDistPosition(pos), null, null);
             s.Play();
             var posSnd = new PositionalSound() {
                 pos = pos,
@@ -139,6 +141,10 @@ namespace Xenko.Engine
             });
         }
 
+        /// <summary>
+        /// Call this to make sure sounds attached to things get moved (and cleaned up) properly
+        /// </summary>
+        /// <param name="overrideTimePerFrame"></param>
         public static void UpdatePlayingSoundPositions(float? overrideTimePerFrame = null)
         {
             for (int i = 0; i < currentAttached.Count; i++)
@@ -159,7 +165,8 @@ namespace Xenko.Engine
                 }
                 Vector3 newpos = ps.entity.Transform.WorldPosition();
                 float timePerFrame = overrideTimePerFrame ?? ((float)internalGame.UpdateTime.Elapsed.Ticks / TimeSpan.TicksPerSecond);
-                ps.soundInstance.Apply3D(ProcessMinDistPosition(newpos), (newpos - ps.pos) / timePerFrame, null, ps.distance_scale);
+                ps.soundInstance.DistanceScale = ps.distance_scale;
+                ps.soundInstance.Apply3D(ProcessMinDistPosition(newpos), (newpos - ps.pos) / timePerFrame, null);
                 ps.pos = newpos;
             }
         }

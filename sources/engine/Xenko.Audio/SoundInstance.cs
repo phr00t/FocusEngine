@@ -22,6 +22,7 @@ namespace Xenko.Audio
         protected float pan;
         protected float pitch;
         protected float volume;
+        protected float distancescale;
         protected bool spatialized;
         internal PlayState playState = PlayState.Stopped;
 
@@ -178,6 +179,25 @@ namespace Xenko.Audio
         }
 
         /// <summary>
+        /// How does distance attenuation scale for this sound? 1 is default, 0 is disabling attenuation
+        /// </summary>
+        public float DistanceScale
+        {
+            get => distancescale;
+            set
+            {
+                if (distancescale == value) return;
+
+                distancescale = value;
+
+                if (engine.State == AudioEngineState.Invalidated)
+                    return;
+
+                AudioLayer.SourceSetRolloff(Source, distancescale);
+            }
+        }
+
+        /// <summary>
         /// A task that completes when the sound is ready to play
         /// </summary>
         /// <returns>Returns a task that will complete when the sound has been buffered and ready to play</returns>
@@ -190,12 +210,9 @@ namespace Xenko.Audio
         /// <summary>
         /// Quick and easy way to apply 3D parameters without an AudioEmitter
         /// </summary>
-        public void Apply3D(Vector3 Position, Vector3? velocity = null, Quaternion? direction = null, float distanceScale = 1f)
+        public void Apply3D(Vector3 Position, Vector3? velocity = null, Quaternion? direction = null)
         {
             if (!spatialized) return;
-
-            if (distanceScale != 1f)
-                Vector3.Lerp(ref Listener.Position, ref Position, distanceScale, out Position);    
 
             Vector3 vel = velocity ?? Vector3.Zero;
             Vector3 dir = direction == null ? Vector3.UnitZ : Vector3.Transform(Vector3.UnitZ, direction.Value);
@@ -277,6 +294,7 @@ namespace Xenko.Audio
             Pan = 0f;
             Pitch = 1f;
             Volume = 1f;
+            DistanceScale = 1f;
             IsLooping = false;
             Stop();
         }
