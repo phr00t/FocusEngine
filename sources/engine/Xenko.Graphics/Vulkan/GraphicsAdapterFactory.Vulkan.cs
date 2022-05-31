@@ -1,5 +1,9 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
+
+// set this define if we want to debug Vulkan. Requires Framework v4.8 runtime for some weird reason (might be a Vortice.Vulkan version thing)
+//#define VULKAN_DEBUG
+
 #if XENKO_GRAPHICS_API_VULKAN
 using System;
 using System.Collections.Generic;
@@ -10,7 +14,7 @@ using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using Xenko.Core;
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
 using System.Collections.Concurrent;
 #endif
 
@@ -20,7 +24,7 @@ namespace Xenko.Graphics
     {
         private static GraphicsAdapterFactoryInstance defaultInstance;
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
         private static GraphicsAdapterFactoryInstance debugInstance;
 #endif
 
@@ -32,7 +36,7 @@ namespace Xenko.Graphics
             var result = vkInitialize();
             result.CheckResult();
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
             if (!RuntimeInformation.FrameworkDescription.Contains("amework")) 
                 throw new Exception("Engine is running Vulkan in DEBUG with .NET Core. Debug output reports don't work. Try running with .NET Framework v4.8 or RELEASE. Later versions of Vortice.Vulkan might not have this problem, but I haven't gotten to fixing that yet.");    
 #endif
@@ -63,7 +67,7 @@ namespace Xenko.Graphics
                 defaultInstance = null;
             }
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
             if (debugInstance != null)
             {
                 debugInstance.Dispose();
@@ -81,7 +85,7 @@ namespace Xenko.Graphics
             {
                 Initialize();
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
                 if (enableValidation)
                 {
                     return debugInstance ?? (debugInstance = new GraphicsAdapterFactoryInstance(true));
@@ -99,7 +103,7 @@ namespace Xenko.Graphics
 
     internal class GraphicsAdapterFactoryInstance : IDisposable
     {
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
         private VkDebugReportCallbackEXT debugReportCallback;
         private DebugReportCallbackDelegate debugReport;
         internal BeginDebugMarkerDelegate BeginDebugMarker;
@@ -119,7 +123,7 @@ namespace Xenko.Graphics
 
             IntPtr[] enabledLayerNames = new IntPtr[0];
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
             if (enableValidation)
             {
                 var desiredLayerNames = new[]
@@ -171,7 +175,7 @@ namespace Xenko.Graphics
             desiredExtensionNames.Add("VK_NV_external_memory_capabilities"); // NVIDIA needs this one for OpenVR
             desiredExtensionNames.Add("VK_KHR_external_memory_capabilities"); // this one might be used in the future for OpenVR
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
             bool enableDebugReport = enableValidation && availableExtensionNames.Contains("VK_EXT_debug_report");
             if (enableDebugReport)
                 desiredExtensionNames.Add("VK_EXT_debug_report");
@@ -207,7 +211,7 @@ namespace Xenko.Graphics
                     vkLoadInstance(NativeInstance);
                 }
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
                 if (enableDebugReport)
                 {
                     var createDebugReportCallbackName = Marshal.StringToHGlobalAnsi("vkCreateDebugReportCallbackEXT");
@@ -255,7 +259,7 @@ namespace Xenko.Graphics
             }
         }
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
 
         private static ConcurrentDictionary<string, bool> ErrorsAlready = new ConcurrentDictionary<string, bool>();
 
@@ -299,7 +303,7 @@ namespace Xenko.Graphics
 
         public unsafe void Dispose()
         {
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
             if (debugReportCallback != VkDebugReportCallbackEXT.Null)
             {
                 vkDestroyDebugReportCallbackEXT(NativeInstance, debugReportCallback, null);
@@ -309,7 +313,7 @@ namespace Xenko.Graphics
             vkDestroyInstance(NativeInstance, null);
         }
 
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         internal unsafe delegate void BeginDebugMarkerDelegate(VkCommandBuffer commandBuffer, VkDebugMarkerMarkerInfoEXT* markerInfo);
 
