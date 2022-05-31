@@ -231,6 +231,26 @@ namespace Xenko.Engine
         private static System.Random rand;
         private static Game internalGame;
 
+        /// <summary>
+        /// Pre-load a sound so it will play faster later.
+        /// </summary>
+        /// <param name="url">Content URL of the audio</param>
+        public static void PreloadAudio(string url)
+        {
+            if (Sounds.TryGetValue(url, out var snd1) || instances.TryGetValue(url, out var ins))
+                return; // already loaded
+
+            // this might throw an exception if you provided a bad url
+            Sound snd2 = internalGame.Content.Load<Sound>(url);
+
+            // load this sound and prepare lists for it
+            SoundInstance si = snd2.CreateInstance(AudioEngine.DefaultListener);
+            List<SoundInstance> lsi = new List<SoundInstance>();
+            lsi.Add(si);
+            instances[url] = lsi;
+            Sounds[url] = snd2;
+        }
+
         private static SoundInstance getFreeInstance(string url, bool spatialized)
         {
             if (url == null) return null;
@@ -249,7 +269,7 @@ namespace Xenko.Engine
                 // don't have a free one to play, add a new one to the list
                 if (Sounds.TryGetValue(url, out var snd0))
                 {
-                    SoundInstance si0 = snd0.CreateInstance(AudioEngine.DefaultListener, true, false, 0f, HrtfEnvironment.Small);
+                    SoundInstance si0 = snd0.CreateInstance(AudioEngine.DefaultListener);
                     ins.Add(si0);
                     return si0;
                 }
@@ -258,7 +278,7 @@ namespace Xenko.Engine
             // don't have a list for this, make one
             if (Sounds.TryGetValue(url, out var snd1))
             {
-                SoundInstance si1 = snd1.CreateInstance(AudioEngine.DefaultListener, true, false, 0f, HrtfEnvironment.Small);
+                SoundInstance si1 = snd1.CreateInstance(AudioEngine.DefaultListener);
                 List<SoundInstance> lsi1 = new List<SoundInstance>();
                 lsi1.Add(si1);
                 instances[url] = lsi1;
@@ -271,7 +291,7 @@ namespace Xenko.Engine
             if (!snd2.Spatialized && spatialized)
                 throw new InvalidOperationException("Trying to play " + url + " positionally, yet it is a non-spatialized sound!");
 
-            SoundInstance si = snd2.CreateInstance(AudioEngine.DefaultListener, true, false, 0f, HrtfEnvironment.Small);
+            SoundInstance si = snd2.CreateInstance(AudioEngine.DefaultListener);
             List<SoundInstance> lsi = new List<SoundInstance>();
             lsi.Add(si);
             instances[url] = lsi;
