@@ -36,7 +36,7 @@ namespace Xenko.Audio
         /// <summary>
         /// The commands derived classes should execute.
         /// </summary>
-        protected readonly ConcurrentQueue<AsyncCommand> Commands = new ConcurrentQueue<AsyncCommand>();
+        protected readonly ConcurrentQueue<AsyncCommand> Commands = new ConcurrentQueue<AsyncCommand>(), StopCommands = new ConcurrentQueue<AsyncCommand>();
 
         private bool readyToPlay;
         private int prebufferedCount;
@@ -109,7 +109,7 @@ namespace Xenko.Audio
         /// </summary>
         public virtual void Dispose()
         {
-            Commands.Enqueue(AsyncCommand.Dispose);
+            StopCommands.Enqueue(AsyncCommand.Dispose);
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace Xenko.Audio
         /// </summary>
         public void Pause()
         {
-            Commands.Enqueue(AsyncCommand.Pause);
+            StopCommands.Enqueue(AsyncCommand.Pause);
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Xenko.Audio
         /// </summary>
         public void Stop()
         {
-            Commands.Enqueue(AsyncCommand.Stop);
+            StopCommands.Enqueue(AsyncCommand.Stop);
         }
 
         /// <summary>
@@ -341,7 +341,8 @@ namespace Xenko.Audio
                         Sources.Add(source);
                 }
 
-                for (int i=0; i<Sources.Count; i++)
+                // process stops, cleanups & pauses first
+                for (int i = 0; i < Sources.Count; i++)
                 {
                     var source = Sources[i];
 
@@ -351,6 +352,34 @@ namespace Xenko.Audio
                         i--;
                         continue;
                     }
+
+                    while (!source.StopCommands.IsEmpty)
+                    {
+                        AsyncCommand command;
+                        if (!source.StopCommands.TryDequeue(out command)) continue;
+                        switch (command)
+                        {
+                            case AsyncCommand.Pause:
+                                source.PauseInternal();
+                                break;
+                            case AsyncCommand.Stop:
+                                source.StopInternal();
+                                break;
+                            case AsyncCommand.Dispose:
+                                source.DisposeInternal();
+                                Sources.RemoveAt(i);
+                                i--;
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException();
+                        }
+                    }
+                }
+
+                // handle the rest of commands and playing
+                for (int i=0; i<Sources.Count; i++)
+                {
+                    var source = Sources[i];
 
                     source.UpdateInternal();
 
@@ -365,30 +394,16 @@ namespace Xenko.Audio
                             case AsyncCommand.Play:
                                 source.PlayInternal();
                                 break;
-                            case AsyncCommand.Pause:
-                                source.PauseInternal();
-                                break;
-                            case AsyncCommand.Stop:
-                                source.StopInternal();
-                                break;
                             case AsyncCommand.Seek:
                                 seekRequested = true;
                                 break;
                             case AsyncCommand.SetRange:
                                 source.RestartInternal();
                                 break;
-                            case AsyncCommand.Dispose:
-                                source.DisposeInternal();
-                                Sources.RemoveAt(i);
-                                i--;
-                                break;
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
                     }
-
-                    if (source.isDisposed)
-                        continue;
 
                     //Did we get a Seek request?
                     if (seekRequested)
