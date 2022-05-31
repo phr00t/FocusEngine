@@ -1,5 +1,9 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
+
+// set this define if we want to debug Vulkan. Requires Framework v4.8 runtime for some weird reason (might be a Vortice.Vulkan version thing)
+//#define VULKAN_DEBUG
+
 #if XENKO_GRAPHICS_API_VULKAN
 using System;
 using System.Collections.Generic;
@@ -628,7 +632,7 @@ namespace Xenko.Graphics
         /// <param name="name">The name.</param>
         public unsafe void BeginProfile(Color4 profileColor, string name)
         {
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
             if (GraphicsDevice.IsProfilingSupported)
             {
                 var bytes = System.Text.Encoding.ASCII.GetBytes(name);
@@ -653,7 +657,7 @@ namespace Xenko.Graphics
         /// </summary>
         public void EndProfile()
         {
-#if DEBUG
+#if VULKAN_DEBUG && DEBUG
             if (GraphicsDevice.IsProfilingSupported)
             {
                 GraphicsAdapterFactory.GetInstance(GraphicsDevice.IsDebugMode).EndDebugMarker(currentCommandList.NativeCommandBuffer);
