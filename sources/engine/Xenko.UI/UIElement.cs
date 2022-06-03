@@ -21,10 +21,10 @@ namespace Xenko.UI
     /// Provides a base class for all the User Interface elements in Xenko applications.
     /// </summary>
     [DataContract(Inherited = true)]
-    [CategoryOrder(10, AppearanceCategory, Expand = ExpandRule.Auto)]
+    [CategoryOrder(10, AppearanceCategory, Expand = ExpandRule.Once)]
     [CategoryOrder(20, BehaviorCategory, Expand = ExpandRule.Auto)]
     [CategoryOrder(30, LayoutCategory, Expand = ExpandRule.Auto)]
-    [CategoryOrder(100, MiscCategory, Expand = ExpandRule.Auto)]
+    [CategoryOrder(100, MiscCategory, Expand = ExpandRule.Once)]
     [DebuggerDisplay("UIElement: {Name}")]
     public abstract partial class UIElement : IUIElementUpdate, IUIElementChildren, IIdentifiable
     {
