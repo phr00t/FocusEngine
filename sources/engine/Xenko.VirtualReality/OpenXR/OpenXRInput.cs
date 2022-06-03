@@ -114,6 +114,7 @@ namespace Xenko.VirtualReality
             "/interaction_profiles/htc/vive_cosmos_controller",
             "/interaction_profiles/huawei/controller",
             "/interaction_profiles/microsoft/hand_interaction",
+            "/interaction_profiles/htc/vive_focus3_controller"
         };
 
         internal static unsafe bool IsPathSupported(OpenXRHmd hmd, ulong profile, ActionSuggestedBinding* suggested)
