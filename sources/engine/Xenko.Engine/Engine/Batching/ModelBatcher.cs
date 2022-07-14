@@ -29,6 +29,7 @@ namespace Xenko.Engine
             public Entity Entity;
             public Model Model;
             public Matrix? Transform;
+            public Vector2? uvScale, uvOffset;
             public int MaterialIndex;
         }
 
@@ -158,6 +159,12 @@ namespace Xenko.Engine
             return true;
         }
 
+        /// <summary>
+        /// Tries to separate a model's meshes into separate Entities
+        /// </summary>
+        /// <param name="m">Model to separate</param>
+        /// <param name="prefix">What to prefix Entity names</param>
+        /// <returns>List of Entities from model</returns>
         public static List<Entity> UnbatchModel(Model m, string prefix = "unbatched")
         {
             List<Entity> unbatched = new List<Entity>();
@@ -195,6 +202,8 @@ namespace Xenko.Engine
                     chunk.Entity.Transform.UpdateWorldMatrixInternal(true, false);
                 }
                 Matrix worldMatrix = chunk.Entity == null ? (chunk.Transform ?? Matrix.Identity) : chunk.Entity.Transform.WorldMatrix;
+                Vector2 uvScale = chunk.uvScale ?? Vector2.One;
+                Vector2 uvOffset = chunk.uvOffset ?? Vector2.Zero;
                 Matrix rot;
                 if (worldMatrix != Matrix.Identity)
                     worldMatrix.GetRotationMatrix(out rot);
@@ -213,9 +222,8 @@ namespace Xenko.Engine
                         //vertexes
                         if (CachedModelData.TryGet(modelMesh, out var information))
                         {
-                            // clone positions and normals, since they may change
-                            positions = (Vector3[])information.positions.Clone();
-                            normals = (Vector3[])information.normals.Clone();
+                            positions = information.positions;
+                            normals = information.normals;
                             tangents = information.tangents;
                             uvs = information.uvs;
                             colors = information.colors;
@@ -284,8 +292,8 @@ namespace Xenko.Engine
                                 {
                                     colors = colors,
                                     indicies = smd.Indicies,
-                                    normals = (Vector3[])normals.Clone(),
-                                    positions = (Vector3[])positions.Clone(),
+                                    normals = normals,
+                                    positions = positions,
                                     tangents = tangents,
                                     uvs = uvs
                                 }
@@ -312,8 +320,8 @@ namespace Xenko.Engine
                             CachedData cmd = new CachedData()
                             {
                                 colors = colors,
-                                positions = (Vector3[])positions.Clone(),
-                                normals = (Vector3[])normals.Clone(),
+                                positions = positions,
+                                normals = normals,
                                 uvs = uvs,
                                 tangents = tangents
                             };
@@ -366,30 +374,32 @@ namespace Xenko.Engine
                         bool needmatrix = worldMatrix != Matrix.Identity;
                         for (int k = 0; k < positions.Length; k++)
                         {
+                            Vector3 finalPos = positions[k];
+                            Vector3 finalNorm = normals[k];
+
                             if (needmatrix)
                             {
-                                Vector3.Transform(ref positions[k], ref worldMatrix, out positions[k]);
+                                Vector3.Transform(ref positions[k], ref worldMatrix, out finalPos);
 
                                 if (normals != null)
-                                    Vector3.TransformNormal(ref normals[k], ref rot, out normals[k]);
+                                    Vector3.TransformNormal(ref normals[k], ref rot, out finalNorm);
                             }
 
                             // update bounding box?
-                            Vector3 pos = positions[k];
-                            if (pos.X > bb.Maximum.X) bb.Maximum.X = pos.X;
-                            if (pos.Y > bb.Maximum.Y) bb.Maximum.Y = pos.Y;
-                            if (pos.Z > bb.Maximum.Z) bb.Maximum.Z = pos.Z;
-                            if (pos.X < bb.Minimum.X) bb.Minimum.X = pos.X;
-                            if (pos.Y < bb.Minimum.Y) bb.Minimum.Y = pos.Y;
-                            if (pos.Z < bb.Minimum.Z) bb.Minimum.Z = pos.Z;
+                            if (finalPos.X > bb.Maximum.X) bb.Maximum.X = finalPos.X;
+                            if (finalPos.Y > bb.Maximum.Y) bb.Maximum.Y = finalPos.Y;
+                            if (finalPos.Z > bb.Maximum.Z) bb.Maximum.Z = finalPos.Z;
+                            if (finalPos.X < bb.Minimum.X) bb.Minimum.X = finalPos.X;
+                            if (finalPos.Y < bb.Minimum.Y) bb.Minimum.Y = finalPos.Y;
+                            if (finalPos.Z < bb.Minimum.Z) bb.Minimum.Z = finalPos.Z;
 
                             if (vertsNT != null)
                             {
                                 vertsNT.Add(new VertexPositionNormalTextureTangent
                                 {
-                                    Position = positions[k],
-                                    Normal = normals != null ? normals[k] : Vector3.UnitY,
-                                    TextureCoordinate = uvs[k],
+                                    Position = finalPos,
+                                    Normal = normals != null ? finalNorm : Vector3.UnitY,
+                                    TextureCoordinate = uvs[k] * uvScale + uvOffset,
                                     Tangent = tangents != null ? tangents[k] : Vector4.UnitW
                                 });
                             }
@@ -397,8 +407,8 @@ namespace Xenko.Engine
                             {
                                 vertsNC.Add(new VertexPositionNormalColor
                                 {
-                                    Position = positions[k],
-                                    Normal = normals != null ? normals[k] : Vector3.UnitY,
+                                    Position = finalPos,
+                                    Normal = normals != null ? finalNorm : Vector3.UnitY,
                                     Color = colors != null ? colors[k] : Color4.White
                                 });
                             }
@@ -556,10 +566,12 @@ namespace Xenko.Engine
         /// </summary>
         /// <param name="models">List of models to batch</param>
         /// <param name="listOfTransforms">Matrix position for each model listed</param>
+        /// <param name="uvScales">If provided, will scale each model's UV map at that index</param>
+        /// <param name="uvOffsets">If provided, will offset each model's UV map at that index</param>
         /// <returns>batched model</returns>
-        public static Model GenerateBatch(List<Model> models, List<Matrix> listOfTransforms)
+        public static Model GenerateBatch(List<Model> models, List<Matrix> listOfTransforms, List<Vector2> uvScales = null, List<Vector2> uvOffsets = null)
         {
-            if (models == null || listOfTransforms == null || models.Count != listOfTransforms.Count)
+            if (models == null || listOfTransforms == null || models.Count != listOfTransforms.Count || uvScales != null && uvScales.Count != models.Count || uvOffsets != null && uvOffsets.Count != models.Count)
                 throw new ArgumentException("Null arguments or counts do not match when generating batched model!");
 
             var materials = new Dictionary<MaterialInstance, List<BatchingChunk>>();
@@ -574,7 +586,8 @@ namespace Xenko.Engine
                 {
                     var material = model.Materials[index];
 
-                    var chunk = new BatchingChunk { Entity = null, Model = model, MaterialIndex = index, Transform = listOfTransforms[m] };
+                    var chunk = new BatchingChunk { Entity = null, Model = model, MaterialIndex = index, Transform = listOfTransforms[m],
+                                                    uvOffset = uvOffsets != null ? uvOffsets[m] : null, uvScale = uvScales != null ? uvScales[m] : null };
 
                     if (materials.TryGetValue(material, out var entities))
                     {
