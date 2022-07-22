@@ -804,6 +804,12 @@ namespace Xenko.Physics.Bepu
         [DataMember(69)]
         public bool IgnorePhysicsRotation = false;
 
+        /// <summary>
+        /// When updating the associated TransformComponent, should we not set position?
+        /// </summary>
+        [DataMember(75)]
+        public bool IgnorePhysicsPosition = false;
+
         [DataMemberIgnore]
         public Vector3? LocalPhysicsOffset = null;
 
@@ -833,12 +839,14 @@ namespace Xenko.Physics.Bepu
         /// <summary>
         /// Updades the graphics transformation from the given physics transformation
         /// </summary>
-        /// <param name="physicsTransform"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void UpdateTransformationComponent(Entity entity)
         {
-            entity.Transform.Position = Position;
-            if (LocalPhysicsOffset.HasValue) entity.Transform.Position += LocalPhysicsOffset.Value;
+            if (IgnorePhysicsPosition == false)
+            {
+                entity.Transform.Position = Position;
+                if (LocalPhysicsOffset.HasValue) entity.Transform.Position += LocalPhysicsOffset.Value;
+            }
             if (IgnorePhysicsRotation == false) entity.Transform.Rotation = Rotation;
         }
     }
