@@ -19,6 +19,12 @@ My games require the engine to be developed at a faster pace than Stride. I'm in
 
 Yes, and it is free for you to try! Works on all operating systems and supports VR in Windows: https://store.steampowered.com/app/1256380/FPS_Infinite/
 
+Other paid games:
+
+8089: https://store.steampowered.com/app/1593280/8089_The_Next_Action_RPG/
+Spermination: https://store.steampowered.com/app/2001910/Spermination_Cream_of_the_Crop/
+PerformVR: https://store.steampowered.com/app/1868400/PerformVR/
+
 ## What is different?
 
 Most of Focus is similar to Stride and there shouldn't be any loss of functionality over the original. Changes are focused on fixes, performance improvements and new features. However, I do not maintain different languages, Android support or the Launcher. The following is a rough list of "major" changes, but might not accurately reflect the current state of differences (since both githubs are moving targets which are hopefully improving):
@@ -27,15 +33,15 @@ Most of Focus is similar to Stride and there shouldn't be any loss of functional
 * Vulkan: Focus primarily uses Vulkan, which has been significantly overhauled to provide more performance you'd expect from the newer API. Vulkan works on Linux too. Vulkan tries to work on Mac OSX via MoltenVK, but compatibility issues have arisen that are hard to troublesoot. Stride/Xenko doesn't work either on Mac OSX as of this writing. DirectX is deprecated and unsupported on this fork.
 * BepuPhysics2 for faster Physics: Focus has an additional physics library integrated, which is much faster, has an easier API, multithreaded and pure C#. It isn't integrated with GameStudio though, like Bullet physics is. See https://github.com/phr00t/FocusEngine/tree/master/sources/engine/Xenko.Physics/Bepu. If you decide to still use Bullet, this fork can handle Bullet running in another thread with interpolation.
 * API Ease: TransformComponents have nice shortcuts like WorldPosition and WorldRotation. There are also other very useful shortcuts, like Material.Clone to easily clone materials.
-* Lots of bugfixes: Lots of issues, and even GameStudio crashes and project corruption, have been fixed/improved in this fork. Some specific examples is crashes when particle colors or rendering 3D text from multiple cameras.
-* GlobalSoundManager: easily play all sound effects for your whole project from a single object, which handles loading and pooling sound instances automatically (even asynchronously). If you use positional sounds, make sure you call UpdatePlayingSoundPositions every frame! See https://github.com/phr00t/FocusEngine/blob/master/sources/engine/Xenko.Engine/Engine/GlobalSoundManager.cs
+* Lots of bugfixes: Lots of issues, and even GameStudio crashes and project corruption, have been fixed/improved in this fork. Some specific examples is crashes with particle colors or rendering 3D text from multiple cameras.
+* GlobalSoundManager: easily play all sound effects for your whole project from a single static class, which handles loading and pooling sound instances automatically (even asynchronously). If you use positional sounds, make sure you call UpdatePlayingSoundPositions every frame! See https://github.com/phr00t/FocusEngine/blob/master/sources/engine/Xenko.Engine/Engine/GlobalSoundManager.cs
 * CinematicAction: Simple system for performing cinematic actions on objects and calling functions at certain times. Can build a simple timeline for things to move, rotate and execute. See https://github.com/phr00t/FocusEngine/blob/master/sources/engine/Xenko.Engine/Cinematics/CinematicAnimation.cs
 * EntityPool: Makes it really easy to reuse entities and prefabs. This can save lots of memory and processing, instead of recreating things that come and go (like enemies or projectiles). See https://github.com/phr00t/FocusEngine/blob/master/sources/engine/Xenko.Engine/Engine/EntityPool.cs
 * UI improvements: View frustum is implemented in this fork, so UI elements outside of view won't be drawn for performance reasons. ScrollViewers can work with mouse wheels out of the box. Easily get UI elements to access in code from a Page using GatherUIDictionary. Easily make Lists and Pulldown selection boxes using GridList and PulldownList (not integrated with GameStudio yet, though). Overall UI performance is greatly improved, too!
 * Particle System improvements: Colored particles work, which is pretty important! Also added EmitSpecificParticle to a ParticleEmitter, so you can emit individual particles at certain position, speeds and colors (like using EmitParams in Unity).
 * Better UI Editor: Selecting things in the editor works more intuitively, like hidden things are skipped and smaller things are easier to click. Hold Shift to disable snapping etc.
 * UI Text features: vertically align text or use \<color> tags to dynamically change text colors. Use \<br> tags to have multiline text set straight from GameStudio. Need text shadows, outlines or bevels? Precompile a font (right click it in the asset view) that has a Glyph Margin > 0, which will generate a PNG with room to edit in effects right into the glyphs.
-* ModelBatcher: Easily make batched models using lots of individual models (think grass and rocks for your whole terrain batched into one draw call and entity). See https://github.com/phr00t/FocusEngine/blob/master/sources/engine/Xenko.Engine/Engine/ModelBatcher.cs
+* ModelBatcher: Easily make batched models using lots of individual models (think grass and rocks for your whole terrain batched into one draw call and entity). See https://github.com/phr00t/FocusEngine/blob/master/sources/engine/Xenko.Engine/Engine/ModelBatcher.cs -- if you have moving things that want to be batched, look into BatchedMeshDraw
 * Level of detail system: in GameSettings -> Rendering, you can set a value for things to cull when they are really small on the screen. Separate value can be used for culling shadows, too. Individual models can have "Small Factor Adjustment" values that make them more important (or less important) to make them cull easier/harder.
 * Able to set Entities (via the TransformComponent) as "static" so complex matrix calculations can be skipped for them every frame. If you have lots of objects that don't move in a scene, this can provide a significant CPU boost.
 * Much more control over the depth buffer: objects, even transparent ones and UI components, provide options for how they interacts with the depth buffer.
@@ -62,13 +68,19 @@ FPS Infinite, powered by Focus Engine, running on the Steam Deck! Should work ou
 
 ## What is worse in this fork?
 
-Android/mobile support, different languages, and Universal Windows Platform support. I also work very little with DirectX, which is maintained just for the editor. Some changes I make to improve Vulkan might cause a (hopefully minor) bug in the DirectX API, which will be of low priority to fix. Vulkan isn't as fully featured as DirectX yet, so GPU instancing doesn't work on Vulkan (although you may find the ModelBatcher & BatchedMeshDraw works in most cases).
+Android/mobile support, different languages, and Universal Windows Platform support. I also work very little with DirectX, which is maintained just for the editor. Some changes I make to improve Vulkan might cause a (hopefully minor) bug in the DirectX API, which will be of low priority to fix. GPU instancing isn't implemented on Vulkan yet (although you may find the ModelBatcher & BatchedMeshDraw covers this in most cases).
 
 Documentation is worse in this fork, as I don't have time to go back and properly document the new features I add. The list above isn't updated often enough to showcase the latest improvements. I try to comment new additions, but would require looking at the source to see them. Stride documentation is mostly still applicable, but there may be better ways to do things in this fork (VR for example).
+
+Community support doesn't exist for this fork. The community usually revolves around the original Stride.
 
 You can now export games and projects targeting .NET 6 & Visual Studio 2022 is now supported. However, GameStudio (the editor) is still running on .NET Framework 4.8 (not a big deal, in my humble opinion).
 
 Creating templates with this fork is semi broken (you'll get an error, but it still gets created). Just browse for it next time you open Focus. There is an issue for it on the issues tab.
+
+## Why don't you merge all these improvements back into Stride?
+
+The Stride team doesn't really want most of my work, or they don't think these improvements are necessary. I've made decisions without their input to save time, so taking my work now would take significant review and likely significant rewrites to adhere to their opinions and standards. I stand by my code and its quality (otherwise I wouldn't trust making commercial games with it), but the Stride team would rather do it their way (if and when they ever get to it). Sometimes, some improvements do make it into Stride in some form, like the Fog and Outline post processing filters. Recently, I kickstarted bringing OpenXR support into Stride (but not all of my VR improvements), and they seem to be getting it to work with DirectX. Fully merging would take much more work than us "spare time devs" have. If you want to use my improvements, I only can recommend using (and building off of) my fork.
 
 ## License
 
