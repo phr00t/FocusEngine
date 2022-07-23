@@ -22,7 +22,9 @@ Yes, and it is free for you to try! Works on all operating systems and supports 
 Other paid games:
 
 8089: https://store.steampowered.com/app/1593280/8089_The_Next_Action_RPG/
+
 Spermination: https://store.steampowered.com/app/2001910/Spermination_Cream_of_the_Crop/
+
 PerformVR: https://store.steampowered.com/app/1868400/PerformVR/
 
 ## What is different?
