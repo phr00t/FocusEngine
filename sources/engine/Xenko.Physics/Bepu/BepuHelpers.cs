@@ -345,7 +345,7 @@ namespace Xenko.Physics.Bepu
 
                 if (ModelBatcher.UnpackRawVertData(buf.VertIndexData, modelMesh.Draw.VertexBuffers[0].Declaration,
                                                    out Vector3[] arraypositions, out Core.Mathematics.Vector3[] normals, out Core.Mathematics.Vector2[] uvs,
-                                                   out Color4[] colors, out Vector4[] tangents) == false)
+                                                   out Color4[] colors, out Vector4[] tangents, modelMesh.Draw.VertexBuffers[0].Offset) == false)
                 {
                     throw new ArgumentException("Couldn't unpack mesh for " + modelMesh.Name + ", buffer wasn't stored or data packed weird.");
                 }

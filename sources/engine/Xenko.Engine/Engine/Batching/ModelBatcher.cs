@@ -75,7 +75,7 @@ namespace Xenko.Engine
             }
 
             if (UnpackRawVertData(buf.VertIndexData, m.Draw.VertexBuffers[0].Declaration,
-                                  out positions, out normals, out uvs, out colors, out tangents) == false)
+                                  out positions, out normals, out uvs, out colors, out tangents, m.Draw.VertexBuffers[0].Offset) == false)
             {
                 indicies = null;
                 return false;
@@ -110,7 +110,7 @@ namespace Xenko.Engine
         /// <returns>Returns true if some data was successful in extraction</returns>
         public static unsafe bool UnpackRawVertData(byte[] data, VertexDeclaration declaration,
                                                     out Vector3[] positions, out Vector3[] normals,
-                                                    out Vector2[] uvs, out Color4[] colors, out Vector4[] tangents)
+                                                    out Vector2[] uvs, out Color4[] colors, out Vector4[] tangents, int data_offset = 0)
         {
             positions = null;
             normals = null;
@@ -119,13 +119,14 @@ namespace Xenko.Engine
             tangents = null;
             if (data == null || declaration == null || data.Length <= 0) return false;
             VertexElement[] elements = declaration.VertexElements;
-            int totalEntries = data.Length / declaration.VertexStride;
+            int datalen = data.Length - data_offset;
+            int totalEntries = datalen / declaration.VertexStride;
             positions = new Vector3[totalEntries];
             int[] eoffsets = new int[elements.Length];
             for (int i = 1; i < elements.Length; i++) eoffsets[i] = eoffsets[i - 1] + elements[i - 1].Format.SizeInBytes();
-            fixed (byte* dp = data)
+            fixed (byte* dp = &data[data_offset])
             {
-                for (int offset = 0; offset < data.Length; offset += declaration.VertexStride)
+                for (int offset = 0; offset < datalen; offset += declaration.VertexStride)
                 {
                     int vertindex = offset / declaration.VertexStride;
                     for (int i = 0; i < elements.Length; i++)
@@ -311,7 +312,7 @@ namespace Xenko.Engine
                             }
 
                             if (UnpackRawVertData(buf.VertIndexData, modelMesh.Draw.VertexBuffers[0].Declaration,
-                                                  out positions, out normals, out uvs, out colors, out tangents) == false)
+                                                  out positions, out normals, out uvs, out colors, out tangents, modelMesh.Draw.VertexBuffers[0].Offset) == false)
                             {
                                 if (unbatched != null) unbatched.Add(chunk.Entity);
                                 continue;
