@@ -238,10 +238,10 @@ namespace Xenko.Engine
         private static Xenko.Rendering.Mesh cubeMesh;
 
         /// <summary>
-        /// Helpful function to quickly generate a colored, visible bounding box over this physics component. Requires to be attached to an Entity already
+        /// Helpful function to quickly generate a colored, visible bounding box over this physics component. This component must be attached to an Entity already if attaching as a child (default behavior).
         /// </summary>
         /// <returns>Child entity generated</returns>
-        public Entity AttachDebugShapeAsChild()
+        public Entity GenerateDebugBoundingBox(bool attachAsChild = true)
         {
             System.Numerics.Vector3 min, max;
             if (ColliderShape is IConvexShape ics)
@@ -283,7 +283,7 @@ namespace Xenko.Engine
                 cubeMesh = new Rendering.Mesh { Draw = meshDraw };
             }
 
-            Entity e = new Entity(Entity.Name + "-physicsBB");
+            Entity e = new Entity((Entity?.Name ?? "unattached") + "-physicsBB");
 
             Model m = new Model();
 
@@ -298,14 +298,20 @@ namespace Xenko.Engine
             ModelComponent mc = e.GetOrCreate<ModelComponent>();
             mc.Model = m;
 
-            e.Transform.Scale = new Vector3(max.X - min.X, max.Y - min.Y, max.Z - min.Z) / Entity.Transform.WorldScale();
-            e.Transform.Position = centerOffset / Entity.Transform.WorldScale();
-            if (this is BepuRigidbodyComponent rb && rb.IgnorePhysicsRotation)
+            if (attachAsChild)
             {
-                e.Transform.Rotation = Rotation;
-                if (rb.LocalPhysicsOffset.HasValue) e.Transform.Position -= rb.LocalPhysicsOffset.Value;
+                e.Transform.Scale = new Vector3(max.X - min.X, max.Y - min.Y, max.Z - min.Z) / Entity.Transform.WorldScale();
+                e.Transform.Position = centerOffset / Entity.Transform.WorldScale();
+                if (this is BepuRigidbodyComponent rb && rb.LocalPhysicsOffset.HasValue)
+                    e.Transform.Position -= rb.LocalPhysicsOffset.Value;
+                e.Transform.Parent = Entity.Transform;
             }
-            e.Transform.Parent = Entity.Transform;
+            else
+            {
+                e.Transform.Scale = new Vector3(max.X - min.X, max.Y - min.Y, max.Z - min.Z);
+                e.Transform.Position = Position + centerOffset;
+                e.Transform.Rotation = Rotation;
+            }
 
             return e;
         }
