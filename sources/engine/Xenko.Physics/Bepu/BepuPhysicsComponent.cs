@@ -234,9 +234,13 @@ namespace Xenko.Engine
         [DataMember]
         virtual public float SpeculativeMargin { get; set; } = 0.1f;
 
-        private static Material debugShapeMaterial;
+        private static Material[] debugShapeMaterial;
         private static Xenko.Rendering.Mesh cubeMesh;
 
+        /// <summary>
+        /// Helpful function to quickly generate a colored, visible bounding box over this physics component. Requires to be attached to an Entity already
+        /// </summary>
+        /// <returns>Child entity generated</returns>
         public Entity AttachDebugShapeAsChild()
         {
             System.Numerics.Vector3 min, max;
@@ -256,17 +260,23 @@ namespace Xenko.Engine
 
             if (debugShapeMaterial == null)
             {
-                var materialDescription = new MaterialDescriptor
-                {
-                    Attributes =
-                    {
-                        DiffuseModel = new MaterialDiffuseLambertModelFeature(),
-                        Diffuse = new MaterialDiffuseMapFeature(new ComputeColor { Key = MaterialKeys.DiffuseValue })
-                    }
-                };
+                debugShapeMaterial = new Material[3];
 
-                debugShapeMaterial = Material.New(g.GraphicsDevice, materialDescription);
-                debugShapeMaterial.Passes[0].Parameters.Set(MaterialKeys.DiffuseValue, Color.Red);
+                for (int i=0; i<debugShapeMaterial.Length; i++) {
+                    var materialDescription = new MaterialDescriptor
+                    {
+                        Attributes = {
+                            DiffuseModel = new MaterialDiffuseLambertModelFeature(),
+                            Diffuse = new MaterialDiffuseMapFeature(new ComputeColor { Key = MaterialKeys.DiffuseValue })
+                        }
+                    };
+
+                    debugShapeMaterial[i] = Material.New(g.GraphicsDevice, materialDescription);
+                }
+
+                debugShapeMaterial[0].Passes[0].Parameters.Set(MaterialKeys.DiffuseValue, Color.OrangeRed);
+                debugShapeMaterial[1].Passes[0].Parameters.Set(MaterialKeys.DiffuseValue, Color.Blue);
+                debugShapeMaterial[2].Passes[0].Parameters.Set(MaterialKeys.DiffuseValue, Color.Pink);
 
                 var meshDraw = GeometricPrimitive.Cube.New(g.GraphicsDevice, Vector3.One).ToMeshDraw();
 
@@ -276,7 +286,13 @@ namespace Xenko.Engine
             Entity e = new Entity(Entity.Name + "-physicsBB");
 
             Model m = new Model();
-            m.Add(debugShapeMaterial);
+
+            // pick material based on rigidbody type
+            if (this is BepuStaticColliderComponent)
+                m.Add(debugShapeMaterial[0]);
+            else if (this is BepuRigidbodyComponent brc)
+                m.Add(debugShapeMaterial[brc.RigidBodyType == RigidBodyTypes.Dynamic ? 1 : 2]);
+
             m.Meshes.Add(cubeMesh);
 
             ModelComponent mc = e.GetOrCreate<ModelComponent>();
@@ -284,7 +300,11 @@ namespace Xenko.Engine
 
             e.Transform.Scale = new Vector3(max.X - min.X, max.Y - min.Y, max.Z - min.Z) / Entity.Transform.WorldScale();
             e.Transform.Position = centerOffset / Entity.Transform.WorldScale();
-            if (this is BepuRigidbodyComponent rb && rb.IgnorePhysicsRotation) e.Transform.Rotation = Rotation;
+            if (this is BepuRigidbodyComponent rb && rb.IgnorePhysicsRotation)
+            {
+                e.Transform.Rotation = Rotation;
+                if (rb.LocalPhysicsOffset.HasValue) e.Transform.Position -= rb.LocalPhysicsOffset.Value;
+            }
             e.Transform.Parent = Entity.Transform;
 
             return e;
