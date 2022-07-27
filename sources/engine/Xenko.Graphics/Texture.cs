@@ -1224,7 +1224,8 @@ namespace Xenko.Graphics
             // Check that the textureData size is correct
             if (textureData == null) throw new ArgumentNullException("textureData");
             Image.ComputePitch(format, width, height, out var rowPitch, out var slicePitch, out _, out _);
-            if (Utilities.SizeOf(textureData) != (slicePitch * depth)) throw new ArgumentException("Invalid size for Image");
+            if (Utilities.SizeOf(textureData) != (slicePitch * depth))
+                throw new ArgumentException("Invalid size for Image. TextureData size is " + Utilities.SizeOf(textureData) + ", slicepitch is " + slicePitch + ", depth is " + depth + ". SlicePitch*Depth != size");
 
             return new DataBox(fixedPointer, rowPitch, slicePitch);
         }
