@@ -102,6 +102,7 @@ namespace Xenko.VirtualReality
             Extensions.Add("XR_MSFT_hand_interaction");
             Extensions.Add("XR_EXT_samsung_odyssey_controller");
             Extensions.Add("XR_HTC_vive_focus3_controller_interaction");
+            Extensions.Add("XR_HTC_hand_interaction");
 
             uint propCount = 0;
             Xr.EnumerateInstanceExtensionProperties((byte*)null, 0, &propCount, null);
