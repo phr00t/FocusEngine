@@ -189,8 +189,6 @@ namespace Xenko.Rendering.Shadows
 
         private class ShaderGroupData : LightShadowMapShaderGroupDataBase
         {
-            private const string ShaderName = "ShadowMapReceiverPointCubeMap";
-
             private Texture shadowMapTexture;
             private Vector2 shadowMapTextureSize;
             private Vector2 shadowMapTextureTexelSize;
@@ -220,11 +218,22 @@ namespace Xenko.Rendering.Shadows
                 shadowMapTextureKey = ShadowMapKeys.ShadowMapTexture.ComposeWith(compositionName);
                 shadowMapTextureSizeKey = ShadowMapKeys.TextureSize.ComposeWith(compositionName);
                 shadowMapTextureTexelSizeKey = ShadowMapKeys.TextureTexelSize.ComposeWith(compositionName);
-                worldToShadowKey = ShadowMapReceiverPointCubeMapKeys.WorldToShadow.ComposeWith(compositionName);
-                inverseWorldToShadowKey = ShadowMapReceiverPointCubeMapKeys.InverseWorldToShadow.ComposeWith(compositionName);
-                depthBiasesKey = ShadowMapReceiverPointCubeMapKeys.DepthBiases.ComposeWith(compositionName);
-                depthParametersKey = ShadowMapReceiverPointCubeMapKeys.DepthParameters.ComposeWith(compositionName);
-                offsetScalesKey = ShadowMapReceiverPointCubeMapKeys.OffsetScales.ComposeWith(compositionName);
+                if (LightClusteredPointSpotGroupRenderer.UseLinearLighting)
+                {
+                    worldToShadowKey = ShadowMapReceiverPointCubeMapLinearKeys.WorldToShadow.ComposeWith(compositionName);
+                    inverseWorldToShadowKey = ShadowMapReceiverPointCubeMapLinearKeys.InverseWorldToShadow.ComposeWith(compositionName);
+                    depthBiasesKey = ShadowMapReceiverPointCubeMapLinearKeys.DepthBiases.ComposeWith(compositionName);
+                    depthParametersKey = ShadowMapReceiverPointCubeMapLinearKeys.DepthParameters.ComposeWith(compositionName);
+                    offsetScalesKey = ShadowMapReceiverPointCubeMapLinearKeys.OffsetScales.ComposeWith(compositionName);
+                }
+                else
+                {
+                    worldToShadowKey = ShadowMapReceiverPointCubeMapKeys.WorldToShadow.ComposeWith(compositionName);
+                    inverseWorldToShadowKey = ShadowMapReceiverPointCubeMapKeys.InverseWorldToShadow.ComposeWith(compositionName);
+                    depthBiasesKey = ShadowMapReceiverPointCubeMapKeys.DepthBiases.ComposeWith(compositionName);
+                    depthParametersKey = ShadowMapReceiverPointCubeMapKeys.DepthParameters.ComposeWith(compositionName);
+                    offsetScalesKey = ShadowMapReceiverPointCubeMapKeys.OffsetScales.ComposeWith(compositionName);
+                }
             }
 
             public override void UpdateLightCount(int lightLastCount, int lightCurrentCount)
@@ -240,7 +249,7 @@ namespace Xenko.Rendering.Shadows
 
             public override ShaderClassSource CreateShaderSource(int lightCurrentCount)
             {
-                return new ShaderClassSource(ShaderName, lightCurrentCount);
+                return new ShaderClassSource(LightClusteredPointSpotGroupRenderer.UseLinearLighting ? "ShadowMapReceiverPointCubeMapLinear" : "ShadowMapReceiverPointCubeMap", lightCurrentCount);
             }
 
             private object locker = new object();

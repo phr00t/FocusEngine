@@ -39,7 +39,7 @@ namespace Xenko.Rendering.Lights
                 base.UpdateLayout(compositionName);
 
                 countKey = DirectLightGroupPerDrawKeys.LightCount.ComposeWith(compositionName);
-                lightsKey = LightPointGroupKeys.Lights.ComposeWith(compositionName);
+                lightsKey = LightClusteredPointSpotGroupRenderer.UseLinearLighting ? LightPointGroupLinearKeys.Lights.ComposeWith(compositionName) : LightPointGroupKeys.Lights.ComposeWith(compositionName);
             }
 
             protected override void UpdateLightCount()
@@ -47,7 +47,7 @@ namespace Xenko.Rendering.Lights
                 base.UpdateLightCount();
 
                 var mixin = new ShaderMixinSource();
-                mixin.Mixins.Add(new ShaderClassSource("LightPointGroup", LightCurrentCount));
+                mixin.Mixins.Add(new ShaderClassSource(LightClusteredPointSpotGroupRenderer.UseLinearLighting ? "LightPointGroupLinear" : "LightPointGroup", LightCurrentCount));
                 // Old fixed path kept in case we need it again later
                 //mixin.Mixins.Add(new ShaderClassSource("LightPointGroup", LightCurrentCount));
                 //mixin.Mixins.Add(new ShaderClassSource("DirectLightGroupFixed", LightCurrentCount));
