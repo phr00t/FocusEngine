@@ -63,7 +63,7 @@ namespace Xenko.Rendering.Lights
         /// <value>The spot angle in degrees.</value>
         /// <userdoc>The angle of the main beam of the light spot.</userdoc>
         [DataMember(20)]
-        [DataMemberRange(0.01, 90, 1, 10, 1)]
+        [DataMemberRange(0.01, 180, 1, 10, 1)]
         [DefaultValue(30.0f)]
         public float AngleInner { get; set; }
 
@@ -73,7 +73,7 @@ namespace Xenko.Rendering.Lights
         /// <value>The spot angle in degrees.</value>
         /// <userdoc>The angle of secondary beam of the light spot</userdoc>
         [DataMember(30)]
-        [DataMemberRange(0.01, 90, 1, 10, 1)]
+        [DataMemberRange(0.01, 180, 1, 10, 1)]
         [DefaultValue(35.0f)]
         public float AngleOuter { get; set; }
 
