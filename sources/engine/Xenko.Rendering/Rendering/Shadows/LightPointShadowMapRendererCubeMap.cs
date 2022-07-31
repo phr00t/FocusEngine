@@ -100,7 +100,8 @@ namespace Xenko.Rendering.Shadows
             shaderData.OffsetScale = lightShadowMap.Light.Shadow.BiasParameters.NormalOffsetScale;
             shaderData.DepthParameters = GetShadowMapDepthParameters(lightShadowMap);
 
-            var clippingPlanes = GetLightClippingPlanes((LightPoint)lightShadowMap.Light);
+            var pointlight = (LightPoint)lightShadowMap.Light;
+            var clippingPlanes = GetLightClippingPlanes(pointlight);
 
             var textureMapSize = lightShadowMap.GetRectangle(0).Size;
 
@@ -110,6 +111,8 @@ namespace Xenko.Rendering.Shadows
             shaderData.Projection = Matrix.PerspectiveFovRH(halfFov * 2, 1.0f, clippingPlanes.X, clippingPlanes.Y);
 
             Vector2 atlasSize = new Vector2(lightShadowMap.Atlas.Width, lightShadowMap.Atlas.Height);
+
+            bool skipUpDown = ((pointlight.Shadow as LightPointShadowMap)?.SkipUpDownMaps ?? false);
 
             for (int i = 0; i < 6; i++)
             {
@@ -128,6 +131,9 @@ namespace Xenko.Rendering.Shadows
 
                 shadowRenderView.NearClipPlane = clippingPlanes.X;
                 shadowRenderView.FarClipPlane = clippingPlanes.Y;
+
+                // if we are up/down, don't render anything so its just open for these directions
+                shadowRenderView.CullingMask = skipUpDown && i >= 4 ? RenderGroupMask.None : RenderGroupMask.All;
 
                 shadowRenderView.View = shaderData.View[i];
                 shadowRenderView.Projection = shaderData.Projection;

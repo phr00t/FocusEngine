@@ -18,5 +18,12 @@ namespace Xenko.Rendering.Lights
         /// </summary>
         [DefaultValue(LightPointShadowMapType.CubeMap)]
         public LightPointShadowMapType Type { get; set; } = LightPointShadowMapType.CubeMap;
+
+        /// <summary>
+        /// If you don't need shadows facing up or down, skip them here to speed up rendering
+        /// </summary>
+        [DataMember]
+        [DefaultValue(false)]
+        public bool SkipUpDownMaps { get; set; } = false;
     }
 }
