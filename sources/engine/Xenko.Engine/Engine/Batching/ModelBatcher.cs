@@ -722,11 +722,14 @@ namespace Xenko.Engine
 
         private static MaterialInstance ExtractMaterialInstance(ModelComponent mc, int index)
         {
-            if (mc.Materials.Count <= index ||
-                mc.Materials[index] == null)
-                return mc.Model.Materials[index];
+            if (mc.Materials.TryGetValue(index, out var material))
+                return new MaterialInstance(material);
 
-            return new MaterialInstance() { Material = mc.Materials[index] };
+            if (mc.Model != null && index < mc.Model.Materials.Count) {
+                return mc.Model.Materials[index];
+            }
+
+            return null;
         }
 
         /// <summary>

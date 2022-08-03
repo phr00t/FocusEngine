@@ -16,7 +16,7 @@ namespace Xenko.Rendering
 {
     public class ModelRenderProcessor : EntityProcessor<ModelComponent, RenderModel>, IEntityComponentRenderProcessor
     {
-        private Material fallbackMaterial;
+        internal static Material fallbackMaterial;
 
         public List<RenderModel> RenderModels => ComponentDataValues;
         public List<ModelComponent> ModelComponents => ComponentDataKeys;
@@ -175,11 +175,6 @@ namespace Xenko.Rendering
             renderMesh.TransparentWriteDepth = modelComponent.AlwaysDepthWrite;
         }
 
-        private Material FindMaterial(Material materialOverride, MaterialInstance modelMaterialInstance)
-        {
-            return materialOverride ?? modelMaterialInstance?.Material ?? fallbackMaterial;
-        }
-
         private void CheckMeshes(ModelComponent modelComponent, RenderModel renderModel)
         {
             // Check if model changed
@@ -196,13 +191,12 @@ namespace Xenko.Rendering
                     if (modelComponent.Enabled)
                     {
                         // Check materials
-                        var modelComponentMaterials = modelComponent.Materials;
                         for (int sourceMeshIndex = 0; sourceMeshIndex < model.Meshes.Count; sourceMeshIndex++)
                         {
                             ref var material = ref renderModel.Materials[sourceMeshIndex];
                             var materialIndex = model.Meshes[sourceMeshIndex].MaterialIndex;
 
-                            var newMaterial = FindMaterial(modelComponentMaterials.SafeGet(materialIndex), model.Materials.GetItemOrNull(materialIndex));
+                            var newMaterial = modelComponent.GetMaterial(materialIndex);
 
                             // If material changed or its number of pass changed, trigger a full regeneration of RenderMeshes (note: we could do partial later)
                             if ((newMaterial?.Passes.Count ?? 1) != material.MeshCount)
@@ -247,7 +241,7 @@ namespace Xenko.Rendering
             for (int sourceMeshIndex = 0; sourceMeshIndex < model.Meshes.Count; sourceMeshIndex++)
             {
                 var materialIndex = model.Meshes[sourceMeshIndex].MaterialIndex;
-                var material = FindMaterial(modelComponent.Materials.SafeGet(materialIndex), model.Materials.GetItemOrNull(materialIndex));
+                var material = modelComponent.GetMaterial(materialIndex);
                 var meshCount = material?.Passes.Count ?? 1;
                 renderModel.Materials[sourceMeshIndex] = new RenderModel.MaterialInfo { Material = material, MeshStartIndex = materialMeshCount, MeshCount = meshCount };
                 materialMeshCount += meshCount;

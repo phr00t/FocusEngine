@@ -233,19 +233,13 @@ namespace Xenko.Engine
         /// <returns>The material at the specified index or null if not found</returns>
         public Material GetMaterial(int index)
         {
-            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), @"index cannot be < 0");
-
-            Material material;
-            if (Materials.TryGetValue(index, out material))
-            {
+            if (Materials.TryGetValue(index, out var material))
                 return material;
-            }
-            // TODO: if Model is null, shouldn't we always return null?
+
             if (Model != null && index < Model.Materials.Count)
-            {
-                material = Model.Materials[index].Material;
-            }
-            return material;
+                return Model.Materials[index].Material;
+
+            return ModelRenderProcessor.fallbackMaterial;
         }
 
         /// <summary>
