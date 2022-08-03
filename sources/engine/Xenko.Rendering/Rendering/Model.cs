@@ -102,13 +102,19 @@ namespace Xenko.Rendering
         /// Merges models
         /// </summary>
         /// <param name="model">Model to merge</param>
-        public void Add(Model model, bool updateBoundingBox = true)
+        /// <param name="updateBoundingBox">Should we update the bounding box to include both models?</param>
+        /// <param name="shiftMeshMaterialIndicies">Should we shift mesh material indicies to align with existing materials in the model?</param>
+        public void Add(Model model, bool updateBoundingBox = true, bool shiftMeshMaterialIndicies = false)
         {
             if (model != null)
             {
+                int indexShift = shiftMeshMaterialIndicies ? materials.Count : 0;
+
                 for (int i=0; i<model.meshes.Count; i++)
                 {
-                    Add(model.meshes[i]);
+                    Mesh m = model.meshes[i];
+                    m.MaterialIndex += indexShift;
+                    Add(m);
                 }
                 for (int i=0; i<model.materials.Count; i++)
                 {
