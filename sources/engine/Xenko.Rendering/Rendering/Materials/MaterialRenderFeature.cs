@@ -99,7 +99,7 @@ namespace Xenko.Rendering.Materials
         {
             base.InitializeCore();
 
-            if (fallbackMaterial != null)
+            if (fallbackMaterial == null)
             {
                 var graphicsDevice = ServiceRegistry.instance.GetSafeServiceAs<IGraphicsDeviceService>().GraphicsDevice;
 
