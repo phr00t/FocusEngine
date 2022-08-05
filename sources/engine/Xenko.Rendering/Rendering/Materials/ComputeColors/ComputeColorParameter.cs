@@ -104,7 +104,7 @@ namespace Xenko.Rendering.Materials.ComputeColors
         /// The texture filtering mode.
         /// </summary>
         [DataMember(10)]
-        [DefaultValue(TextureFilter.Linear)]
+        [DefaultValue(TextureFilter.Anisotropic)]
         public TextureFilter Filtering { get; set; }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace Xenko.Rendering.Materials.ComputeColors
 
         public ComputeColorParameterSampler()
         {
-            Filtering = TextureFilter.Linear;
+            Filtering = TextureFilter.Anisotropic;
             AddressModeU = TextureAddressMode.Wrap;
             AddressModeV = TextureAddressMode.Wrap;
         }

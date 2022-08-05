@@ -122,7 +122,7 @@ namespace Xenko.Graphics
 
         private void SetDefaults()
         {
-            Filter = TextureFilter.Linear;
+            Filter = TextureFilter.Anisotropic;
             AddressU = TextureAddressMode.Clamp;
             AddressV = TextureAddressMode.Clamp;
             AddressW = TextureAddressMode.Clamp;

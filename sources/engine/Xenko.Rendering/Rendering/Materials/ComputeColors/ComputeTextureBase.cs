@@ -81,7 +81,7 @@ namespace Xenko.Rendering.Materials.ComputeColors
         /// The texture filtering method
         /// </userdoc>
         [DataMember(41)]
-        [DefaultValue(TextureFilter.Linear)]
+        [DefaultValue(TextureFilter.Anisotropic)]
         public TextureFilter Filtering
         {
             get
