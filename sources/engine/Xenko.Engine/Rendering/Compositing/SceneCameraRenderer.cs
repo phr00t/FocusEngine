@@ -118,8 +118,26 @@ namespace Xenko.Rendering.Compositing
                 GraphicsCompositor gc = ss?.GraphicsCompositor;
                 if (gc != null)
                 {
-                    var id = gc.Cameras[0].ToSlotId();
-                    camera = SetFirstCamera(ref id, ss.SceneInstance.RootScene.Entities);
+                    // if there are no cameras in this compositor, make one
+                    if (gc.Cameras.Count == 0)
+                    {
+                        camera = new CameraComponent(0.1f, 800f);
+                        Entity camEntity = new Entity("AutomaticCamera");                        
+                        camEntity.Add(camera);
+                        ss.SceneInstance.RootScene.Entities.Add(camEntity);
+                        Guid Id = Guid.NewGuid();
+                        camera.Slot = new SceneCameraSlotId(Id);
+                        gc.Cameras.Add(new SceneCameraSlot() {
+                            Camera = camera,
+                            Name = "AutomaticCamera",
+                            Id = Id
+                        });
+                    }
+                    else
+                    {
+                        var id = gc.Cameras[0].ToSlotId();
+                        camera = SetFirstCamera(ref id, ss.SceneInstance.RootScene.Entities);
+                    }
                 }
 
                 if (camera == null)
