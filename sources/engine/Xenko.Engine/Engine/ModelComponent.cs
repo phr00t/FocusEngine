@@ -11,6 +11,7 @@ using Xenko.Core.Mathematics;
 using Xenko.Engine.Design;
 using Xenko.Engine.Processors;
 using Xenko.Rendering;
+using Xenko.Rendering.Materials;
 using Xenko.Updater;
 
 namespace Xenko.Engine
@@ -239,7 +240,7 @@ namespace Xenko.Engine
             if (Model != null && index < Model.Materials.Count)
                 return Model.Materials[index].Material;
 
-            return ModelRenderProcessor.fallbackMaterial;
+            return MaterialRenderFeature.fallbackMaterial;
         }
 
         /// <summary>

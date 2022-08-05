@@ -21,8 +21,19 @@ namespace Xenko.Rendering
         public Mesh Mesh;
 
         // Material
-        // TODO: Extract with MaterialRenderFeature
-        public MaterialPass MaterialPass;
+        private MaterialPass _mpass;
+
+        public MaterialPass MaterialPass
+        {
+            set
+            {
+                _mpass = value;
+            }
+            get
+            {
+                return _mpass ?? MaterialRenderFeature.fallbackMaterial.Passes[0];
+            }
+        }
 
         // TODO GRAPHICS REFACTOR store that in RenderData (StaticObjectNode?)
         internal MaterialRenderFeature.MaterialInfo MaterialInfo;

@@ -16,8 +16,6 @@ namespace Xenko.Rendering
 {
     public class ModelRenderProcessor : EntityProcessor<ModelComponent, RenderModel>, IEntityComponentRenderProcessor
     {
-        internal static Material fallbackMaterial;
-
         public List<RenderModel> RenderModels => ComponentDataValues;
         public List<ModelComponent> ModelComponents => ComponentDataKeys;
 
@@ -30,16 +28,7 @@ namespace Xenko.Rendering
         /// <inheritdoc />
         protected internal override void OnSystemAdd()
         {
-            var graphicsDevice = Services.GetSafeServiceAs<IGraphicsDeviceService>().GraphicsDevice;
-
-            fallbackMaterial = Material.New(graphicsDevice, new MaterialDescriptor
-            {
-                Attributes =
-                {
-                    Diffuse = new MaterialDiffuseMapFeature(new ComputeTextureColor()),
-                    DiffuseModel = new MaterialDiffuseLambertModelFeature(),
-                },
-            });
+        
         }
 
         /// <inheritdoc />

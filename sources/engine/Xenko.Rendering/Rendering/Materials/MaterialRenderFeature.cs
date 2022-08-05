@@ -8,6 +8,7 @@ using Xenko.Core;
 using Xenko.Core.Threading;
 using Xenko.Extensions;
 using Xenko.Graphics;
+using Xenko.Rendering.Materials.ComputeColors;
 using Xenko.Shaders;
 using Buffer = Xenko.Graphics.Buffer;
 
@@ -18,6 +19,8 @@ namespace Xenko.Rendering.Materials
     /// </summary>
     public class MaterialRenderFeature : SubRenderFeature
     {
+        internal static Material fallbackMaterial;
+
         private StaticObjectPropertyKey<RenderEffect> renderEffectKey;
         private StaticObjectPropertyKey<TessellationState> tessellationStateKey;
 
@@ -95,6 +98,17 @@ namespace Xenko.Rendering.Materials
         protected override void InitializeCore()
         {
             base.InitializeCore();
+
+            var graphicsDevice = ServiceRegistry.instance.GetSafeServiceAs<IGraphicsDeviceService>().GraphicsDevice;
+
+            fallbackMaterial = Material.New(graphicsDevice, new MaterialDescriptor
+            {
+                Attributes =
+                {
+                    Diffuse = new MaterialDiffuseMapFeature(new ComputeTextureColor()),
+                    DiffuseModel = new MaterialDiffuseLambertModelFeature(),
+                },
+            });
 
             renderEffectKey = ((RootEffectRenderFeature)RootRenderFeature).RenderEffectKey;
             tessellationStateKey = RootRenderFeature.RenderData.CreateStaticObjectKey<TessellationState>();
