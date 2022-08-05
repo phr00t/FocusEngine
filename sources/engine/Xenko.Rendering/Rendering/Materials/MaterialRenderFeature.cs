@@ -99,16 +99,19 @@ namespace Xenko.Rendering.Materials
         {
             base.InitializeCore();
 
-            var graphicsDevice = ServiceRegistry.instance.GetSafeServiceAs<IGraphicsDeviceService>().GraphicsDevice;
-
-            fallbackMaterial = Material.New(graphicsDevice, new MaterialDescriptor
+            if (fallbackMaterial != null)
             {
-                Attributes =
+                var graphicsDevice = ServiceRegistry.instance.GetSafeServiceAs<IGraphicsDeviceService>().GraphicsDevice;
+
+                fallbackMaterial = Material.New(graphicsDevice, new MaterialDescriptor
                 {
-                    Diffuse = new MaterialDiffuseMapFeature(new ComputeTextureColor()),
-                    DiffuseModel = new MaterialDiffuseLambertModelFeature(),
-                },
-            });
+                    Attributes =
+                    {
+                        Diffuse = new MaterialDiffuseMapFeature(new ComputeTextureColor()),
+                        DiffuseModel = new MaterialDiffuseLambertModelFeature(),
+                    },
+                });
+            }
 
             renderEffectKey = ((RootEffectRenderFeature)RootRenderFeature).RenderEffectKey;
             tessellationStateKey = RootRenderFeature.RenderData.CreateStaticObjectKey<TessellationState>();
