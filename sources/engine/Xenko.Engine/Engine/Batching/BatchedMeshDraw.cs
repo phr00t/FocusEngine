@@ -83,6 +83,17 @@ namespace Xenko.Engine
         }
 
         /// <summary>
+        /// Gets the UV offset of this index, if we are doing that kinda thing
+        /// </summary>
+        /// <param name="index">which one</param>
+        /// <returns>UV offset, if any</returns>
+        public Vector2 GetUVScale(int index)
+        {
+            if (uvScales == null) return Vector2.One;
+            return uvScales[index];
+        }
+
+        /// <summary>
         /// Gets the custom color of this index, if any
         /// </summary>
         /// <param name="index">which one</param>
@@ -110,10 +121,34 @@ namespace Xenko.Engine
         }
 
         /// <summary>
+        /// You can give individual "instances" a UV scale, so copied models use different scales of a texture
+        /// </summary>
+        /// <param name="index">Which index to scale UVs by?</param>
+        /// <param name="scale">How much to scale the UVs?</param>
+        public void SetUVScale(int index, Vector2 scale)
+        {
+            if (uvScales == null)
+            {
+                // gotta initialize all of these to 1...
+                uvScales = new Vector2[internalTransforms.Length];
+                for (int i = 0; i < internalTransforms.Length; i++) {
+                    uvScales[i].X = 1f;
+                    uvScales[i].Y = 1f;
+                }
+            }
+
+            if (uvScales[index] != scale)
+            {
+                uvScales[index] = scale;
+                MarkUpdateNeeded(index);
+            }
+        }
+
+        /// <summary>
         /// You can give individual "instances" color/tints if the shader is using vertex colors instead of textures
         /// </summary>
         /// <param name="index">Which index to set a custom color?</param>
-        /// <param name="offset">What should the custom color tint be?</param>
+        /// <param name="color">What should the custom color tint be?</param>
         public void SetColorTint(int index, Color4 color)
         {
             if (colors == null)
@@ -336,7 +371,8 @@ namespace Xenko.Engine
                     else tempHiding[index] = false;
                 }
                 actuallyUpdated[Interlocked.Increment(ref auCount) - 1] = index;
-                Vector2? uvOffset = uvOffsets == null ? null : uvOffsets[index];
+                Vector2 uvOffset = uvOffsets == null ? Vector2.Zero : uvOffsets[index];
+                Vector2 uvScale = uvScales == null ? Vector2.One : uvScales[index];
                 Color4? specialColor = colors == null ? null : colors[index];
                 tMatrix.GetScale(out var tMatrixScale);
                 int vPos = index * len;
@@ -359,7 +395,8 @@ namespace Xenko.Engine
                             endvert.Normal.Y = ((origNom.X * tMatrix.M12) + (origNom.Y * tMatrix.M22) + (origNom.Z * tMatrix.M32)) / tMatrixScale.Y;
                             endvert.Normal.Z = ((origNom.X * tMatrix.M13) + (origNom.Y * tMatrix.M23) + (origNom.Z * tMatrix.M33)) / tMatrixScale.Z;
                             endvert.Tangent = ovr.Tangent;
-                            endvert.TextureCoordinate = uvOffset.HasValue ? ovr.TextureCoordinate + uvOffset.Value : ovr.TextureCoordinate;
+                            endvert.TextureCoordinate.X = ovr.TextureCoordinate.X * uvScale.X + uvOffset.X;
+                            endvert.TextureCoordinate.Y = ovr.TextureCoordinate.Y * uvScale.Y + uvOffset.Y;
                         }
                     });
                 }
@@ -424,7 +461,7 @@ namespace Xenko.Engine
         private int tCount, auCount;
         private int[] indexUpdatesRequired, proccessingUpdates, actuallyUpdated;
         private bool[] avoidDuplicates;
-        private Vector2[] uvOffsets;
+        private Vector2[] uvOffsets, uvScales;
         private Color4[] colors;
 
         VertexPositionNormalTextureTangent[] origVerts0;
