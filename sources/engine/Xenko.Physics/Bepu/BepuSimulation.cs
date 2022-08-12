@@ -98,9 +98,16 @@ namespace Xenko.Physics.Bepu
 #endif
 
         /// <summary>
-        /// Totally disable the simulation if set to true
+        /// Totally disable the simulation if set to true. This points to the same Simulation.DisableSimulation boolean
         /// </summary>
-        public static bool DisableSimulation = false;
+        public static bool DisableSimulation
+        {
+            get => Simulation.DisableSimulation;
+            set
+            {
+                Simulation.DisableSimulation = value;
+            }
+        }
 
         internal static BepuStaticColliderComponent[] StaticMappings = new BepuStaticColliderComponent[64];
         internal static BepuRigidbodyComponent[] RigidMappings = new BepuRigidbodyComponent[64];
@@ -977,7 +984,7 @@ namespace Xenko.Physics.Bepu
 
         internal void Simulate(float deltaTime)
         {
-            if (internalSimulation == null || DisableSimulation) return;
+            if (internalSimulation == null) return;
 
             using (simulationLocker.ReadLock())
             {
