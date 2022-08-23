@@ -7,6 +7,32 @@ using Xenko.Rendering.Materials;
 namespace Xenko.Rendering
 {
     /// <summary>
+    /// How should this mesh use depth testing?
+    /// </summary>
+    public enum MESH_DEPTH_MODE
+    {
+        /// <summary>
+        /// Default depth testing and writing (not seen behind walls etc.)
+        /// </summary>
+        Default,
+
+        /// <summary>
+        /// Default depth testing and always writing to the depth buffer, even if transparent
+        /// </summary>
+        DefaultForceWrite,
+
+        /// <summary>
+        /// Always draw this, regardless of depth
+        /// </summary>
+        NoDepthTest,
+
+        /// <summary>
+        /// Draw this only behind walls (inverse of default)
+        /// </summary>
+        ReverseDepthTest
+    }
+
+    /// <summary>
     /// Used by <see cref="MeshRenderFeature"/> to render a <see cref="Rendering.Mesh"/>.
     /// </summary>
     public class RenderMesh : RenderObject
@@ -42,7 +68,7 @@ namespace Xenko.Rendering
 
         public bool IsScalingNegative;
 
-        public bool TransparentWriteDepth;
+        public MESH_DEPTH_MODE DepthMode;
 
         public bool IsPreviousScalingNegative;
 

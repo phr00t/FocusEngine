@@ -161,7 +161,7 @@ namespace Xenko.Rendering
             renderMesh.MaterialPass = materialPass;
 
             renderMesh.IsShadowCaster = modelComponent.IsShadowCaster;
-            renderMesh.TransparentWriteDepth = modelComponent.AlwaysDepthWrite;
+            renderMesh.DepthMode = modelComponent.DepthMode;
         }
 
         private void CheckMeshes(ModelComponent modelComponent, RenderModel renderModel)

@@ -21,9 +21,24 @@ namespace Xenko.Rendering
             if (renderNode.RenderStage == TransparentRenderStage)
             {
                 pipelineState.BlendState = renderMesh.MaterialPass.BlendState ?? BlendStates.AlphaBlend;
-                pipelineState.DepthStencilState = renderMesh.TransparentWriteDepth ? DepthStencilStates.Default : DepthStencilStates.DepthRead;
                 if (isMultisample)
                     pipelineState.BlendState.AlphaToCoverageEnable = renderMesh.MaterialPass.AlphaToCoverage ?? true;
+            }
+
+            switch (renderMesh.DepthMode)
+            {
+                case MESH_DEPTH_MODE.Default:
+                    pipelineState.DepthStencilState = renderNode.RenderStage == TransparentRenderStage ? DepthStencilStates.DepthRead : DepthStencilStates.Default;
+                    break;
+                case MESH_DEPTH_MODE.DefaultForceWrite:
+                    pipelineState.DepthStencilState = DepthStencilStates.Default;
+                    break;
+                case MESH_DEPTH_MODE.NoDepthTest:
+                    pipelineState.DepthStencilState = DepthStencilStates.None;
+                    break;
+                case MESH_DEPTH_MODE.ReverseDepthTest:
+                    pipelineState.DepthStencilState = DepthStencilStates.DefaultInverse;
+                    break;
             }
 
             var cullMode = pipelineState.RasterizerState.CullMode;

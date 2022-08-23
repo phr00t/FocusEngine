@@ -151,9 +151,9 @@ namespace Xenko.Engine
         /// Even if we are transparent, still write to the depth buffer?
         /// </summary>
         [DataMember(35)]
-        [DefaultValue(false)]
-        [Display("Always Depth Write")]
-        public bool AlwaysDepthWrite { get; set; } = false;
+        [DefaultValue(MESH_DEPTH_MODE.Default)]
+        [Display("Depth Mode")]
+        public MESH_DEPTH_MODE DepthMode { get; set; } = MESH_DEPTH_MODE.Default;
 
         /// <summary>
         /// The render group for this component.
