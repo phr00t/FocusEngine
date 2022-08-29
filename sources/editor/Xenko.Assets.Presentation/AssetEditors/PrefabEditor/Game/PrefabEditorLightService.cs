@@ -19,10 +19,10 @@ namespace Xenko.Assets.Presentation.AssetEditors.PrefabEditor.Game
 
             CreateLight("Prefab Editor Ambient Light", new LightAmbient(), 0.3f, scene);
 
-            var directionalLight1 = CreateLight("Prefab Editor Ambient Light1", new LightDirectional(), 2.5f, scene);
+            var directionalLight1 = CreateLight("Prefab Editor Directional Light1", new LightDirectional(), 0.8f, scene);
             directionalLight1.Transform.Rotation = Quaternion.RotationYawPitchRoll(MathUtil.Pi * 1.125f, MathUtil.Pi * -0.125f, 0.0f);
 
-            var directionalLight2 = CreateLight("Prefab Editor Ambient Light2", new LightDirectional(), 2.5f, scene);
+            var directionalLight2 = CreateLight("Prefab Editor Directional Light2", new LightDirectional(), 0.8f, scene);
             directionalLight2.Transform.Rotation = Quaternion.RotationYawPitchRoll(MathUtil.Pi * 0.125f, MathUtil.Pi * -0.25f, 0.0f);
         }
 
