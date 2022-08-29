@@ -418,7 +418,7 @@ namespace Xenko.Assets.Presentation.AssetEditors.UIEditor.Services
         [NotNull]
         private static PrefabEditorGame CreateEditorGame(TaskCompletionSource<bool> gameContentLoadedTaskSource, IEffectCompiler effectCompiler, string effectLogPath)
         {
-            return new PrefabEditorGame(gameContentLoadedTaskSource, effectCompiler, effectLogPath);
+            return new PrefabEditorGame(gameContentLoadedTaskSource, effectCompiler, effectLogPath, true);
         }
 
         [CanBeNull]

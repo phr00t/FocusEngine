@@ -47,8 +47,9 @@ namespace Xenko.Assets.Presentation.AssetEditors.EntityHierarchyEditor.Game
         private readonly Vector3 upAxis = Vector3.UnitY;
         private Material fallbackColorMaterial;
         private Material fallbackTextureMaterial;
+        private bool skipPostProcessing = false;
 
-        protected EntityHierarchyEditorGame(TaskCompletionSource<bool> gameContentLoadedTaskSource, IEffectCompiler effectCompiler, string effectLogPath)
+        protected EntityHierarchyEditorGame(TaskCompletionSource<bool> gameContentLoadedTaskSource, IEffectCompiler effectCompiler, string effectLogPath, bool skipPostProcessing = false)
         {
             this.gameContentLoadedTaskSource = gameContentLoadedTaskSource;
             this.effectCompiler = effectCompiler;
@@ -57,6 +58,7 @@ namespace Xenko.Assets.Presentation.AssetEditors.EntityHierarchyEditor.Game
             this.GraphicsDeviceManager.SynchronizeWithVerticalRetrace = true;
             this.WindowMinimumUpdateRate.MinimumElapsedTime = TimeSpan.Zero;
             this.MinimizedMinimumUpdateRate.MinimumElapsedTime = TimeSpan.FromSeconds(1.0);
+            this.skipPostProcessing = skipPostProcessing;
             CreateScenePipeline();
         }
 
@@ -315,7 +317,7 @@ namespace Xenko.Assets.Presentation.AssetEditors.EntityHierarchyEditor.Game
             }
 
             // TODO: Maybe define this scene default graphics compositor as an asset?
-            var defaultGraphicsCompositor = GraphicsCompositorHelper.CreateDefault(true, EditorGraphicsCompositorHelper.EditorForwardShadingEffect);
+            var defaultGraphicsCompositor = GraphicsCompositorHelper.CreateDefault(!skipPostProcessing, EditorGraphicsCompositorHelper.EditorForwardShadingEffect);
 
             // Add UI (engine doesn't depend on it)
             defaultGraphicsCompositor.RenderFeatures.Add(new UIRenderFeature
@@ -366,7 +368,7 @@ namespace Xenko.Assets.Presentation.AssetEditors.EntityHierarchyEditor.Game
             GameSystems.Add(EditorSceneSystem);
 
             EditorSceneSystem.DrawOrder = SceneSystem.DrawOrder + 1;
-            EditorSceneSystem.GraphicsCompositor = GraphicsCompositorHelper.CreateDefault(true, EditorGraphicsCompositorHelper.EditorForwardShadingEffect, groupMask: GizmoBase.DefaultGroupMask);
+            EditorSceneSystem.GraphicsCompositor = GraphicsCompositorHelper.CreateDefault(!skipPostProcessing, EditorGraphicsCompositorHelper.EditorForwardShadingEffect, groupMask: GizmoBase.DefaultGroupMask);
 
             // Do a few adjustments to the default compositor
             EditorSceneSystem.GraphicsCompositor.RenderFeatures.OfType<MeshRenderFeature>().FirstOrDefault()?.RenderFeatures.Add(new WireframeRenderFeature());

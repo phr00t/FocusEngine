@@ -14,8 +14,8 @@ namespace Xenko.Assets.Presentation.AssetEditors.PrefabEditor.Game
 {
     public sealed class PrefabEditorGame : EntityHierarchyEditorGame
     {
-        public PrefabEditorGame(TaskCompletionSource<bool> gameContentLoadedTaskSource, IEffectCompiler effectCompiler, string effectLogPath)
-            : base(gameContentLoadedTaskSource, effectCompiler, effectLogPath)
+        public PrefabEditorGame(TaskCompletionSource<bool> gameContentLoadedTaskSource, IEffectCompiler effectCompiler, string effectLogPath, bool skipPostProcessing = false)
+            : base(gameContentLoadedTaskSource, effectCompiler, effectLogPath, skipPostProcessing)
         {
         }
 
