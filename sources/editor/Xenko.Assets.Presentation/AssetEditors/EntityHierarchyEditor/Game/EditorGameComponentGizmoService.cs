@@ -219,14 +219,10 @@ namespace Xenko.Assets.Presentation.AssetEditors.EntityHierarchyEditor.Game
             }
 
             // Creates the main gizmo if it does not exist
-            if (mainComponent != null && !gizmoEntities.TryGetValue(mainComponent, out gizmo))
-            {
-                CreateGizmoEntity(entity, mainComponent);
-            }
             if (gizmoEntities == null || gizmoEntities.Count == 0)
-            {
                 CreateGizmoEntity(entity, entity.Transform, typeof(FallbackGizmo));
-            }
+            else if (mainComponent != null && !gizmoEntities.TryGetValue(mainComponent, out gizmo))
+                CreateGizmoEntity(entity, mainComponent);
         }
 
         private EntityComponent GetMainGizmoComponent(Entity entity)
