@@ -36,6 +36,15 @@ namespace Xenko.Engine
         }
 
         /// <summary>
+        /// Shortcut to finding a UIElement based on name from this page
+        /// </summary>
+        /// <param name="name">Name of UIElement to find</param>
+        public UIElement FindName(string name)
+        {
+            return RootElement.FindName(name);
+        }
+
+        /// <summary>
         /// Shortcut to gathering a dictionary of UIElements from page of type T
         /// </summary>
         /// <typeparam name="T">Type of UIElements to gather, can be UIElement too for all</typeparam>
