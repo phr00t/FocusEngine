@@ -13,6 +13,71 @@ using Xenko.Rendering.Rendering;
 namespace Xenko.Engine
 {
     /// <summary>
+    /// Helper class to refer to a BatchedMeshDraw index (can get its matrix, scale etc.)
+    /// </summary>
+    public class BatchedMeshDrawReference
+    {
+        public BatchedMeshDraw batchedMeshDraw { get; private set; }
+        public int index { get; private set; }
+
+        /// <summary>
+        /// Returns true if this points to a correct and valid copy index
+        /// </summary>
+        public bool IsValidReference => index > -1 && index < batchedMeshDraw.Capacity;
+
+        public Matrix TransformMatrix 
+        {
+            get => batchedMeshDraw.GetTransform(index);
+            set => batchedMeshDraw.SetTransform(index, value);
+        }
+        public Vector2 UVOffset
+        {
+            get => batchedMeshDraw.GetUVOffset(index);
+            set => batchedMeshDraw.SetUVOffset(index, value);
+        }
+        public Vector2 UVScale
+        {
+            get => batchedMeshDraw.GetUVScale(index);
+            set => batchedMeshDraw.SetUVScale(index, value);
+        }
+
+        /// <summary>
+        /// This not only hides this index, it invalidates it (since once hidden, it could be reused elsewhere without this reference knowing)
+        /// </summary>
+        public void Hide()
+        {
+            if (index != -1)
+            {
+                batchedMeshDraw.HideIndex(index);
+                index = -1;
+            }
+        }
+
+        /// <summary>
+        /// Finds a new index for this index, if possible. This does nothing if there already is a valid index.
+        /// </summary>
+        /// <returns>true if a new copy index was found (or we already have one). False if no index could be found</returns>
+        public bool FindNewIndex()
+        {
+            if (index == -1)
+                index = batchedMeshDraw.GetAvailableIndex();
+
+            return index != -1;
+        }
+
+        /// <summary>
+        /// Make a reference to a copy in batchedMeshDraw
+        /// </summary>
+        /// <param name="batchedMeshDraw">Which batch to reference copies of?</param>
+        /// <param name="index">Which index to be a reference to? Provide -1 to find one automatically</param>
+        public BatchedMeshDrawReference(BatchedMeshDraw batchedMeshDraw, int index = -1)
+        {
+            this.batchedMeshDraw = batchedMeshDraw;
+            this.index = index == -1 ? batchedMeshDraw.GetAvailableIndex() : index;
+        }
+    }
+
+    /// <summary>
     /// This is like GPU instancing, but handled on the CPU-side to make it easier to implement and use.
     /// It tracks the mesh and moves parts only as needed. Generally thread-safe, except don't make changes while rendering is happening.
     /// Can be linked with other TransformComponents for easy updating "instanced" copies via each TransformComponent's BatchedMeshDrawReference
@@ -41,6 +106,9 @@ namespace Xenko.Engine
         /// <param name="transform">WorldTransform</param>
         public void SetTransform(int index, Matrix transform)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             if (internalTransforms[index] != transform)
             {
                 internalTransforms[index] = transform;
@@ -58,6 +126,9 @@ namespace Xenko.Engine
         /// <returns>Current matrix of index</returns>
         public Matrix GetTransform(int index)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             return internalTransforms[index];
         }
 
@@ -68,6 +139,9 @@ namespace Xenko.Engine
         /// <returns>true if hidden</returns>
         public bool IsHidden(int index)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             return internalTransforms[index] == dontdraw;
         }
 
@@ -78,6 +152,9 @@ namespace Xenko.Engine
         /// <returns>UV offset, if any</returns>
         public Vector2 GetUVOffset(int index)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             if (uvOffsets == null) return Vector2.Zero;
             return uvOffsets[index];
         }
@@ -89,6 +166,9 @@ namespace Xenko.Engine
         /// <returns>UV offset, if any</returns>
         public Vector2 GetUVScale(int index)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             if (uvScales == null) return Vector2.One;
             return uvScales[index];
         }
@@ -100,6 +180,9 @@ namespace Xenko.Engine
         /// <returns>Color, if any</returns>
         public Color4 GetColorTint(int index)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             if (colors == null) return Color4.White;
             return colors[index];
         }
@@ -111,6 +194,9 @@ namespace Xenko.Engine
         /// <param name="offset">How much to offset the UVs?</param>
         public void SetUVOffset(int index, Vector2 offset)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             if (uvOffsets == null) uvOffsets = new Vector2[internalTransforms.Length];
 
             if (uvOffsets[index] != offset)
@@ -127,6 +213,9 @@ namespace Xenko.Engine
         /// <param name="scale">How much to scale the UVs?</param>
         public void SetUVScale(int index, Vector2 scale)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             if (uvScales == null)
             {
                 // gotta initialize all of these to 1...
@@ -151,6 +240,9 @@ namespace Xenko.Engine
         /// <param name="color">What should the custom color tint be?</param>
         public void SetColorTint(int index, Color4 color)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             if (colors == null)
             {
                 // initialize everything to white, so it doesn't black everything else out
@@ -171,6 +263,9 @@ namespace Xenko.Engine
         /// <param name="index">Which one to hide</param>
         public void HideIndex(int index)
         {
+            if (index < 0 || index >= internalTransforms.Length)
+                throw new IndexOutOfRangeException("BatchedMeshDraw out of bounds: index " + index + " is invalid (length is " + internalTransforms.Length + ")");
+
             if (internalTransforms[index] != dontdraw)
             {
                 internalTransforms[index] = dontdraw;
@@ -190,21 +285,6 @@ namespace Xenko.Engine
         /// Returns how many objects this BatchedMeshDraw can maintain. If you go over this number, you'll get out-of-bound exceptions.
         /// </summary>
         public int Capacity => internalTransforms.Length;
-
-        /// <summary>
-        /// Reference used on TransformComponent to automatically update as needed
-        /// </summary>
-        public class BatchedMeshDrawReference
-        {
-            public BatchedMeshDraw batchedMeshDraw { get; private set; }
-            public int index { get; private set; }
-
-            public BatchedMeshDrawReference(BatchedMeshDraw batchedMeshDraw, int index)
-            {
-                this.index = index;
-                this.batchedMeshDraw = batchedMeshDraw;
-            }
-        }
 
         /// <summary>
         /// Get a copy index that is currently hidden and is ready to be used

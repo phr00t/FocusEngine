@@ -106,7 +106,7 @@ namespace Xenko.Engine
         /// Should this TransformComponent automatically update a batched model index?
         /// </summary>
         [DataMemberIgnore]
-        public BatchedMeshDraw.BatchedMeshDrawReference AutoUpdateBatchedMesh;
+        public BatchedMeshDrawReference AutoUpdateBatchedMesh;
 
         /// <summary>
         /// If in VR, do we want to override the normally tracked TransformComponent to point at UI elements?
@@ -643,7 +643,7 @@ namespace Xenko.Engine
                 }
 
                 if (AutoUpdateBatchedMesh != null)
-                    AutoUpdateBatchedMesh.batchedMeshDraw.SetTransform(AutoUpdateBatchedMesh.index, WorldMatrix);
+                    AutoUpdateBatchedMesh.TransformMatrix = WorldMatrix;
             }
         }
 

@@ -300,7 +300,7 @@ namespace Xenko.Engine
 
             // if this was batched, hide it
             if (entity.Transform.AutoUpdateBatchedMesh != null)
-                entity.Transform.AutoUpdateBatchedMesh.batchedMeshDraw.HideIndex(entity.Transform.AutoUpdateBatchedMesh.index);
+                entity.Transform.AutoUpdateBatchedMesh.Hide();
 
             // last thing is check is returning to pool
             if (entity.UsingPool != null && entity.PreventReturnToPoolOnDetach == false)
