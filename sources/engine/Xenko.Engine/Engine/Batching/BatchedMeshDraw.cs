@@ -25,7 +25,7 @@ namespace Xenko.Engine
         /// </summary>
         public bool IsValidReference => index > -1 && index < batchedMeshDraw.Capacity;
 
-        public Matrix TransformMatrix 
+        public Matrix TransformMatrix
         {
             get => batchedMeshDraw.GetTransform(index);
             set => batchedMeshDraw.SetTransform(index, value);
@@ -39,6 +39,11 @@ namespace Xenko.Engine
         {
             get => batchedMeshDraw.GetUVScale(index);
             set => batchedMeshDraw.SetUVScale(index, value);
+        }
+        public Color4 ColorTint
+        {
+            get => batchedMeshDraw.GetColorTint(index);
+            set => batchedMeshDraw.SetColorTint(index, value);
         }
 
         /// <summary>
