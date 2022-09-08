@@ -51,6 +51,7 @@ namespace Xenko.UI
         private float defaultWidth;
         private float defaultHeight;
         private float defaultDepth;
+        private float rotation;
         private float width = float.NaN;
         private float height = float.NaN;
         private float depth = float.NaN;
@@ -234,7 +235,27 @@ namespace Xenko.UI
             get => width;
             set
             {
+                if (width == value) return;
+
                 width = MathUtil.Clamp(value, 0.0f, float.MaxValue);
+                InvalidateMeasure();
+            }
+        }
+
+        /// <summary>
+        /// how is this UI element rotated?
+        /// </summary>
+        [DataMember]
+        [Display(category: LayoutCategory)]
+        [DefaultValue(0f)]
+        public float Rotation 
+        { 
+            get => rotation;
+            set
+            {
+                if (rotation == value) return;
+
+                rotation = value;
                 InvalidateMeasure();
             }
         }
@@ -253,6 +274,8 @@ namespace Xenko.UI
             get => height;
             set
             {
+                if (height == value) return;
+
                 height = MathUtil.Clamp(value, 0.0f, float.MaxValue);
                 InvalidateMeasure();
             }
@@ -272,6 +295,8 @@ namespace Xenko.UI
             get => depth;
             set
             {
+                if (depth == value) return;
+
                 depth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
                 InvalidateMeasure();
             }
@@ -304,6 +329,8 @@ namespace Xenko.UI
             get => horizontalAlignment;
             set
             {
+                if (horizontalAlignment == value) return;
+
                 horizontalAlignment = value;
                 InvalidateArrange();
             }
@@ -321,6 +348,8 @@ namespace Xenko.UI
             get => verticalAlignment;
             set
             {
+                if (verticalAlignment == value) return;
+
                 verticalAlignment = value;
                 InvalidateArrange();
             }
@@ -338,6 +367,8 @@ namespace Xenko.UI
             get => depthAlignment;
             set
             {
+                if (depthAlignment == value) return;
+
                 depthAlignment = value;
                 InvalidateArrange();
             }
@@ -354,6 +385,8 @@ namespace Xenko.UI
             get => MarginInternal;
             set
             {
+                if (MarginInternal == value) return;
+
                 MarginInternal = value;
                 InvalidateMeasure();
             }
@@ -403,6 +436,9 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
+
+                if (minimumWidth == value) return;
+
                 minimumWidth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
                 InvalidateMeasure();
             }
@@ -424,6 +460,9 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
+
+                if (minimumHeight == value) return;
+
                 minimumHeight = MathUtil.Clamp(value, 0.0f, float.MaxValue);
                 InvalidateMeasure();
             }
@@ -445,6 +484,9 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
+
+                if (minimumDepth == value) return;
+
                 minimumDepth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
                 InvalidateMeasure();
             }
@@ -466,6 +508,9 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
+
+                if (maximumWidth == value) return;
+
                 maximumWidth = MathUtil.Clamp(value, 0.0f, float.PositiveInfinity);
                 InvalidateMeasure();
             }
@@ -487,6 +532,9 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
+
+                if (maximumHeight == value) return;
+
                 maximumHeight = MathUtil.Clamp(value, 0.0f, float.PositiveInfinity);
                 InvalidateMeasure();
             }
@@ -508,6 +556,9 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
+
+                if (maximumDepth == value) return;
+
                 maximumDepth = MathUtil.Clamp(value, 0.0f, float.PositiveInfinity);
                 InvalidateMeasure();
             }
@@ -529,6 +580,9 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
+
+                if (defaultWidth == value) return;
+
                 defaultWidth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
                 InvalidateMeasure();
             }
@@ -550,6 +604,9 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
+
+                if (defaultHeight == value) return;
+
                 defaultHeight = MathUtil.Clamp(value, 0.0f, float.MaxValue);
                 InvalidateMeasure();
             }
@@ -571,6 +628,9 @@ namespace Xenko.UI
             {
                 if (float.IsNaN(value))
                     return;
+
+                if (defaultDepth == value) return;
+
                 defaultDepth = MathUtil.Clamp(value, 0.0f, float.MaxValue);
                 InvalidateMeasure();
             }
@@ -1424,6 +1484,10 @@ namespace Xenko.UI
             if (parentWorldChanged || LocalMatrixChanged || ArrangeChanged)
             {
                 var localMatrixCopy = localMatrix;
+
+                // apply rotation?
+                if (Rotation != 0f)
+                    localMatrixCopy *= Matrix.RotationZ(Rotation);
 
                 // include rendering offsets into the local matrix.
                 localMatrixCopy.TranslationVector += RenderOffsets + RenderSize / 2;
