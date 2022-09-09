@@ -260,8 +260,11 @@ namespace Xenko.Core.Assets.Editor.ViewModel
                 return;
 
             // make the change file!
-            string f = EditorViewModel.Instance.projectPath + "/files_changed";
-            File.WriteAllText(f, System.DateTime.Now.Ticks.ToString());
+            try
+            {
+                string f = EditorViewModel.Instance.projectPath + "/files_changed";
+                File.WriteAllText(f, System.DateTime.Now.Ticks.ToString());
+            } catch(Exception) { }
         }
 
         private static void PrepareSystemWatcher()
