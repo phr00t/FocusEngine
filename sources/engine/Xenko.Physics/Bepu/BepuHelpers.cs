@@ -160,6 +160,27 @@ namespace Xenko.Physics.Bepu
         }
 
         /// <summary>
+        /// Generates a physics box shape based on a bounding box
+        /// </summary>
+        /// <param name="bb">Bounding box</param>
+        /// <param name="scale">Should we scale this bounding box by something? Defaults to null (no)</param>
+        /// <param name="allowOffsetCompound">Allow us to move the center using a compound shape? Defaults to true (yes)</param>
+        /// <returns>A physics box</returns>
+        public static IShape GenerateBoxOfBounding(BoundingBox bb, Vector3? scale = null, bool allowOffsetCompound = true)
+        {
+            if (scale.HasValue)
+            {
+                bb.Maximum *= scale.Value;
+                bb.Minimum *= scale.Value;
+            }
+
+            var center = bb.Center;
+            var box = new Box(bb.Extent.X * 2f, bb.Extent.Y * 2f, bb.Extent.Z * 2f);
+            if (allowOffsetCompound && center.LengthSquared() > 0.01f) return OffsetSingleShape(box, center);
+            return box;
+        }
+
+        /// <summary>
         /// Generates a sphere collider shape of an entity. Entity must have a mesh to get sizing from. Make sure this object's WorldMatrix is up to date for proper scaling.
         /// </summary>
         public static IShape GenerateSphereOfEntity(Entity e, float scale = 1f, bool allowOffsetCompound = true)
