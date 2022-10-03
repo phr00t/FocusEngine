@@ -29,12 +29,6 @@ namespace Xenko.Rendering.Lights
         /// <inheritdoc/>
         public VisibilityGroup VisibilityGroup { get; set; }
 
-        /// <summary>
-        /// Gets the active lights.
-        /// </summary>
-        /// <value>The lights.</value>
-        public RenderLightCollection Lights { get; } = new RenderLightCollection(DefaultLightCapacityCount);
-
         public RenderLight GetRenderLight(LightComponent lightComponent)
         {
             return KeyIndex.TryGetValue(lightComponent, out int index) ? ComponentDataValues[index] : null;
@@ -47,19 +41,20 @@ namespace Xenko.Rendering.Lights
         protected internal override void OnSystemAdd()
         {
             base.OnSystemAdd();
-            VisibilityGroup.Tags.Set(ForwardLightingRenderFeature.CurrentLights, Lights);
         }
 
         protected internal override void OnSystemRemove()
         {
-            VisibilityGroup.Tags.Set(ForwardLightingRenderFeature.CurrentLights, null);
             base.OnSystemRemove();
         }
 
         public override void Draw(RenderContext context)
         {
             // 1) Clear the cache of current lights (without destroying collections but keeping previously allocated ones)
-            Lights.Clear();
+            if (context.Lights == null)
+                context.Lights = new RenderLightCollection(DefaultLightCapacityCount);
+            else
+                context.Lights.Clear();
 
             var colorSpace = context.GraphicsDevice.ColorSpace;
 
@@ -100,7 +95,7 @@ namespace Xenko.Rendering.Lights
                 // Compute bounding boxes
                 renderLight.UpdateBoundingBox();
 
-                Lights.Add(renderLight);
+                context.Lights.Add(renderLight);
             }
         }
     }

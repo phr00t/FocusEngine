@@ -9,6 +9,7 @@ using Xenko.Core.Annotations;
 using Xenko.Engine;
 using Xenko.Games;
 using Xenko.Graphics;
+using Xenko.Rendering.Lights;
 using Xenko.Streaming;
 using ComponentBase = Xenko.Core.ComponentBase;
 using IServiceRegistry = Xenko.Core.IServiceRegistry;
@@ -114,6 +115,11 @@ namespace Xenko.Rendering
         /// </summary>
         [CanBeNull]
         public StreamingManager StreamingManager { get; set; }
+
+        /// <summary>
+        /// Lights for this context
+        /// </summary>
+        public RenderLightCollection Lights { get; set; }
 
         protected override void Destroy()
         {
