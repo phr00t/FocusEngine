@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text;
 
 namespace Xenko.Audio
 {
@@ -37,10 +38,11 @@ namespace Xenko.Audio
             SampleRate = sampleRate;
             BufferSize = bufferSize;
             Channels = channels;
-            celtPtr = xnCeltCreate(sampleRate, bufferSize, channels, decoderOnly);
+            StringBuilder err = new StringBuilder(128);
+            celtPtr = xnCeltCreate(sampleRate, bufferSize, channels, decoderOnly, err);
             if (celtPtr == IntPtr.Zero)
             {
-                throw new Exception("Failed to create an instance of the celt encoder/decoder.");
+                throw new Exception("Failed to create an instance of the celt encoder/decoder. Check sample rate or buffer size of sound asset. Details: " + err.ToString() + ". Parameters were sampleRate: " + sampleRate + ", bufferSize: " + bufferSize + ", channels: " + channels);
             }
         }
 
@@ -156,7 +158,7 @@ namespace Xenko.Audio
 
         [SuppressUnmanagedCodeSecurity]
         [DllImport(NativeInvoke.Library, CallingConvention = CallingConvention.Cdecl)]
-        private static extern IntPtr xnCeltCreate(int sampleRate, int bufferSize, int channels, bool decoderOnly);
+        private static extern IntPtr xnCeltCreate(int sampleRate, int bufferSize, int channels, bool decoderOnly, StringBuilder sb);
 
         [SuppressUnmanagedCodeSecurity]
         [DllImport(NativeInvoke.Library, CallingConvention = CallingConvention.Cdecl)]

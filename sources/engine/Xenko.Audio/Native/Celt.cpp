@@ -5,6 +5,7 @@
 #include "../../Xenko.Native/XenkoNative.h"
 #define HAVE_STDINT_H
 #include "../../../../deps/Celt/include/opus_custom.h"
+#include <stdio.h>
 
 extern "C" {
 	class XenkoCelt
@@ -14,7 +15,7 @@ extern "C" {
 
 		~XenkoCelt();
 
-		bool Init();
+		bool Init(char* err_str);
 
 		OpusCustomEncoder* GetEncoder() const;
 
@@ -30,10 +31,10 @@ extern "C" {
 		bool decoder_only_;
 	};
 
-	DLL_EXPORT_API void* xnCeltCreate(int sampleRate, int bufferSize, int channels, bool decoderOnly)
+	DLL_EXPORT_API void* xnCeltCreate(int sampleRate, int bufferSize, int channels, bool decoderOnly, char* error)
 	{
 		XenkoCelt* celt = new XenkoCelt(sampleRate, bufferSize, channels, decoderOnly);
-		if(!celt->Init())
+		if(!celt->Init(error))
 		{
 			delete celt;
 			return nullptr;
@@ -91,18 +92,29 @@ XenkoCelt::~XenkoCelt()
 	mode_ = nullptr;
 }
 
-bool XenkoCelt::Init()
+bool XenkoCelt::Init(char* err_str)
 {
-	mode_ = opus_custom_mode_create(sample_rate_, buffer_size_, nullptr);
-	if (!mode_) return false;
+	int err;
 
-	decoder_ = opus_custom_decoder_create(mode_, channels_, nullptr);
-	if (!decoder_) return false;
+	mode_ = opus_custom_mode_create(sample_rate_, buffer_size_, &err);
+	if (!mode_) {
+		sprintf(err_str, "opus_custom_mode_create_err: %d", err);
+		return false;
+	}
+
+	decoder_ = opus_custom_decoder_create(mode_, channels_, &err);
+	if (!decoder_) {
+		sprintf(err_str, "opus_custom_decoder_create: %d", err);
+		return false;
+	}
 
 	if (!decoder_only_)
 	{
-		encoder_ = opus_custom_encoder_create(mode_, channels_, nullptr);
-		if (!encoder_) return false;
+		encoder_ = opus_custom_encoder_create(mode_, channels_, &err);
+		if (!encoder_) {
+			sprintf(err_str, "opus_custom_encoder_create: %d", err);
+			return false;
+		}
 	}
 
 	return true;
