@@ -42,7 +42,7 @@ namespace Xenko.Audio
             celtPtr = xnCeltCreate(sampleRate, bufferSize, channels, decoderOnly, err);
             if (celtPtr == IntPtr.Zero)
             {
-                throw new Exception("Failed to create an instance of the celt encoder/decoder. Check sample rate or buffer size of sound asset. Details: " + err.ToString() + ". Parameters were sampleRate: " + sampleRate + ", bufferSize: " + bufferSize + ", channels: " + channels);
+                throw new Exception("Failed to create an instance of the celt encoder/decoder. Sample rate is probably unsupported, but check channels/buffer size too. Details: " + err.ToString() + ". Parameters were sampleRate: " + sampleRate + ", bufferSize: " + bufferSize + ", channels: " + channels);
             }
         }
 
