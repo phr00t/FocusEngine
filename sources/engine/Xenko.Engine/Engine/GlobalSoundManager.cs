@@ -109,7 +109,6 @@ namespace Xenko.Engine
                 oldpos = pos,
                 soundInstance = s,
                 entity = parent,
-                distance_scale = distanceScale
             };
             lock (currentAttached) {
                 currentAttached.Add(posSnd);
@@ -165,7 +164,6 @@ namespace Xenko.Engine
                 }
                 Vector3 newpos = ps.entity.Transform.WorldPosition();
                 float timePerFrame = overrideTimePerFrame ?? ((float)internalGame.UpdateTime.Elapsed.Ticks / TimeSpan.TicksPerSecond);
-                ps.soundInstance.DistanceScale = ps.distance_scale;
                 ps.soundInstance.Apply3D(ProcessMinDistPosition(newpos), (newpos - ps.oldpos) / timePerFrame, null);
                 ps.oldpos = newpos;
             }
@@ -304,7 +302,6 @@ namespace Xenko.Engine
             public SoundInstance soundInstance;
             public Entity entity;
             public Vector3 oldpos;
-            public float distance_scale;
         }
     }
 }
