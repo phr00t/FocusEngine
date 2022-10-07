@@ -471,6 +471,42 @@ namespace Xenko.Core.Serialization.Contents
             }
         }
 
+        /// <summary>
+        /// Get all of the asset URLs
+        /// </summary>
+        /// <param name="baseURL">Base URL to search, defaults to root</param>
+        /// <param name="searchString">Search string to search, defaults to wildcard *</param>
+        /// <param name="searchOption">Search all directiories or just the base one?</param>
+        /// <param name="excludeShaders">Shaders usually fill up a bunch of these urls. This defaults to skipping them in result</param>
+        /// <param name="excludeData">Exclude the auto-generated _Data entries?</param>
+        /// <returns>Array of strings containing all URLs found in the content manager</returns>
+        public string[] AllURLs(string baseURL = "", string searchString = "*", VirtualSearchOption searchOption = VirtualSearchOption.AllDirectories, bool excludeShaders = true, bool excludeData = true)
+        {
+            var files = FileProvider.ListFiles(baseURL, searchString, searchOption);
+
+            if (excludeShaders == false && excludeData == false) return files;
+
+            int entriesRemoved = 0;
+            for (int i=0; i<files.Length - entriesRemoved; i++)
+            {
+                string s = files[i];
+                if (excludeShaders && (s.StartsWith("__shaders_bytecode__/") ||
+                                       s.StartsWith("shaders/")) ||
+                    excludeData && s.EndsWith("_Data"))
+                {
+                    // clean this shader entry
+                    files[i] = files[files.Length - 1 - entriesRemoved];
+                    entriesRemoved++;
+                    i--;
+                }
+            }
+
+            if (entriesRemoved > 0)
+                Array.Resize(ref files, files.Length - entriesRemoved);
+
+            return files;
+        }
+
         private object DeserializeObject(Queue<DeserializeOperation> serializeOperations, Reference parentReference, string url, Type objType, object obj, ContentManagerLoaderSettings settings)
         {
             // Try to find already loaded object
