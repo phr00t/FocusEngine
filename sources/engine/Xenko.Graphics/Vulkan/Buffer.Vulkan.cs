@@ -8,6 +8,7 @@ using Vortice.Vulkan;
 using static Vortice.Vulkan.Vulkan;
 using Xenko.Core;
 using System.Runtime.ExceptionServices;
+using Xenko.Core.Serialization.Contents;
 
 namespace Xenko.Graphics
 {
@@ -126,8 +127,8 @@ namespace Xenko.Graphics
         {
             // capture vertex information for possible later easy batching or physics mesh generation
             if (dataPointer != IntPtr.Zero &&
-                (ViewFlags == BufferFlags.VertexBuffer && (CaptureAllModelBuffers || bufferDescription.SizeInBytes <= CaptureVertexBuffersOfSize) ||
-                 ViewFlags == BufferFlags.IndexBuffer && (CaptureAllModelBuffers || bufferDescription.SizeInBytes <= CaptureIndexBuffersOfSize)))
+                (ViewFlags == BufferFlags.VertexBuffer && (ContentManager._captureThisModel || CaptureAllModelBuffers || bufferDescription.SizeInBytes <= CaptureVertexBuffersOfSize) ||
+                 ViewFlags == BufferFlags.IndexBuffer && (ContentManager._captureThisModel || CaptureAllModelBuffers || bufferDescription.SizeInBytes <= CaptureIndexBuffersOfSize)))
             {
                 VertIndexData = new byte[Description.SizeInBytes];
                 fixed (byte* vid = &VertIndexData[0])

@@ -22,6 +22,7 @@
 // THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using Xenko.Core;
 using Xenko.Core.Serialization;
 using Xenko.Core.Serialization.Contents;
@@ -45,6 +46,17 @@ namespace Xenko.Graphics
         /// </summary>
         [DataMemberIgnore]
         public static bool CaptureAllModelBuffers = false;
+
+        /// <summary>
+        /// Register a model content url for storing buffer contents, regardless of size or value of CaptureAllModelBuffers. Should work whether loaded via GameStudio or code
+        /// </summary>
+        /// <param name="content_url">Content URL for the model asset</param>
+        public static void PreserveModelBufferForURL(string content_url)
+        {
+            // need to actually store generated urls for vertex/index buffer
+            ContentManager._captureModelBuffers.Add(content_url + "/gen/Buffer_1");
+            ContentManager._captureModelBuffers.Add(content_url + "/gen/Buffer_2");
+        }
 
         /// <summary>
         /// Capture easy-access data for all vertex buffers below this size. Can be useful for batching!

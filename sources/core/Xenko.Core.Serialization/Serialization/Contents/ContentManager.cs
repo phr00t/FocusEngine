@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Xenko.Core.Diagnostics;
@@ -14,6 +15,8 @@ using Xenko.Core.MicroThreading;
 using Xenko.Core.Reflection;
 using Xenko.Core.Storage;
 using Xenko.Core.Streaming;
+
+[assembly: InternalsVisibleToAttribute("Xenko.Graphics")]
 
 namespace Xenko.Core.Serialization.Contents
 {
@@ -25,6 +28,9 @@ namespace Xenko.Core.Serialization.Contents
         private static readonly Logger Log = GlobalLogger.GetLogger("ContentManager");
 
         public DatabaseFileProvider FileProvider => databaseFileProvider.FileProvider;
+
+        internal static readonly HashSet<string> _captureModelBuffers = new HashSet<string>();
+        internal static bool _captureThisModel;
 
         private readonly IDatabaseFileProviderService databaseFileProvider;
 
@@ -594,7 +600,11 @@ namespace Xenko.Core.Serialization.Contents
 
                     PrepareSerializerContext(contentSerializerContext, streamReader.Context);
 
+                    _captureThisModel = _captureModelBuffers.Contains(url);
+
                     contentSerializerContext.SerializeContent(streamReader, serializer, result);
+
+                    _captureThisModel = false;
 
                     // Add reference
                     parentReference?.References.Add(reference);
