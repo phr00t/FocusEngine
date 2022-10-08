@@ -2,6 +2,7 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Xenko.Core;
@@ -142,6 +143,31 @@ namespace Xenko.Engine
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Collects all Entities in this scene into a Dictionary, keyed by Entity names
+        /// </summary>
+        /// <param name="parentScene">The scene to collect entities from</param>
+        /// <returns>Dictionary of all entities currently in this scene</returns>
+        public static Dictionary<string, Entity> CollectChildren([NotNull] this Scene parentScene)
+        {
+            var d = new Dictionary<string, Entity>();
+
+            foreach (Entity e in parentScene.Entities)
+                _addChildren(e, d);
+
+            return d;
+        }
+
+        private static void _addChildren(Entity root, Dictionary<string, Entity> d)
+        {
+            foreach (TransformComponent e in root.Transform.Children)
+            {
+                d[e.Entity.Name] = e.Entity;
+
+                if (e.Children.Count > 0) _addChildren(e.Entity, d);
+            }
         }
 
         /// <summary>
