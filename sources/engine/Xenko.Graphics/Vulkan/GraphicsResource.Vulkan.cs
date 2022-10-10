@@ -57,15 +57,15 @@ namespace Xenko.Graphics
             localProps = physicalDeviceMemoryProperties;
 
             var typeBits = memoryRequirements.memoryTypeBits;
-            for (uint i = 0; i < localProps.memoryTypeCount; i++)
+            for (int i = 0; i < localProps.memoryTypeCount; i++)
             {
                 if ((typeBits & 1) == 1)
                 {
                     // Type is available, does it match user properties?
-                    var memoryType = *(&localProps.memoryTypes_0 + i);
+                    var memoryType = localProps.memoryTypes[i];
                     if ((memoryType.propertyFlags & memoryProperties) == memoryProperties)
                     {
-                        allocateInfo.memoryTypeIndex = i;
+                        allocateInfo.memoryTypeIndex = (uint)i;
                         break;
                     }
                 }

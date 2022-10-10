@@ -138,17 +138,7 @@ namespace Xenko.GameStudio
 
         private static string GetCommonArguments()
         {
-            var arguments = "";
-
-            using (var debugger = VisualStudioDebugger.GetAttached())
-            {
-                if (debugger != null)
-                {
-                    arguments += $" /Reattach {debugger.ProcessId}";
-                }
-            }
-
-            return arguments;
+            return "";
         }
     }
 }

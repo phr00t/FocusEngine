@@ -99,12 +99,12 @@ namespace Xenko.Graphics
             }
         }
 
-        private void ConvertMinFilter(TextureFilter filter, out VkFilter minFilter, out VkFilter magFilter, out VkSamplerMipmapMode mipmapMode, out uint enableComparison, out uint enableAnisotropy)
+        private void ConvertMinFilter(TextureFilter filter, out VkFilter minFilter, out VkFilter magFilter, out VkSamplerMipmapMode mipmapMode, out VkBool32 enableComparison, out VkBool32 enableAnisotropy)
         {
             minFilter = magFilter = VkFilter.Nearest;
             mipmapMode = VkSamplerMipmapMode.Nearest;
-            enableComparison = 0;
-            enableAnisotropy = 0;
+            enableComparison = Vortice.Vulkan.VkBool32.False;
+            enableAnisotropy = Vortice.Vulkan.VkBool32.False;
 
             switch (filter)
             {
@@ -140,7 +140,7 @@ namespace Xenko.Graphics
                     magFilter = VkFilter.Linear;
                     break;
                 case TextureFilter.Anisotropic:
-                    enableAnisotropy = 1;
+                    enableAnisotropy = Vortice.Vulkan.VkBool32.True;
                     mipmapMode = VkSamplerMipmapMode.Linear;
                     minFilter = VkFilter.Linear;
                     magFilter = VkFilter.Linear;
@@ -148,46 +148,46 @@ namespace Xenko.Graphics
 
                 // Comparison mip point
                 case TextureFilter.ComparisonPoint:
-                    enableComparison = 1;
+                    enableComparison = Vortice.Vulkan.VkBool32.True;
                     break;
                 case TextureFilter.ComparisonMinLinearMagMipPoint:
-                    enableComparison = 1;
+                    enableComparison = Vortice.Vulkan.VkBool32.True;
                     minFilter = VkFilter.Linear;
                     break;
                 case TextureFilter.ComparisonMinPointMagLinearMipPoint:
-                    enableComparison = 1;
+                    enableComparison = Vortice.Vulkan.VkBool32.True;
                     magFilter = VkFilter.Linear;
                     break;
                 case TextureFilter.ComparisonMinMagLinearMipPoint:
-                    enableComparison = 1;
+                    enableComparison = Vortice.Vulkan.VkBool32.True;
                     minFilter = VkFilter.Linear;
                     magFilter = VkFilter.Linear;
                     break;
 
                 // Comparison mip linear
                 case TextureFilter.ComparisonMinMagPointMipLinear:
-                    enableComparison = 1;
+                    enableComparison = Vortice.Vulkan.VkBool32.True;
                     mipmapMode = VkSamplerMipmapMode.Linear;
                     break;
                 case TextureFilter.ComparisonMinLinearMagPointMipLinear:
-                    enableComparison = 1;
+                    enableComparison = Vortice.Vulkan.VkBool32.True;
                     mipmapMode = VkSamplerMipmapMode.Linear;
                     minFilter = VkFilter.Linear;
                     break;
                 case TextureFilter.ComparisonMinPointMagMipLinear:
-                    enableComparison = 1;
+                    enableComparison = Vortice.Vulkan.VkBool32.True;
                     mipmapMode = VkSamplerMipmapMode.Linear;
                     magFilter = VkFilter.Linear;
                     break;
                 case TextureFilter.ComparisonLinear:
-                    enableComparison = 1;
+                    enableComparison = Vortice.Vulkan.VkBool32.True;
                     mipmapMode = VkSamplerMipmapMode.Linear;
                     minFilter = VkFilter.Linear;
                     magFilter = VkFilter.Linear;
                     break;
                 case TextureFilter.ComparisonAnisotropic:
-                    enableComparison = 1;
-                    enableAnisotropy = 1;
+                    enableComparison = Vortice.Vulkan.VkBool32.True;
+                    enableAnisotropy = Vortice.Vulkan.VkBool32.True;
                     mipmapMode = VkSamplerMipmapMode.Linear;
                     minFilter = VkFilter.Linear;
                     magFilter = VkFilter.Linear;

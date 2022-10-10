@@ -129,15 +129,7 @@ namespace Xenko.GameStudio
                     }
                     else if (args[i] == "/Reattach")
                     {
-                        var debuggerProcessId = int.Parse(args[++i]);
-
-                        if (!System.Diagnostics.Debugger.IsAttached)
-                        {
-                            using (var debugger = VisualStudioDebugger.GetByProcess(debuggerProcessId))
-                            {
-                                debugger?.Attach();
-                            }
-                        }
+                        // not supported
                     }
                     else if (args[i] == "/RecordEffects")
                     {

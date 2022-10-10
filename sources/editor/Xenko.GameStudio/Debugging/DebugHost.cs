@@ -22,43 +22,6 @@ namespace Xenko.GameStudio.Debugging
         public void Start(string workingDirectory, Process debuggerProcess, LoggerResult logger)
         {
             var gameHostAssembly = typeof(GameDebuggerTarget).Assembly.Location;
-
-            using (var debugger = debuggerProcess != null ? VisualStudioDebugger.GetByProcess(debuggerProcess.Id) : null)
-            {
-                var address = "net.pipe://localhost/" + Guid.NewGuid();
-                var arguments = $"--host=\"{address}\"";
-
-                // Child process should wait for a debugger to be attached
-                if (debugger != null)
-                    arguments += " --wait-debugger-attach";
-
-                var startInfo = new ProcessStartInfo
-                {
-                    FileName = gameHostAssembly,
-                    Arguments = arguments,
-                    WorkingDirectory = workingDirectory,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                };
-
-                // Start WCF pipe
-                var gameDebuggerHost = new GameDebuggerHost(logger);
-                ServiceHost = new ServiceHost(gameDebuggerHost);
-                ServiceHost.AddServiceEndpoint(typeof(IGameDebuggerHost), new NetNamedPipeBinding(NetNamedPipeSecurityMode.None) { MaxReceivedMessageSize = int.MaxValue }, address);
-                ServiceHost.Open();
-
-                var process = new Process { StartInfo = startInfo };
-                process.Start();
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                // Attach debugger
-                debugger?.AttachToProcess(process.Id);
-
-                GameHost = gameDebuggerHost;
-            }
         }
 
         public void Stop()

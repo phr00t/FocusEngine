@@ -348,7 +348,7 @@ namespace Xenko.Graphics
                 }
             }
 
-            vkUpdateDescriptorSets(GraphicsDevice.NativeDevice, (uint)bindingCount, writes, 0, null);
+            vkUpdateDescriptorSets(GraphicsDevice.NativeDevice, bindingCount, writes, 0, null);
             vkCmdBindDescriptorSets(currentCommandList.NativeCommandBuffer, VkPipelineBindPoint.Graphics, activePipeline.NativeLayout, 0, 1, &localDescriptorSet, 0, null);
         }
 
@@ -500,7 +500,7 @@ namespace Xenko.Graphics
 
             PrepareDraw();
 
-            vkCmdDraw(currentCommandList.NativeCommandBuffer, (uint)vertexCount, 1, (uint)startVertexLocation, 0);
+            vkCmdDraw(currentCommandList.NativeCommandBuffer, vertexCount, 1, (uint)startVertexLocation, 0);
 
             GraphicsDevice.FrameTriangleCount += (uint)vertexCount;
             GraphicsDevice.FrameDrawCalls++;
@@ -535,7 +535,7 @@ namespace Xenko.Graphics
 
             PrepareDraw();
 
-            vkCmdDrawIndexed(currentCommandList.NativeCommandBuffer, (uint)indexCount, 1, (uint)startIndexLocation, baseVertexLocation, 0);
+            vkCmdDrawIndexed(currentCommandList.NativeCommandBuffer, indexCount, 1, (uint)startIndexLocation, baseVertexLocation, 0);
 
             GraphicsDevice.FrameDrawCalls++;
             GraphicsDevice.FrameTriangleCount += (uint)indexCount;
@@ -556,7 +556,7 @@ namespace Xenko.Graphics
 
             PrepareDraw();
 
-            vkCmdDrawIndexed(currentCommandList.NativeCommandBuffer, (uint)indexCountPerInstance, (uint)instanceCount, (uint)startIndexLocation, baseVertexLocation, (uint)startInstanceLocation);
+            vkCmdDrawIndexed(currentCommandList.NativeCommandBuffer, indexCountPerInstance, instanceCount, (uint)startIndexLocation, baseVertexLocation, (uint)startInstanceLocation);
             //NativeCommandList.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
 
             GraphicsDevice.FrameDrawCalls++;
@@ -598,7 +598,7 @@ namespace Xenko.Graphics
 
             PrepareDraw();
 
-            vkCmdDraw(currentCommandList.NativeCommandBuffer, (uint)vertexCountPerInstance, (uint)instanceCount, (uint)startVertexLocation, (uint)startVertexLocation);
+            vkCmdDraw(currentCommandList.NativeCommandBuffer, vertexCountPerInstance, instanceCount, (uint)startVertexLocation, (uint)startVertexLocation);
             //NativeCommandList.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
 
             GraphicsDevice.FrameDrawCalls++;
@@ -676,7 +676,7 @@ namespace Xenko.Graphics
 
         public void ResetQueryPool(QueryPool queryPool)
         {
-            vkCmdResetQueryPool(currentCommandList.NativeCommandBuffer, queryPool.NativeQueryPool, 0, (uint)queryPool.QueryCount);
+            vkCmdResetQueryPool(currentCommandList.NativeCommandBuffer, queryPool.NativeQueryPool, 0, queryPool.QueryCount);
         }
 
         /// <summary>
@@ -850,7 +850,7 @@ namespace Xenko.Graphics
                     imageBarriers[imageBarrierCount++] = new VkImageMemoryBarrier(destinationParent.NativeImage, new VkImageSubresourceRange(destinationParent.NativeImageAspect, 0, uint.MaxValue, 0, uint.MaxValue), destinationTexture.NativeAccessMask, VkAccessFlags.TransferWrite, destinationTexture.NativeLayout, VkImageLayout.TransferDstOptimal);
                 }
 
-                vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, bufferBarrierCount, bufferBarriers, imageBarrierCount, imageBarriers);
+                vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, (int)bufferBarrierCount, bufferBarriers, (int)imageBarrierCount, imageBarriers);
 
                 // Copy
                 if (destinationTexture.Usage == GraphicsResourceUsage.Staging)
@@ -939,7 +939,7 @@ namespace Xenko.Graphics
                     imageBarrierCount++;
                 }
 
-                vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, VkPipelineStageFlags.Transfer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkDependencyFlags.None, 0, null, bufferBarrierCount, bufferBarriers, imageBarrierCount, imageBarriers);
+                vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, VkPipelineStageFlags.Transfer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkDependencyFlags.None, 0, null, (int)bufferBarrierCount, bufferBarriers, (int)imageBarrierCount, imageBarriers);
             }
             else
             {
@@ -1018,7 +1018,7 @@ namespace Xenko.Graphics
                     imageBarriers[imageBarrierCount++] = new VkImageMemoryBarrier(destinationParent.NativeImage, new VkImageSubresourceRange(destinationParent.NativeImageAspect, 0, uint.MaxValue, 0, uint.MaxValue), destinationParent.NativeAccessMask, VkAccessFlags.TransferWrite, destinationParent.NativeLayout, VkImageLayout.TransferDstOptimal);
                 }
 
-                vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, bufferBarrierCount, bufferBarriers, imageBarrierCount, imageBarriers);
+                vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, (int)bufferBarrierCount, bufferBarriers, (int)imageBarrierCount, imageBarriers);
 
                 // Copy
                 if (destinationTexture.Usage == GraphicsResourceUsage.Staging)
@@ -1113,7 +1113,7 @@ namespace Xenko.Graphics
                     imageBarrierCount++;
                 }
 
-                vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, VkPipelineStageFlags.Transfer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkDependencyFlags.None, 0, null, bufferBarrierCount, bufferBarriers, imageBarrierCount, imageBarriers);
+                vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, VkPipelineStageFlags.Transfer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkDependencyFlags.None, 0, null, (int)bufferBarrierCount, bufferBarriers, (int)imageBarrierCount, imageBarriers);
             }
             else
             {

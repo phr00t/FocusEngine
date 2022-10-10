@@ -12,7 +12,6 @@ using System.ServiceModel;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Xenko.Core.VisualStudio;
 using Binding = System.ServiceModel.Channels.Binding;
 
 namespace Xenko.ExecServer
@@ -105,16 +104,7 @@ namespace Xenko.ExecServer
                 foreach (DictionaryEntry environmentVariable in Environment.GetEnvironmentVariables())
                     environmentVariables.Add((string)environmentVariable.Key, (string)environmentVariable.Value);
 
-                int? debuggerProcessId = null;
-                using (var debugger = VisualStudioDebugger.GetAttached())
-                {
-                    if (debugger != null)
-                    {
-                        debuggerProcessId = debugger.ProcessId;
-                    }
-                }
-
-                var result = RunClient(executablePath, workingDirectory, environmentVariables, args, useShadowCache, debuggerProcessId);
+                var result = RunClient(executablePath, workingDirectory, environmentVariables, args, useShadowCache, null);
                 return result;
             }
         }

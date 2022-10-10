@@ -366,14 +366,6 @@ namespace Xenko.Core.Assets.CompilerApp
             var address = "net.pipe://localhost/" + Guid.NewGuid();
             var arguments = $"--slave=\"{address}\" --build-path=\"{builderOptions.BuildDirectory}\"";
 
-            using (var debugger = VisualStudioDebugger.GetAttached())
-            {
-                if (debugger != null)
-                {
-                    arguments += $" --reattach-debugger={debugger.ProcessId}";
-                }
-            }
-
             // Start WCF pipe for communication with process
             var processBuilderRemote = new ProcessBuilderRemote(assemblyContainer, commandContext, command);
             var host = new ServiceHost(processBuilderRemote);

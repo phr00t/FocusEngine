@@ -157,23 +157,7 @@ namespace Xenko.GameStudio.Debugging
 
         private static async Task<Process> GetDebuggerProcess(EditorViewModel editor)
         {
-            // Check if the current solution is opened in some IDE instance
-            var process = await VisualStudioService.GetVisualStudio(editor.Session, false);
-
-            if (process == null)
-            {
-                // If not, let the user pick an instance
-                var picker = new DebuggerPickerWindow(VisualStudioDTE.GetActiveInstances());
-
-                var result = await picker.ShowModal();
-
-                if (result == DialogResult.Ok)
-                {
-                    process = await picker.SelectedDebugger.Launch(editor.Session);
-                }
-            }
-
-            return process;
+            return null;
         }
 
         public void Dispose()
