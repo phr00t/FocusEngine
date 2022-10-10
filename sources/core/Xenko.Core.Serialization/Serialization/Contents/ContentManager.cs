@@ -600,7 +600,7 @@ namespace Xenko.Core.Serialization.Contents
 
                     PrepareSerializerContext(contentSerializerContext, streamReader.Context);
 
-                    _captureThisModel = _captureModelBuffers.Contains(url);
+                    _captureThisModel = _captureModelBuffers?.Contains(url) ?? false;
 
                     contentSerializerContext.SerializeContent(streamReader, serializer, result);
 
