@@ -61,17 +61,37 @@ namespace Xenko.VirtualReality
 
         public override bool SwapTouchpadJoystick { get; set; }
 
-        private Quaternion? holdOffset;
-        private float _holdoffset;
+        private Quaternion? holdOffsetGrip, holdOffsetPoint;
+        private float _holdoffset_grip, _holdoffset_point;
 
+        /// <summary>
+        /// Shortcut to setting offset for both grip and point
+        /// </summary>
         public override float HoldAngleOffset
         {
-            get => _holdoffset;
             set
             {
-                _holdoffset = value;
+                HoldAngleOffset_Grip = value;
+                HoldAngleOffset_Point = value;
+            }
+        }
 
-                holdOffset = Quaternion.RotationXDeg(_holdoffset);
+        public override float HoldAngleOffset_Grip
+        {
+            get => _holdoffset_grip; 
+            set
+            {
+                _holdoffset_grip = value;
+                holdOffsetGrip = value == 0 ? null : Quaternion.RotationXDeg(_holdoffset_grip);
+            }
+        }
+
+        public override float HoldAngleOffset_Point {
+            get => _holdoffset_point;
+            set
+            {
+                _holdoffset_point = value;
+                holdOffsetPoint = value == 0 ? null : Quaternion.RotationXDeg(_holdoffset_point);
             }
         }
 
@@ -246,6 +266,8 @@ namespace Xenko.VirtualReality
 
             currentVel *= baseHMD.BodyScaling;
             currentPos *= baseHMD.BodyScaling;
+
+            Quaternion? holdOffset = UseGripInsteadOfAimPose ? holdOffsetGrip : holdOffsetPoint;
 
             if (holdOffset.HasValue)
             {

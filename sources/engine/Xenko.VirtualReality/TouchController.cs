@@ -32,7 +32,11 @@ namespace Xenko.VirtualReality
 
         public abstract bool HasThumbstick { get; internal set;  }
 
-        public abstract float HoldAngleOffset { get; set; }
+        public abstract float HoldAngleOffset { set; }
+
+        public abstract float HoldAngleOffset_Grip { get; set; }
+
+        public abstract float HoldAngleOffset_Point { get; set; }
 
         public abstract float Trigger { get; }
 
