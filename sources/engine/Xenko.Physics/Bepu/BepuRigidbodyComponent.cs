@@ -497,7 +497,7 @@ namespace Xenko.Physics.Bepu
             get => base.ColliderShape;
             set
             {
-                if (value == null || value == ColliderShape) return;
+                if (value == null || value.Equals(ColliderShape)) return;
 
                 if (AddedToScene && ColliderShape != null)
                 {
@@ -694,7 +694,7 @@ namespace Xenko.Physics.Bepu
             }
         }
 
-        private bool newPos = false, newRotation = false;
+        internal bool newPos = false, newRotation = false;
 
         [DataMemberIgnore]
         public override Vector3 Position
@@ -813,6 +813,12 @@ namespace Xenko.Physics.Bepu
         [DataMemberIgnore]
         public Vector3? LocalPhysicsOffset = null;
 
+        /// <summary>
+        /// Automatically use the bottom of this physics component for positioning the attached entity
+        /// </summary>
+        [DataMemberIgnore]
+        public bool AttachEntityAtBottom { get; set; }
+
         [DataMemberIgnore]
         public Vector3 VelocityLinearChange { get; private set; }
             
@@ -844,8 +850,10 @@ namespace Xenko.Physics.Bepu
         {
             if (IgnorePhysicsPosition == false)
             {
-                entity.Transform.Position = Position;
-                if (LocalPhysicsOffset.HasValue) entity.Transform.Position += LocalPhysicsOffset.Value;
+                Vector3 pos = Position;
+                if (AttachEntityAtBottom) pos.Y = InternalBody.BoundingBox.Min.Y;
+                if (LocalPhysicsOffset.HasValue) pos += LocalPhysicsOffset.Value;
+                entity.Transform.Position = pos;
             }
             if (IgnorePhysicsRotation == false) entity.Transform.Rotation = Rotation;
         }

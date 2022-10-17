@@ -466,8 +466,12 @@ namespace Xenko.Physics.Bepu
                 }
                 else if (component is BepuRigidbodyComponent rigidBody)
                 {
-                    if (!rigidBody.IgnorePhysicsPosition) rigidBody.bodyDescription.Pose.Position = BepuHelpers.ToBepu(component.Entity.Transform.WorldPosition() - (rigidBody.LocalPhysicsOffset ?? Vector3.Zero));
-                    if (!rigidBody.RotationLock && !rigidBody.IgnorePhysicsRotation) rigidBody.bodyDescription.Pose.Orientation = BepuHelpers.ToBepu(component.Entity.Transform.WorldRotation());
+                    if (!rigidBody.IgnorePhysicsPosition)
+                    {
+                        if (!rigidBody.newPos) rigidBody.bodyDescription.Pose.Position = BepuHelpers.ToBepu(component.Entity.Transform.WorldPosition());
+                        if (rigidBody.LocalPhysicsOffset.HasValue) rigidBody.bodyDescription.Pose.Position -= BepuHelpers.ToBepu(rigidBody.LocalPhysicsOffset.Value);
+                    }
+                    if (!rigidBody.RotationLock && !rigidBody.IgnorePhysicsRotation && !rigidBody.newRotation) rigidBody.bodyDescription.Pose.Orientation = BepuHelpers.ToBepu(component.Entity.Transform.WorldRotation());
                     using (simulationLocker.WriteLock())
                     {
                         rigidBody.bodyDescription.Collidable = rigidBody.ColliderShape.GenerateDescription(internalSimulation, rigidBody.SpeculativeMargin);

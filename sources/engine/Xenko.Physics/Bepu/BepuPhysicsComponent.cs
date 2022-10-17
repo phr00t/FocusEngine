@@ -33,7 +33,7 @@ namespace Xenko.Engine
     [Display("BepuPhysics", Expand = ExpandRule.Once)]
     [AllowMultipleComponents]
     [ComponentOrder(3100)]
-    public abstract class BepuPhysicsComponent : ActivableEntityComponent
+    public abstract class BepuPhysicsComponent : EntityComponent
     {
         protected static Logger logger = GlobalLogger.GetLogger("BepuPhysicsComponent");
 
