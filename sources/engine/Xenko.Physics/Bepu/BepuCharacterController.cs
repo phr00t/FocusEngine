@@ -71,15 +71,11 @@ namespace Xenko.Physics.Bepu
             // can we find an attached camera?
             foreach(Entity e in baseBody.GetChildren())
             {
-                if (Camera == null) Camera = e.Get<CameraComponent>();
-                if (e.Transform.TrackVRHand != TouchControllerHand.None)
-                    AdditionalVREntitiesToDisconnectFromCamera.Add(e);
-            }
-
-            if (Camera != null && VRMode)
-            {
-                foreach (Entity e in AdditionalVREntitiesToDisconnectFromCamera)
-                    if (e.Transform.Parent == Camera.Entity.Transform) e.Transform.Parent = Body.Entity.Transform;
+                if (Camera == null)
+                {
+                    Camera = e.Get<CameraComponent>();
+                    break;
+                }
             }
 
             Body.AttachEntityAtBottom = true;
@@ -89,6 +85,19 @@ namespace Xenko.Physics.Bepu
             Body.ActionPerSimulationTick += UpdatePerSimulationTick;
 
             baseBody.Add(Body);
+
+            if (Camera != null && VRMode)
+            {
+                // can we find any tracked stuff to pick off?
+                foreach (Entity e in Camera.Entity.GetChildren())
+                {
+                    if (e.Transform.TrackVRHand != TouchControllerHand.None)
+                        AdditionalVREntitiesToDisconnectFromCamera.Add(e);
+                }
+
+                foreach (Entity e in AdditionalVREntitiesToDisconnectFromCamera)
+                    if (e.Transform.Parent == Camera.Entity.Transform) e.Transform.Parent = baseBody.Transform;
+            }
 
             internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
         }
