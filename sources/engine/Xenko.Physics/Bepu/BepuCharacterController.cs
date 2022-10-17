@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 using BepuPhysics.Collidables;
@@ -11,7 +12,7 @@ using Xenko.VirtualReality;
 namespace Xenko.Physics.Bepu
 {
     /// <summary>
-    /// Helper object for handling player movement with a base physical body and a VR head attached to a neck. This can be used without VR too, but will just act like a simple character controller.
+    /// Helper object for handling character movement with a base physical body (and optional child camera/VR).
     /// </summary>
     public class BepuCharacterController
     {
@@ -29,28 +30,37 @@ namespace Xenko.Physics.Bepu
         private bool VR;
 
         public float Height { get; internal set; }
-        public float Width { get; internal set; }
+        public float Radius { get; internal set; }
 
-        private Dictionary<Vector2, Capsule> CapsuleCache = new Dictionary<Vector2, Capsule>();
+        private static ConcurrentDictionary<Vector2, Capsule> CapsuleCache = new ConcurrentDictionary<Vector2, Capsule>();
+
+        private Capsule getCapsule(float radius, float height)
+        {
+            var key = new Vector2(radius, height);
+            if (CapsuleCache.TryGetValue(key, out var cap))
+                return cap;
+
+            float capsule_len = height - radius * 2f;
+            if (capsule_len <= 0f)
+                throw new ArgumentOutOfRangeException("Height cannot be less than 2*radius for capsule shape (BepuCharacterController for " + Body.Entity.Name);
+
+            cap = new BepuPhysics.Collidables.Capsule(radius, capsule_len);
+            CapsuleCache[key] = cap;
+
+            return cap;
+        }
 
         /// <summary>
         /// Make a new BepuCharacterController helper for an entity, also useful for VR. Automatically will break off VR-tracked from Camera to base if using VR
         /// </summary>
-        public BepuCharacterController(Entity baseBody, float height = 1.7f, float width = 0.5f, bool VRMode = false, CollisionFilterGroups physics_group = CollisionFilterGroups.CharacterFilter,
+        public BepuCharacterController(Entity baseBody, float height = 1.7f, float radius = 0.5f, bool VRMode = false, CollisionFilterGroups physics_group = CollisionFilterGroups.CharacterFilter,
                                        CollisionFilterGroupFlags collides_with = CollisionFilterGroupFlags.StaticFilter | CollisionFilterGroupFlags.KinematicFilter |
                                        CollisionFilterGroupFlags.EnemyFilter | CollisionFilterGroupFlags.CharacterFilter, HashSet<Entity> AdditionalVREntitiesToDisconnectFromCamera = null)
         {
-            float capsule_len = height - width * 2f;
-            if (capsule_len <= 0f)
-                throw new ArgumentOutOfRangeException("Height cannot be less than 2*width for capsule shape (BepuCharacterController for " + baseBody.Name);
-
             Height = height;
-            Width = width;
+            Radius = radius;
 
-            var cap = new Capsule(width, capsule_len);
-            CapsuleCache[new Vector2(width, height)] = cap;
-
-            Body = new BepuRigidbodyComponent(cap);
+            Body = new BepuRigidbodyComponent(getCapsule(radius, height));
             Body.CollisionGroup = physics_group;
             Body.CanCollideWith = collides_with;
             VR = VRMode;
@@ -137,29 +147,17 @@ namespace Xenko.Physics.Bepu
         /// <summary>
         /// This can change the shape of the rigidbody easily
         /// </summary>
-        public void Resize(float? height, float? width = null, bool reposition = true)
+        public void Resize(float? height, float? radius = null, bool reposition = true)
         {
             float useh = height ?? Height;
-            float usew = width ?? Width;
+            float user = radius ?? Radius;
 
-            if (useh == Height && usew == Width) return;
+            if (useh == Height && user == Radius) return;
 
-            var key = new Vector2(usew, useh);
-            if (CapsuleCache.TryGetValue(key, out var capsule))
-                Body.ColliderShape = capsule;
-            else
-            {
-                float capsule_len = useh - usew * 2f;
-                if (capsule_len <= 0f)
-                    throw new ArgumentOutOfRangeException("Height cannot be less than 2*width for capsule shape (BepuCharacterController for " + Body.Entity.Name);
-
-                var cap = new BepuPhysics.Collidables.Capsule(usew, capsule_len);
-                CapsuleCache[key] = cap;
-                Body.ColliderShape = cap;
-            }
+            Body.ColliderShape = getCapsule(user, useh);
 
             Height = useh;
-            Width = usew;
+            Radius = user;
 
             if (reposition) SetPosition(Body.Entity.Transform.Position);
         }
