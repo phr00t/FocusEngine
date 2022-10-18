@@ -325,6 +325,7 @@ namespace Xenko.Physics.Bepu
         public bool VRPressToTurn = false;
         public bool VRComfortMode = false;
         public float VRFOVReductionMin = 0.55f;
+        public float VRFOVReductionSpeed = 10f;
 
         private void UpdateVRFOV(bool ForceFOVReduction, float frameTime)
         {
@@ -348,7 +349,7 @@ namespace Xenko.Physics.Bepu
                     desiredRadius *= desiredRadius;
                 }
             }
-            if (fovReduction.Radius > desiredRadius) frameTime *= 10f;
+            if (fovReduction.Radius > desiredRadius) frameTime *= VRFOVReductionSpeed;
             fovReduction.Radius = desiredRadius * frameTime + fovReduction.Radius * (1f - frameTime);
             fovReduction.Enabled = fovReduction.Radius < 1f;
         }
