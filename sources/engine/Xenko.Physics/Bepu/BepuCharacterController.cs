@@ -7,6 +7,7 @@ using Xenko.Core;
 using Xenko.Core.Mathematics;
 using Xenko.Engine;
 using Xenko.Games;
+using Xenko.Rendering.Images;
 using Xenko.VirtualReality;
 
 namespace Xenko.Physics.Bepu
@@ -26,6 +27,7 @@ namespace Xenko.Physics.Bepu
         /// </summary>
         public CameraComponent Camera { get; internal set; }
 
+        private VRFOV fovReduction;
         private Game internalGame;
         private bool VR;
 
@@ -86,8 +88,25 @@ namespace Xenko.Physics.Bepu
 
             baseBody.Add(Body);
 
+            internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
+
             if (Camera != null && VRMode)
             {
+                // can we get a fov reduction?
+                var pp = internalGame.SceneSystem.GraphicsCompositor.PostProcessing;
+                if (pp != null)
+                {
+                    for (int i = 0; i < pp.Count; i++)
+                    {
+                        var p = pp[i];
+                        if (p.VRFOVFilter != null)
+                        {
+                            fovReduction = p.VRFOVFilter;
+                            break;
+                        }
+                    }
+                }
+
                 // can we find any tracked stuff to pick off?
                 foreach (Entity e in Camera.Entity.GetChildren())
                 {
@@ -98,8 +117,6 @@ namespace Xenko.Physics.Bepu
                 foreach (Entity e in AdditionalVREntitiesToDisconnectFromCamera)
                     if (e.Transform.Parent == Camera.Entity.Transform) e.Transform.Parent = baseBody.Transform;
             }
-
-            internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
         }
 
         /// <summary>
@@ -297,19 +314,60 @@ namespace Xenko.Physics.Bepu
                 AdditionalPerPhysicsAction(_body, frame_time);
         }
 
-        /// <summary>
-        /// If you have a FOV reduction vignette thing in VR, this flag will tell you to use it (smooth turning, for example)
-        /// </summary>
-        public bool ShouldHaveFOVReduction { get; internal set; }
-
         private float desiredPitch, pitch, yaw, desiredYaw;
         private bool shouldFlickTurn = true;
+
+        public float MouseSensitivity = 3f;
+        public bool InvertY = false;
+        public bool VRSmoothTurn = false;
+        public float VRSmoothTurnRate = 125f;
+        public float VRSnapTurnAmount = 45f;
+        public bool VRPressToTurn = false;
+        public bool VRComfortMode = false;
+        public float VRFOVReductionMin = 0.55f;
+
+        private void UpdateVRFOV(bool ForceFOVReduction, float frameTime)
+        {
+            float desiredRadius;
+            if (ForceFOVReduction)
+            {
+                desiredRadius = VRFOVReductionMin;
+            }
+            else
+            {
+                Vector3 vel = Body.LinearVelocity;
+                float speed = vel.Length();
+                if (speed < 0.1f)
+                {
+                    desiredRadius = 1f;
+                }
+                else
+                {
+                    desiredRadius = Vector3.Dot(Camera.Entity.Transform.Forward(true), vel.Normalized());
+                    if (desiredRadius < VRFOVReductionMin) desiredRadius = VRFOVReductionMin;
+                    desiredRadius *= desiredRadius;
+                }
+            }
+            if (fovReduction.Radius > desiredRadius) frameTime *= 10f;
+            fovReduction.Radius = desiredRadius * frameTime + fovReduction.Radius * (1f - frameTime);
+            fovReduction.Enabled = fovReduction.Radius < 1f;
+        }
+
+        private void RotateButKeepCameraPos(Quaternion rotation)
+        {
+            var existingPosition = Camera.Entity.Transform.WorldPosition();
+            Body.Entity.Transform.Rotation *= rotation;
+            var newPosition = Camera.Entity.Transform.WorldPosition(true);
+            Body.Entity.Transform.Position -= (newPosition - existingPosition);
+        }
 
         /// <summary>
         /// Use this to handle mouse/VR look, which operates on a camera (if found)
         /// </summary>
-        public void HandleMouseAndVRLook(float frame_time, float mouse_sensitivity = 3f, bool Invert_Y = false, bool VRSmoothTurn = false, float VRSnapTurnAmount = 45f, bool VRPressToTurn = false)
+        public void HandleMouseAndVRLook()
         {
+            float frame_time = (float)internalGame.UpdateTime.Elapsed.TotalSeconds;
+
             if (Camera == null)
                 throw new ArgumentNullException("No camera to look with!");
 
@@ -329,7 +387,7 @@ namespace Xenko.Physics.Bepu
                         Vector2 thumb = rightController.ThumbstickAxis;
                         if (thumb.X > 0.1f || thumb.X < -0.1f)
                         {
-                            Body.Entity.Transform.Rotation *= global::Xenko.Core.Mathematics.Quaternion.RotationYDeg(thumb.X * frame_time * -125f);
+                            RotateButKeepCameraPos(global::Xenko.Core.Mathematics.Quaternion.RotationYDeg(thumb.X * frame_time * -VRSmoothTurnRate));
                             fov_check = true;
                         }
                     }
@@ -340,9 +398,9 @@ namespace Xenko.Physics.Bepu
                     if (VRPressToTurn)
                     {
                         if (VRButtons.LeftThumbstickLeft.IsPressed())
-                            Body.Entity.Transform.Rotation *= Quaternion.RotationYDeg(VRSnapTurnAmount);
+                            RotateButKeepCameraPos(Quaternion.RotationYDeg(VRSnapTurnAmount));
                         else if (VRButtons.LeftThumbstickRight.IsPressed())
-                            Body.Entity.Transform.Rotation *= Quaternion.RotationYDeg(-VRSnapTurnAmount);
+                            RotateButKeepCameraPos(Quaternion.RotationYDeg(-VRSnapTurnAmount));
                     }
                     else
                     {
@@ -355,7 +413,7 @@ namespace Xenko.Physics.Bepu
                             {
                                 if (shouldFlickTurn)
                                 {
-                                    Body.Entity.Transform.Rotation *= Quaternion.RotationYDeg(-VRSnapTurnAmount);
+                                    RotateButKeepCameraPos(Quaternion.RotationYDeg(-VRSnapTurnAmount));
                                     shouldFlickTurn = false;
                                 }
                             }
@@ -363,7 +421,7 @@ namespace Xenko.Physics.Bepu
                             {
                                 if (shouldFlickTurn)
                                 {
-                                    Body.Entity.Transform.Rotation *= Quaternion.RotationYDeg(VRSnapTurnAmount);
+                                    RotateButKeepCameraPos(Quaternion.RotationYDeg(VRSnapTurnAmount));
                                     shouldFlickTurn = false;
                                 }
                             }
@@ -372,7 +430,13 @@ namespace Xenko.Physics.Bepu
                     }
                 }
 
-                ShouldHaveFOVReduction = fov_check;
+                if (fovReduction != null)
+                {
+                    if (VRComfortMode)
+                        UpdateVRFOV(fov_check, frame_time);
+                    else
+                        fovReduction.Enabled = false;
+                }
 
                 return;
             }
@@ -390,8 +454,8 @@ namespace Xenko.Physics.Bepu
             yaw = Math.Abs(deltaYaw) < frame_time ? desiredYaw : yaw + frame_time * Math.Sign(deltaYaw);
             pitch = Math.Abs(deltaPitch) < frame_time ? desiredPitch : pitch + frame_time * Math.Sign(deltaPitch);
 
-            desiredYaw = yaw -= 1.333f * rotationDelta.X * mouse_sensitivity; // we want to rotate faster Horizontally and Vertically
-            desiredPitch = pitch = MathUtil.Clamp(pitch - rotationDelta.Y * (Invert_Y ? -mouse_sensitivity : mouse_sensitivity), -MathUtil.PiOverTwo + 0.05f, MathUtil.PiOverTwo - 0.05f);
+            desiredYaw = yaw -= 1.333f * rotationDelta.X * MouseSensitivity; // we want to rotate faster Horizontally and Vertically
+            desiredPitch = pitch = MathUtil.Clamp(pitch - rotationDelta.Y * (InvertY ? -MouseSensitivity : MouseSensitivity), -MathUtil.PiOverTwo + 0.05f, MathUtil.PiOverTwo - 0.05f);
 
             Camera.Entity.Transform.Rotation = Quaternion.RotationYawPitchRoll(yaw, pitch, 0);
         }
