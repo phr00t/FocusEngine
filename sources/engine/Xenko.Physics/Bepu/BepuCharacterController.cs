@@ -296,7 +296,7 @@ namespace Xenko.Physics.Bepu
                 float xDist = Body.Position.X - finalpos.X;
                 float yDist = Body.Position.Y - finalpos.Y;
                 float zDist = Body.Position.Z - finalpos.Z;
-                if (xDist * xDist + yDist * yDist + zDist * zDist > 0.1f)
+                if (xDist * xDist + yDist * yDist + zDist * zDist > 0.05f)
                 {
                     Vector3 gravitybump = -(Body.OverrideGravity ? Body.Gravity : BepuSimulation.instance.Gravity);
                     gravitybump.Normalize();
@@ -349,7 +349,11 @@ namespace Xenko.Physics.Bepu
                     desiredRadius *= desiredRadius;
                 }
             }
-            if (fovReduction.Radius > desiredRadius) frameTime *= VRFOVReductionSpeed;
+            if (fovReduction.Radius > desiredRadius)
+            {
+                frameTime *= VRFOVReductionSpeed;
+                if (frameTime > 1f) frameTime = 1f;
+            }
             fovReduction.Radius = desiredRadius * frameTime + fovReduction.Radius * (1f - frameTime);
             fovReduction.Enabled = fovReduction.Radius < 1f;
         }
