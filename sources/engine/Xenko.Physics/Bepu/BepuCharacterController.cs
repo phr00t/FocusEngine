@@ -107,6 +107,9 @@ namespace Xenko.Physics.Bepu
                     }
                 }
 
+                // VR sets the camera transform
+                Camera.VRHeadSetsTransform = true;
+
                 // can we find any tracked stuff to pick off?
                 foreach (Entity e in Camera.Entity.GetChildren())
                 {
@@ -170,10 +173,40 @@ namespace Xenko.Physics.Bepu
             return null;
         }
 
+        private bool forceBlackout;
+
+        /// <summary>
+        /// VR loading can cause annoying flicker. Turn this on just before loading to black out the screen (using the FOV reduction post processing filter). Turn off when done loading.
+        /// </summary>
+        public void SetVRLoadingBlackout(bool on)
+        {
+            if (!VR || fovReduction == null || forceBlackout == on) return;
+
+            forceBlackout = on;
+
+            if (on)
+            {
+                fovReduction.Enabled = true;
+                fovReduction.Radius = 0f;
+            }
+            else
+            {
+                fovReduction.Enabled = false;
+                fovReduction.Radius = 1f;
+            }
+        }
+
+        public enum RESIZE_POSITION_OPTION
+        {
+            RepositionNone = 0,
+            RepositionAll = 1,
+            RepositionBaseEntityOnly = 2
+        }
+
         /// <summary>
         /// This can change the shape of the rigidbody easily
         /// </summary>
-        public void Resize(float? height, float? radius = null, bool reposition = true)
+        public void Resize(float? height, float? radius = null, RESIZE_POSITION_OPTION reposition = RESIZE_POSITION_OPTION.RepositionAll)
         {
             float useh = height ?? Height;
             float user = radius ?? Radius;
@@ -185,7 +218,15 @@ namespace Xenko.Physics.Bepu
             Height = useh;
             Radius = user;
 
-            if (reposition) SetPosition(Body.Entity.Transform.Position);
+            switch (reposition)
+            {
+                case RESIZE_POSITION_OPTION.RepositionAll:
+                    SetPosition(Body.Entity.Transform.Position);
+                    break;
+                case RESIZE_POSITION_OPTION.RepositionBaseEntityOnly:
+                    SetPosition(Body.Entity.Transform.Position, false);
+                    break;
+            }
         }
 
         /// <summary>
@@ -435,7 +476,7 @@ namespace Xenko.Physics.Bepu
                     }
                 }
 
-                if (fovReduction != null)
+                if (fovReduction != null && !forceBlackout)
                 {
                     if (VRComfortMode)
                         UpdateVRFOV(fov_check, frame_time);
@@ -468,9 +509,9 @@ namespace Xenko.Physics.Bepu
         /// <summary>
         /// Set our position and center the camera (if used) on this
         /// </summary>
-        public void SetPosition(Vector3 position)
+        public void SetPosition(Vector3 position, bool updateCamera = true)
         {
-            if (Camera != null && !VR) {
+            if (Camera != null && !VR && updateCamera) {
                 Camera.Entity.Transform.Position.X = 0f;
                 Camera.Entity.Transform.Position.Y = Height * CameraHeightPercent;
                 Camera.Entity.Transform.Position.Z = 0f;
