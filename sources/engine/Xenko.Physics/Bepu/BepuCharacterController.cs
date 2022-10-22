@@ -62,7 +62,16 @@ namespace Xenko.Physics.Bepu
             Height = height;
             Radius = radius;
 
-            Body = new BepuRigidbodyComponent(getCapsule(radius, height));
+            Body = baseBody.Get<BepuRigidbodyComponent>();
+
+            if (Body == null)
+            {
+                Body = new BepuRigidbodyComponent(getCapsule(radius, height));
+                baseBody.Add(Body);
+            }
+            else if (!(Body.ColliderShape is Capsule))
+                throw new ArgumentException(baseBody.Name + " already has a rigidbody, but it isn't a Capsule shape!");
+
             Body.CollisionGroup = physics_group;
             Body.CanCollideWith = collides_with;
             VR = VRMode;
@@ -84,9 +93,8 @@ namespace Xenko.Physics.Bepu
             Body.IgnorePhysicsRotation = true;
             Body.IgnorePhysicsPosition = VR && Camera != null;
             Body.RotationLock = true;
+            Body.ActionPerSimulationTick -= UpdatePerSimulationTick;
             Body.ActionPerSimulationTick += UpdatePerSimulationTick;
-
-            baseBody.Add(Body);
 
             internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
 
