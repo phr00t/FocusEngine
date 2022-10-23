@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Xenko.Core;
 using Xenko.Core.Diagnostics;
 using Xenko.Core.Mathematics;
@@ -102,7 +103,7 @@ namespace Xenko.Graphics
             var defaultPipelineStateDescription = new PipelineStateDescription();
             defaultPipelineStateDescription.SetDefaults();
             AdjustDefaultPipelineStateDescription(ref defaultPipelineStateDescription);
-            DefaultPipelineState = PipelineState.New(this, ref defaultPipelineStateDescription, null);
+            DefaultPipelineState = PipelineState.New(this, defaultPipelineStateDescription, null, true);
 
             InitializePostFeatures();
         }

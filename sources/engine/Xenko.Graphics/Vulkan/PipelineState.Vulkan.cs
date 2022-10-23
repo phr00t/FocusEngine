@@ -56,7 +56,7 @@ namespace Xenko.Graphics
         internal void Prepare(PipelineStateDescription pipelineStateDescription)
         {
 
-            Description = pipelineStateDescription.Clone();
+            Description = pipelineStateDescription;
             Recreate();
         }
 

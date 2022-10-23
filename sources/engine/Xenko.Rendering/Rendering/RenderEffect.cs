@@ -31,10 +31,30 @@ namespace Xenko.Rendering
         public Effect Effect;
         public RenderEffectReflection Reflection;
 
+        private PipelineState latest, previous;
+
+        public bool NeedsNewPipeline { get; private set; }
+
         /// <summary>
         /// Compiled pipeline state.
         /// </summary>
-        public PipelineState PipelineState;
+        public PipelineState PipelineState
+        {
+            get
+            {
+                if (previous?.CurrentState() == PipelineState.PIPELINE_STATE.READY &&
+                    latest?.CurrentState() != PipelineState.PIPELINE_STATE.READY)
+                    return previous;
+
+                return latest;
+            }
+            set
+            {
+                NeedsNewPipeline = value == null;
+                if (latest != value && latest != null) previous = latest;
+                latest = value;
+            }
+        }
 
         /// <summary>
         /// Validates if effect needs to be compiled or recompiled.

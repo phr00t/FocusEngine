@@ -3,6 +3,8 @@
 
 using Xenko.Core.ReferenceCounting;
 using System.Threading;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Xenko.Graphics
 {
@@ -17,7 +19,7 @@ namespace Xenko.Graphics
         public int InputBindingCount { get; private set; }
         internal long storedHash;
 
-        public static PipelineState New(GraphicsDevice graphicsDevice, ref PipelineStateDescription pipelineStateDescription, PipelineState existingState)
+        public static PipelineState New(GraphicsDevice graphicsDevice, PipelineStateDescription pipelineStateDescription, PipelineState existingState, bool forcewait = false)
         {
             // Hash the current state
             long hashedState = pipelineStateDescription.GetLongHashCode();
@@ -47,13 +49,27 @@ namespace Xenko.Graphics
             }
 
             if (GraphicsDevice.Platform == GraphicsPlatform.Vulkan) {
-                // if we are using Vulkan, just make a new pipeline without locking
-                pipelineState.Prepare(pipelineStateDescription);
-            } else {
-                // D3D seems to have quite bad concurrency when using CreateSampler while rendering
-                lock (graphicsDevice.CachedPipelineStates) {
-                    pipelineState.Prepare(pipelineStateDescription);
+                // if we are in vulkan, do it in a task to not hold up the rendering thread
+                var cloned = pipelineStateDescription.Clone();
+
+                if (forcewait)
+                {
+                    pipelineState.Prepare(cloned);
+                    return pipelineState;
                 }
+
+                // do it as a task for later
+                Xenko.Core.Threading.ThreadPool.Instance.QueueWorkItem(() =>
+                {
+                    pipelineState.Prepare(cloned);
+                });
+
+                return pipelineState;
+            }
+            
+            // D3D seems to have quite bad concurrency when using CreateSampler while rendering
+            lock (graphicsDevice.CachedPipelineStates) {
+                pipelineState.Prepare(pipelineStateDescription);
             }
 
             return pipelineState;

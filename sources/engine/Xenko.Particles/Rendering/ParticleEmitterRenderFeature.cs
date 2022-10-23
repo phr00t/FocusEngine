@@ -350,7 +350,7 @@ namespace Xenko.Particles.Rendering
 
                 // Get effect
                 var renderEffect = GetRenderNode(renderNodeReference).RenderEffect;
-                if (renderEffect.Effect == null)
+                if (renderEffect?.Effect == null || renderEffect.PipelineState.CurrentState() != PipelineState.PIPELINE_STATE.READY)
                     continue;
 
                 // Get the extra node data

@@ -28,10 +28,9 @@ namespace Xenko.Graphics
         /// <summary>
         /// Determine and updates <see cref="CurrentState"/> from <see cref="State"/>.
         /// </summary>
-        public void Update()
+        public void Update(bool wait = true)
         {
-            // we already do caching within pipeline state below
-            CurrentState = PipelineState.New(graphicsDevice, ref State, CurrentState);
-        }
+            CurrentState = PipelineState.New(graphicsDevice, State, CurrentState, wait);
+       }
     }
 }

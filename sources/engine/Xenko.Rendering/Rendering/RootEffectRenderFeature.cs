@@ -788,8 +788,7 @@ namespace Xenko.Rendering
                     }
 
                     // Compile pipeline state object (if first time or need change)
-                    // TODO GRAPHICS REFACTOR how to invalidate if we want to change some state? (setting to null should be fine)
-                    if (renderEffect.PipelineState == null)
+                    if (renderEffect.NeedsNewPipeline)
                     {
                         var mutablePipelineState = batch.MutablePipelineState;
                         var pipelineState = mutablePipelineState.State;
@@ -809,7 +808,7 @@ namespace Xenko.Rendering
                         foreach (var pipelineProcessor in PipelineProcessors)
                             pipelineProcessor.Process(renderNodeReference, ref renderNode, renderObject, pipelineState);
 
-                        mutablePipelineState.Update();
+                        mutablePipelineState.Update(false);
                         renderEffect.PipelineState = mutablePipelineState.CurrentState;
                     }
 
