@@ -1,6 +1,7 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xenko.Graphics;
 
@@ -31,7 +32,7 @@ namespace Xenko.Rendering
         public Effect Effect;
         public RenderEffectReflection Reflection;
 
-        private PipelineState latest, previous;
+        private List<PipelineState> Pipelines = new List<PipelineState>();
 
         public bool NeedsNewPipeline { get; private set; }
 
@@ -42,17 +43,30 @@ namespace Xenko.Rendering
         {
             get
             {
-                if (previous?.CurrentState() == PipelineState.PIPELINE_STATE.READY &&
-                    latest?.CurrentState() != PipelineState.PIPELINE_STATE.READY)
-                    return previous;
+                // get first ready pipeline
+                for (int i=0; i < Pipelines.Count; i++)
+                {
+                    var p = Pipelines[i];
+                    if (p.CurrentState() == PipelineState.PIPELINE_STATE.READY)
+                    {
+                        // remove no longer needed pipeline references
+                        if (i + 1 < Pipelines.Count) Pipelines.RemoveRange(i + 1, Pipelines.Count - (i + 1));
+                        return p;
+                    }
+                }
 
-                return latest;
+                // couldn't find a ready pipeline, just return the latest
+                return Pipelines.Count > 0 ? Pipelines[0] : null;
             }
             set
             {
-                NeedsNewPipeline = value == null;
-                if (latest != value && latest != null) previous = latest;
-                latest = value;
+                if (value == null)
+                    NeedsNewPipeline = true;
+                else
+                {
+                    NeedsNewPipeline = false;
+                    if (Pipelines.Contains(value) == false) Pipelines.Insert(0, value);
+                }                    
             }
         }
 
