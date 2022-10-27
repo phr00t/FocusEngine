@@ -28,7 +28,7 @@ namespace Xenko.Physics.Bepu
         public CameraComponent Camera { get; internal set; }
 
         private VRFOV fovReduction;
-        private Game internalGame;
+        private static Game internalGame;
         private bool VR;
 
         public float Height { get; internal set; }
@@ -96,7 +96,7 @@ namespace Xenko.Physics.Bepu
             Body.ActionPerSimulationTick -= UpdatePerSimulationTick;
             Body.ActionPerSimulationTick += UpdatePerSimulationTick;
 
-            internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
+            if (internalGame == null) internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
 
             if (Camera != null && VRMode)
             {
@@ -153,6 +153,8 @@ namespace Xenko.Physics.Bepu
             {
                 Body.CollectCollisionMaximumCount = value ? 8 : 0;
                 Body.CollectCollisions = value;
+                Body.SleepThreshold = value ? -1f : 0.01f;
+                if (value) Body.IsActive = true;
             }
             get => Body.CollectCollisions;
         }
@@ -295,8 +297,8 @@ namespace Xenko.Physics.Bepu
         private void UpdatePerSimulationTick(BepuRigidbodyComponent _body, float frame_time)
         {
             // make sure we are awake if we want to be moving
-            if (Body.InternalBody.Awake == false)
-                Body.InternalBody.Awake = DesiredMovement != Vector3.Zero || ApplySingleImpulse.HasValue || TrackCollisions;
+            if (Body.IsActive == false)
+                Body.IsActive = DesiredMovement != Vector3.Zero || ApplySingleImpulse.HasValue;
 
             if (Body.IgnorePhysicsPosition)
             {
