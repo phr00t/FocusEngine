@@ -348,7 +348,7 @@ namespace Xenko.Rendering
             return true;
         }
 
-        private void ReevaluateActiveRenderStages(RenderObject renderObject)
+        internal void ReevaluateActiveRenderStages(RenderObject renderObject)
         {
             var renderFeature = renderObject.RenderFeature;
             if (renderFeature == null)

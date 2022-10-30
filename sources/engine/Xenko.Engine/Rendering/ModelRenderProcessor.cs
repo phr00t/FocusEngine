@@ -191,12 +191,26 @@ namespace Xenko.Rendering
                             if ((newMaterial?.Passes.Count ?? 1) != material.MeshCount)
                                 goto RegenerateMeshes;
 
-                            // Update materials
                             material.Material = newMaterial;
+
                             int meshIndex = material.MeshStartIndex;
-                            for (int pass = 0; pass < material.MeshCount; ++pass, ++meshIndex)
+                            if (meshIndex >= 0 && meshIndex < renderModel.Meshes.Length)
                             {
-                                UpdateMaterial(renderModel.Meshes[meshIndex], newMaterial?.Passes[pass], modelComponent);
+                                var renderMesh = renderModel.Meshes[meshIndex];
+                                bool hasTransparency = false;
+
+                                for (int pass = 0; pass < material.MeshCount; ++pass, ++meshIndex)
+                                {
+                                    UpdateMaterial(renderMesh, newMaterial?.Passes[pass], modelComponent);
+                                    hasTransparency |= renderMesh.MaterialPass?.HasTransparency ?? false;
+                                }
+
+                                // make sure we are in the right stage if transparency changed
+                                if (renderMesh.lastTransparency != hasTransparency)
+                                {
+                                    renderMesh.lastTransparency = hasTransparency;
+                                    VisibilityGroup.ReevaluateActiveRenderStages(renderMesh);
+                                }
                             }
                         }
                     }
@@ -205,7 +219,7 @@ namespace Xenko.Rendering
                 return;
             }
 
-        RegenerateMeshes:
+RegenerateMeshes:
             renderModel.Model = model;
 
             // Remove old meshes
@@ -246,7 +260,6 @@ namespace Xenko.Rendering
 
                 for (int pass = 0; pass < material.MeshCount; ++pass, ++meshIndex)
                 {
-                    // TODO: Somehow, if material changed we might need to remove/add object in render system again (to evaluate new render stage subscription)
                     var materialIndex = mesh.MaterialIndex;
                     renderMeshes[meshIndex] = new RenderMesh
                     {
@@ -257,6 +270,7 @@ namespace Xenko.Rendering
 
                     // Update material
                     UpdateMaterial(renderMeshes[meshIndex], material.Material?.Passes[pass], modelComponent);
+                    renderMeshes[meshIndex].lastTransparency = renderMeshes[meshIndex].MaterialPass?.HasTransparency ?? false;
                 }
             }
 

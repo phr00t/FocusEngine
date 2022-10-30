@@ -75,5 +75,7 @@ namespace Xenko.Rendering
         public Matrix World = Matrix.Identity;
 
         public Matrix[] BlendMatrices;
+
+        public bool lastTransparency;
     }
 }
