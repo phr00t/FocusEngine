@@ -209,7 +209,7 @@ namespace Xenko.Engine
         {
             // Entity can't be a root because it already has a parent?
             if (entity.Transform != null && entity.Transform.Parent != null)
-                throw new ArgumentException("Entity '" + entity.Name + "' shouldn't have a parent ('" + entity.Transform.Parent.Entity.Name + "')", nameof(entity));
+                return;
 
             InternalAddEntity(entity);
         }
