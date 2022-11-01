@@ -38,6 +38,11 @@ namespace Xenko.VirtualReality
         }
 
         /// <summary>
+        /// Action to run when VR is fully initialized and ready to go. Argument is the initialized VRDevice
+        /// </summary>
+        public static Action<VRDevice> OnVRInitialized;
+
+        /// <summary>
         /// Swap hands at a low level? Easy way to have right hand act like the left hand and vice versa.
         /// </summary>
         public bool SwapControllerHands;
@@ -162,6 +167,9 @@ postswitch:
 
                 // init virtual buttons for use with VR input
                 Xenko.Input.VirtualButton.RegisterExternalVirtualButtonType(typeof(Xenko.VirtualReality.VRButtons));
+
+                // run actions when VR is initialized?
+                if (Device != null && OnVRInitialized != null) OnVRInitialized(Device);
             }
         }
 
