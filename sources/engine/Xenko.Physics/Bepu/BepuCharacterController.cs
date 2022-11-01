@@ -347,13 +347,21 @@ namespace Xenko.Physics.Bepu
                 float xDist = Body.Position.X - finalpos.X;
                 float yDist = Body.Position.Y - finalpos.Y;
                 float zDist = Body.Position.Z - finalpos.Z;
-                if (xDist * xDist + yDist * yDist + zDist * zDist > 0.05f)
+                if (xDist * xDist + yDist * yDist + zDist * zDist > VRPhysicsMoveThreshold * VRPhysicsMoveThreshold)
                 {
-                    Vector3 gravitybump = -(Body.OverrideGravity ? Body.Gravity : BepuSimulation.instance.Gravity);
-                    gravitybump.Normalize();
-                    gravitybump *= 0.05f;
-                    var result = BepuSimulation.instance.ShapeSweep<Capsule>((Capsule)Body.ColliderShape, Body.Position + gravitybump, Body.Rotation, finalpos + gravitybump, Body.CanCollideWith, Body);
-                    if (result.Succeeded == false)
+                    if (VRPhysicsCollisionCheckBeforeMove)
+                    {
+                        Vector3 gravitybump = -(Body.OverrideGravity ? Body.Gravity : BepuSimulation.instance.Gravity);
+                        gravitybump.Normalize();
+                        gravitybump *= 0.05f;
+                        var result = BepuSimulation.instance.ShapeSweep<Capsule>((Capsule)Body.ColliderShape, Body.Position + gravitybump, Body.Rotation, finalpos + gravitybump, Body.CanCollideWith, Body);
+                        if (result.Succeeded == false)
+                        {
+                            Body.Position = finalpos;
+                            oldPos = finalpos;
+                        }
+                    }
+                    else
                     {
                         Body.Position = finalpos;
                         oldPos = finalpos;
@@ -377,6 +385,8 @@ namespace Xenko.Physics.Bepu
         public bool VRComfortMode = false;
         public float VRFOVReductionMin = 0.55f;
         public float VRFOVReductionSpeed = 10f;
+        public bool VRPhysicsCollisionCheckBeforeMove = true;
+        public float VRPhysicsMoveThreshold = 0.2f;
 
         private void UpdateVRFOV(bool ForceFOVReduction, float frameTime)
         {
