@@ -416,7 +416,7 @@ namespace Xenko.UI
 
                 MarginInternal.Left = value.X;
                 MarginInternal.Top = value.Y;
-                InvalidateMeasure();
+                InvalidateArrange();
             }
         }
 
@@ -968,6 +968,13 @@ namespace Xenko.UI
         /// </summary>
         public Vector2 GetNoBullshitSize(UIComponent uiComponent = null)
         {
+            // wait, is the size invalid?
+            if (IsMeasureValid == false)
+            {
+                Measure(previousProvidedMeasureSize);
+                Arrange(DesiredSizeWithMargins, false);
+            }
+
             // try to get quick sizes
             float xsize = RenderSize.X > 0f || float.IsNaN(Width) ? RenderSize.X : Width;
             float ysize = RenderSize.Y > 0f || float.IsNaN(Height) ? RenderSize.Y : Height;
