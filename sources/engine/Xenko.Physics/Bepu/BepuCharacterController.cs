@@ -419,12 +419,60 @@ namespace Xenko.Physics.Bepu
             fovReduction.Enabled = fovReduction.Radius < 1f;
         }
 
+        private void SetRotateButKeepCameraPos(Quaternion rotation)
+        {
+            var existingPosition = Camera.Entity.Transform.WorldPosition();
+            Body.Entity.Transform.Rotation = rotation;
+            var newPosition = Camera.Entity.Transform.WorldPosition(true);
+            Body.Entity.Transform.Position -= (newPosition - existingPosition);
+        }
+
         private void RotateButKeepCameraPos(Quaternion rotation)
         {
             var existingPosition = Camera.Entity.Transform.WorldPosition();
             Body.Entity.Transform.Rotation *= rotation;
             var newPosition = Camera.Entity.Transform.WorldPosition(true);
             Body.Entity.Transform.Position -= (newPosition - existingPosition);
+        }
+
+        /// <summary>
+        /// Sets how the camera is looking for a player character. Has no effect in VR
+        /// </summary>
+        public void SetPlayerLook(float? yaw = null, float? pitch = null)
+        {
+            if (Camera == null || VR) return;
+            this.yaw = this.desiredYaw = yaw ?? this.yaw;
+            this.pitch = this.desiredPitch = pitch ?? this.pitch;
+            Camera.Entity.Transform.Rotation = Quaternion.RotationYawPitchRoll(this.yaw, this.pitch, 0f);
+        }
+
+        /// <summary>
+        /// Makes this character look at the target. flattenY will always be true in VR
+        /// </summary>
+        public void LookAt(Vector3 target, bool flattenY = false)
+        {
+            Vector3 myPos = Camera != null ? Camera.Entity.Transform.WorldPosition() : Body.Position;
+            Vector3 diff = target - myPos;
+            if (flattenY || VR) diff.Y = 0f;
+            if (Camera != null)
+            {
+                if (!VR)
+                {
+                    Quaternion.LookAt(ref Camera.Entity.Transform.Rotation, diff);
+                    var ypr = Camera.Entity.Transform.Rotation.YawPitchRoll;
+                    yaw = desiredYaw = ypr.X;
+                    pitch = desiredPitch = ypr.Y;
+                }
+                else
+                {
+                    Quaternion temp = Quaternion.Identity;
+                    Quaternion camrot = Camera.Entity.Transform.Rotation;
+                    camrot.Invert();
+                    Quaternion.LookAt(ref temp, diff);
+                    SetRotateButKeepCameraPos(temp * camrot);
+                }
+            }
+            else Quaternion.LookAt(ref Body.Entity.Transform.Rotation, diff);
         }
 
         /// <summary>
