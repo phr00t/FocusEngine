@@ -93,8 +93,7 @@ namespace Xenko.Physics.Bepu
             Body.IgnorePhysicsRotation = true;
             Body.IgnorePhysicsPosition = VR && Camera != null;
             Body.RotationLock = true;
-            Body.ActionPerSimulationTick -= UpdatePerSimulationTick;
-            Body.ActionPerSimulationTick += UpdatePerSimulationTick;
+            Body.ActionPerSimulationTick = UpdatePerSimulationTick;
 
             if (internalGame == null) internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
 
@@ -288,7 +287,7 @@ namespace Xenko.Physics.Bepu
         public float CameraHeightPercent = 0.95f;
 
         /// <summary>
-        /// If you'd like to perform a physics tick action on this rigidbody, use this
+        /// If you'd like to perform an additional physics tick action on this rigidbody, use this
         /// </summary>
         public Action<BepuRigidbodyComponent, float> AdditionalPerPhysicsAction = null;
 
