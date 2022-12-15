@@ -252,17 +252,28 @@ namespace Xenko.VirtualReality
             baseHMD.Xr.LocateSpace(UseGripInsteadOfAimPose ? myGripSpace : myAimSpace, baseHMD.globalPlaySpace,
                                    baseHMD.globalFrameState.PredictedDisplayTime, ref handLocation);
 
-            currentPos.X = handLocation.Pose.Position.X;
-            currentPos.Y = handLocation.Pose.Position.Y;
-            currentPos.Z = handLocation.Pose.Position.Z;
-
-            currentVel.X = sv.LinearVelocity.X;
-            currentVel.Y = sv.LinearVelocity.Y;
-            currentVel.Z = sv.LinearVelocity.Z;
+            if ((sv.VelocityFlags & SpaceVelocityFlags.SpaceVelocityLinearValidBit) == 0 || sv.LinearVelocity.X == 0f && sv.LinearVelocity.Y == 0f && sv.LinearVelocity.Z == 0f)
+            {
+                // invalid linear velocity, try calculating it based on position difference
+                currentVel.X = handLocation.Pose.Position.X - currentPos.X;
+                currentVel.Y = handLocation.Pose.Position.Y - currentPos.Y;
+                currentVel.Z = handLocation.Pose.Position.Z - currentPos.Z;
+                currentVel /= (float)time.Elapsed.TotalSeconds;
+            }
+            else
+            {
+                currentVel.X = sv.LinearVelocity.X;
+                currentVel.Y = sv.LinearVelocity.Y;
+                currentVel.Z = sv.LinearVelocity.Z;
+            }
 
             currentAngVel.X = sv.AngularVelocity.X;
             currentAngVel.Y = sv.AngularVelocity.Y;
             currentAngVel.Z = sv.AngularVelocity.Z;
+
+            currentPos.X = handLocation.Pose.Position.X;
+            currentPos.Y = handLocation.Pose.Position.Y;
+            currentPos.Z = handLocation.Pose.Position.Z;
 
             currentVel *= baseHMD.BodyScaling;
             currentPos *= baseHMD.BodyScaling;
