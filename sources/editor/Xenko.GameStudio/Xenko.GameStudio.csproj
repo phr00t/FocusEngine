@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
   <Import Project="..\Xenko.PrivacyPolicy\Xenko.PrivacyPolicy.projitems" Label="Shared" Condition="Exists('..\Xenko.PrivacyPolicy\Xenko.PrivacyPolicy.projitems')" />
   <Import Project="..\..\shared\Xenko.Core.ShellHelper\Xenko.Core.ShellHelper.projitems" Label="Shared" />
   <Import Project="..\Xenko.Editor.CrashReport\Xenko.Editor.CrashReport.projitems" Label="Shared" />
@@ -40,7 +40,7 @@
   <ItemGroup>
     <PackageReference Include="SharpDX" Version="4.2.0" />
     <PackageReference Include="EnvDTE" Version="8.0.2" />
-    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
+    <PackageReference Include="System.Collections.Immutable" Version="7.0.0" />
     <PackageReference Include="Xenko.CrashReport" Version="1.0.1" />
     <PackageReference Include="Mono.Cecil" Version="0.10.4" />
     <Reference Include="Renci.SshNet, Version=2016.0.0.0, Culture=neutral, PublicKeyToken=1cee9f8bde3db106, processorArchitecture=MSIL">

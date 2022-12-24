@@ -35,7 +35,7 @@
   
   <ItemGroup>
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="6.0.5" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.0" />
   </ItemGroup>
   
   <ItemGroup>
@@ -108,4 +108,7 @@
   
   <Import Project="$(XenkoPostSettingsTargets)" />
   <Import Project="Sdk.targets" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
+  <ItemGroup>
+    <PackageReference Update="StyleCop.Analyzers" Version="1.1.118" />
+  </ItemGroup>
 </Project>

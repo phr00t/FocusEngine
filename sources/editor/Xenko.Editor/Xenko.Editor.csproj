@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <Import Project="..\..\targets\Xenko.PreSettings.targets" />
   <Import Project="Sdk.props" Sdk="MSBuild.Sdk.Extras" Version="2.0.54" />
   <PropertyGroup>
@@ -17,12 +17,12 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System.ComponentModel.Composition" />
-    <PackageReference Include="Microsoft.Build" Version="17.3.1" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.3.1" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build" Version="17.4.0" ExcludeAssets="runtime" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.4.0" ExcludeAssets="runtime" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
     <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
     <Reference Include="System.ServiceModel" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="6.0.0" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="7.0.0" />
     <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />

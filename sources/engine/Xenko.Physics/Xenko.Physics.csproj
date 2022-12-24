@@ -58,4 +58,7 @@
       <BuildOutputInPackage Include="$(OutputPath)BepuUtilities.dll" />
     </ItemGroup>
   </Target>
+  <ItemGroup>
+    <PackageReference Update="StyleCop.Analyzers" Version="1.1.118" />
+  </ItemGroup>
 </Project>
