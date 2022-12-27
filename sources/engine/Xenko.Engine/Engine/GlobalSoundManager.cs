@@ -37,6 +37,31 @@ namespace Xenko.Engine
         /// </summary>
         public static float MinimumDistanceToListener = 1f;
 
+        /// <summary>
+        /// If a looped sound is out of range, play it anyway? You want it played if it will come near the player at some point. Defaults to true. Set to false to reduce overlapping sound usage. ignoreDistanceCheck will override this if set on function calls.
+        /// </summary>
+        public static bool PlayOutofRangeLoopedSounds = true;
+
+        /// <summary>
+        /// Different policies for replacing existing sounds when new ones want to play (and we ran out of overlapping sounds)
+        /// </summary>
+        public enum REPLACE_SOUND_POLICY
+        {
+            NO_REPLACING,
+            REPLACE_ANY,
+            REPLACE_UNLOOPED_ONLY
+        }
+
+        /// <summary>
+        /// If you want a sound URL to have its own replacement policy, set it in this dictionary
+        /// </summary>
+        public static Dictionary<string, REPLACE_SOUND_POLICY> ReplaceSoundOverrides = new Dictionary<string, REPLACE_SOUND_POLICY>();
+
+        /// <summary>
+        /// If we have hit the overlap max for a new sound that wants to play, should we stop the oldest one and replace it? Defaults to REPLACE_OLDEST_UNLOOPED_ONLY
+        /// </summary>
+        public static REPLACE_SOUND_POLICY DefaultReplacementPolicy = REPLACE_SOUND_POLICY.REPLACE_UNLOOPED_ONLY;
+
         public static SoundInstance PlayCentralSound(string url, float pitch = 1f, float volume = 1f, float pan = 0f, bool looped = false)
         {
             SoundInstance s = getFreeInstance(url, false);
@@ -69,9 +94,9 @@ namespace Xenko.Engine
             else return desiredPos;
         }
 
-        public static SoundInstance PlayPositionSound(string url, Vector3 position, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
+        public static SoundInstance PlayPositionSound(string url, Vector3 position, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false, bool ignoreDistanceCheck = false)
         {
-            if (MaxSoundDistance > 0f && !looped)
+            if (ignoreDistanceCheck == false && MaxSoundDistance > 0f && (!PlayOutofRangeLoopedSounds || !looped))
             {
                 float sqrDist = ((position - AudioEngine.DefaultListener.Position) * distanceScale).LengthSquared();
                 if (sqrDist >= MaxSoundDistance * MaxSoundDistance) return null;
@@ -88,10 +113,10 @@ namespace Xenko.Engine
             return s;
         }
 
-        public static SoundInstance PlayAttachedSound(string url, Entity parent, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
+        public static SoundInstance PlayAttachedSound(string url, Entity parent, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false, bool ignoreDistanceCheck = false)
         {
             Vector3 pos = parent.Transform.WorldPosition(true);
-            if (MaxSoundDistance > 0f && !looped)
+            if (ignoreDistanceCheck == false && MaxSoundDistance > 0f && (!PlayOutofRangeLoopedSounds || !looped))
             {
                 float sqrDist = ((pos - AudioEngine.DefaultListener.Position) * distanceScale).LengthSquared();
                 if (MaxSoundDistance > 0f && sqrDist >= MaxSoundDistance * MaxSoundDistance) return null;
@@ -124,19 +149,19 @@ namespace Xenko.Engine
             });
         }
 
-        public static Task<SoundInstance> PlayPositionSoundTask(string url, Vector3 position, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
+        public static Task<SoundInstance> PlayPositionSoundTask(string url, Vector3 position, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false, bool ignoreDistanceCheck = false)
         {
             return Task.Factory.StartNew<SoundInstance>(() =>
             {
-                return PlayPositionSound(url, position, pitch, volume, distanceScale, looped);
+                return PlayPositionSound(url, position, pitch, volume, distanceScale, looped, ignoreDistanceCheck);
             });
         }
 
-        public static Task<SoundInstance> PlayAttachedSoundTask(string url, Entity parent, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false)
+        public static Task<SoundInstance> PlayAttachedSoundTask(string url, Entity parent, float pitch = 1f, float volume = 1f, float distanceScale = 1f, bool looped = false, bool ignoreDistanceCheck = false)
         {
             return Task.Factory.StartNew<SoundInstance>(() =>
             {
-                return PlayAttachedSound(url, parent, pitch, volume, distanceScale, looped);
+                return PlayAttachedSound(url, parent, pitch, volume, distanceScale, looped, ignoreDistanceCheck);
             });
         }
 
@@ -255,14 +280,41 @@ namespace Xenko.Engine
 
             if (instances.TryGetValue(url, out var ins))
             {
+                if (ReplaceSoundOverrides.TryGetValue(url, out var ReplacementPolicy) == false)
+                    ReplacementPolicy = DefaultReplacementPolicy;
+
+                SoundInstance oldestSI = null;
+                float replaceScore = 0f;
                 for (int i=0; i<ins.Count; i++)
                 {
-                    if (ins[i].PlayState == Media.PlayState.Stopped)
+                    var snd = ins[i];
+                    if (snd.PlayState == Media.PlayState.Stopped)
                         return ins[i];
+
+                    if (ReplacementPolicy != REPLACE_SOUND_POLICY.NO_REPLACING)
+                    {
+                        float myscore = (float)snd.Position.TotalSeconds + (snd.IsSpatialized ? (snd.SpatializedPosition - snd.Listener.Position).Length() : 0f);
+                        if ((i == 0 || myscore > replaceScore) && (ReplacementPolicy == REPLACE_SOUND_POLICY.REPLACE_ANY || snd.IsLooping == false))
+                        {
+                            oldestSI = snd;
+                            replaceScore = myscore;
+                        }
+                    }
                 }
 
                 // have we reached our max sounds though?
-                if (ins.Count >= MaxSameSoundOverlaps) return null;
+                // are we going to try and replace it?
+                if (ins.Count >= MaxSameSoundOverlaps)
+                {
+                    if (oldestSI != null)
+                    {
+                        oldestSI.Stop();
+                        return oldestSI;
+                    }
+
+                    // max reached and no replacement
+                    return null;
+                }
 
                 // don't have a free one to play, add a new one to the list
                 if (Sounds.TryGetValue(url, out var snd0))

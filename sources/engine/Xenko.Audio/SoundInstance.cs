@@ -29,8 +29,11 @@ namespace Xenko.Audio
         internal AudioLayer.Source Source;
 
         internal AudioListener Listener;
+        internal Vector3 spos = Vector3.Zero;
 
         public bool IsSpatialized => spatialized;
+
+        public Vector3 SpatializedPosition => spatialized ? spos : Listener.Position;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SoundInstance"/> class using a dynamic sound source.
@@ -214,6 +217,7 @@ namespace Xenko.Audio
         {
             if (!spatialized) return;
 
+            spos = Position;
             Vector3 vel = velocity ?? Vector3.Zero;
             Vector3 dir = direction == null ? Vector3.UnitZ : Vector3.Transform(Vector3.UnitZ, direction.Value);
             Vector3 up = direction == null ? Vector3.UnitY : Vector3.Transform(Vector3.UnitY, direction.Value);
