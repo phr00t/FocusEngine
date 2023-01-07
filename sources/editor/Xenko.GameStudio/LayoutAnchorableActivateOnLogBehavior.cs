@@ -13,7 +13,10 @@ namespace Xenko.GameStudio
         protected override void Activate()
         {
             AssociatedObject.Show();
-            AssociatedObject.IsSelected = true;
+            try
+            {
+                AssociatedObject.IsSelected = true;
+            } catch { } // sometimes this crashes..?
             AssociatedObject.IsActive = true;       // This ensures this 'tab' is the selected one in a tab group
         }
     }
