@@ -1442,6 +1442,9 @@ namespace Xenko.Core.Assets.Editor.ViewModel
             }
             // Compute the list of compatible templates per file extension
 
+            // no files? bail
+            if (files.Count == 0) return;
+
             var extensionsList = new Dictionary<string, int>();
             foreach (var file in files)
             {
