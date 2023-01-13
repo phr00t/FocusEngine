@@ -810,6 +810,12 @@ namespace Xenko.Physics.Bepu
         [DataMember(75)]
         public bool IgnorePhysicsPosition = false;
 
+        /// <summary>
+        /// Automatically grab the pose from the attached entity every simulation step? Works best with Kinematic objects
+        /// </summary>
+        [DataMember(85)]
+        public bool GetPoseFromEntity = false;
+
         [DataMemberIgnore]
         public Vector3? LocalPhysicsOffset = null;
 
@@ -829,7 +835,13 @@ namespace Xenko.Physics.Bepu
         internal void UpdateCachedPoseAndVelocity()
         {
             wasAwake = InternalBody.Awake;
-            if (newPos || newRotation)
+            if (GetPoseFromEntity)
+            {
+                InternalBody.Pose.Position = BepuHelpers.ToBepu(Entity.Transform.WorldPosition());
+                InternalBody.Pose.Orientation = BepuHelpers.ToBepu(Entity.Transform.WorldRotation());
+                if (!wasAwake) InternalBody.UpdateBounds();
+            }
+            else if (newPos || newRotation)
             {
                 if (newPos) { newPos = false; InternalBody.Pose.Position = bodyDescription.Pose.Position; }
                 if (newRotation) { newRotation = false; InternalBody.Pose.Orientation = bodyDescription.Pose.Orientation; }
@@ -848,6 +860,7 @@ namespace Xenko.Physics.Bepu
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void UpdateTransformationComponent(Entity entity)
         {
+            if (GetPoseFromEntity) return;
             if (IgnorePhysicsPosition == false)
             {
                 Vector3 pos = Position;
