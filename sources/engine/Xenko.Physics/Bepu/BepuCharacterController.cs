@@ -80,11 +80,12 @@ namespace Xenko.Physics.Bepu
                 AdditionalVREntitiesToDisconnectFromCamera = new HashSet<Entity>();
 
             // can we find an attached camera?
-            foreach(Entity e in baseBody.GetChildren())
+            foreach (Entity e in baseBody.GetChildren())
             {
-                if (Camera == null)
+                var camCheck = e.Get<CameraComponent>();
+                if (camCheck != null)
                 {
-                    Camera = e.Get<CameraComponent>();
+                    Camera = camCheck;
                     break;
                 }
             }
