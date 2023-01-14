@@ -51,7 +51,7 @@ namespace Xenko.UI.Controls
 
             var textRegionSize = (ActualWidth - Padding.Left - Padding.Right);
             var fontScale = LayoutingContext.RealVirtualResolutionRatio;
-            var fontSize = new Vector2(fontScale.Y * ActualTextSize); // we don't want letters non-uniform ratio
+            var fontSize = new Vector2(fontScale.X * ActualTextSize); // we don't want letters non-uniform ratio
 
             // calculate the offset of the beginning of the text due to text alignment
             var alignmentOffset = -textRegionSize / 2f;
@@ -63,7 +63,7 @@ namespace Xenko.UI.Controls
 
                 alignmentOffset = TextAlignment == TextAlignment.Center ? -textWidth / 2 : -textRegionSize / 2f + (textRegionSize - textWidth);
             }
-            var touchInText = position.X - alignmentOffset;
+            var touchInText = position.X - alignmentOffset - TextOffset.X;
 
             // Find the first character starting after the click
             var characterIndex = 0;

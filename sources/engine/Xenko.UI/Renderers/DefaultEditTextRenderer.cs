@@ -64,7 +64,8 @@ namespace Xenko.UI.Renderers
             }
 
             var selectionWorldMatrix = editText.WorldMatrixInternal;
-            selectionWorldMatrix.M41 += offsetTextStart + selectionSize / 2 + offsetAlignment;
+            selectionWorldMatrix.M42 += editText.TextOffset.Y;
+            selectionWorldMatrix.M41 += offsetTextStart + selectionSize / 2 + offsetAlignment + editText.TextOffset.X;
             var selectionScaleVector = new Vector3(selectionSize, editText.LineCount * lineSpacing, 0);
             Batch.DrawRectangle(ref selectionWorldMatrix, ref selectionScaleVector, ref color, context.DepthBias + 1);
         }
@@ -133,6 +134,9 @@ namespace Xenko.UI.Renderers
                 Batch.BeginCustom(context.GraphicsContext, 1);
             }
 
+            drawCommand.Matrix.M42 += editText.TextOffset.Y;
+            drawCommand.Matrix.M41 += editText.TextOffset.X;
+
             // Draw the text
             Batch.DrawString(font, editText.TextToDisplay, ref drawCommand);
 
@@ -151,7 +155,8 @@ namespace Xenko.UI.Renderers
 
                 var sizeCaret = editText.CaretWidth / fontScale.X;
                 var caretWorldMatrix = element.WorldMatrixInternal;
-                caretWorldMatrix.M41 += offsetTextStart + offsetAlignment + (editText.CaretPosition > editText.SelectionStart? selectionSize: 0);
+                caretWorldMatrix.M42 += editText.TextOffset.Y;
+                caretWorldMatrix.M41 += offsetTextStart + offsetAlignment + (editText.CaretPosition > editText.SelectionStart? selectionSize: 0) + editText.TextOffset.X;
                 var caretScaleVector = new Vector3(sizeCaret, editText.LineCount * lineSpacing, 0);
                 Batch.DrawRectangle(ref caretWorldMatrix, ref caretScaleVector, ref caretColor, context.DepthBias + 3);
             }

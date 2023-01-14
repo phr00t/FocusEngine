@@ -246,6 +246,13 @@ namespace Xenko.UI.Controls
         }
 
         /// <summary>
+        /// Offset the text inside the edit area by this much
+        /// </summary>
+        [DataMember]
+        [Display(category: AppearanceCategory)]
+        public Vector2 TextOffset { get; set; } = Vector2.Zero;
+
+        /// <summary>
         /// Gets or sets the color of the text.
         /// </summary>
         /// <userdoc>The color of the text.</userdoc>
