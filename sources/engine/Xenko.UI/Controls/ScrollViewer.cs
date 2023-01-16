@@ -782,8 +782,8 @@ namespace Xenko.UI.Controls
             {
                 Vector3 topLeft = child.RenderOffsets + offsets;
                 Vector3 bottomRight = topLeft + child.RenderSize;
-                child.Hidden = !(topLeft.Y < RenderSize.Y && bottomRight.Y > 0f &&
-                                 topLeft.X < RenderSize.X && bottomRight.X > 0f);
+                child.Hidden = !(topLeft.Y <= RenderSize.Y && bottomRight.Y >= 0f &&
+                                 topLeft.X <= RenderSize.X && bottomRight.X >= 0f);
             }
 
             // force re-calculation of main element and scroll bars world matrices
