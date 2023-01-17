@@ -120,7 +120,7 @@ namespace Xenko.UI.Controls
             IsSelectionActive = false;
             Padding = new Thickness(8, 4, 0, 8, 8, 0);
             DrawLayerNumber += 4; // ( 1: image, 2: selection, 3: Text, 4:Cursor) 
-            CaretWidth = 1f;
+            CaretScale = Vector2.One;
             CaretFrequency = 1f;
         }
 
@@ -305,24 +305,11 @@ namespace Xenko.UI.Controls
         public Color CaretColor { get; set; } = Color.FromAbgr(0xF0F0F0FF);
 
         /// <summary>
-        /// Gets or sets the width of the edit text's cursor (in virtual pixels).
+        /// Gets or sets the size of the edit text's cursor (in virtual pixels).
         /// </summary>
-        /// <remarks>The value is coerced in the range [0, <see cref="float.MaxValue"/>].</remarks>
-        /// <userdoc>The width of the edit text's cursor (in virtual pixels).</userdoc>
         [DataMember]
-        [DataMemberRange(0, 2)]
         [Display(category: AppearanceCategory)]
-        [DefaultValue(0)]
-        public float CaretWidth
-        {
-            get { return caretWith; }
-            set
-            {
-                if (float.IsNaN(value))
-                    return;
-                caretWith = MathUtil.Clamp(value, 0.0f, float.MaxValue);
-            }
-        }
+        public Vector2 CaretScale { get; set; } = Vector2.One;
 
         /// <summary>
         /// Gets or sets the color of the selection.

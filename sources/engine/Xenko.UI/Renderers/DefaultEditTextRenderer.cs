@@ -153,11 +153,11 @@ namespace Xenko.UI.Renderers
                 if (editText.Font.FontType != SpriteFontType.Dynamic)
                     lineSpacing *= editText.ActualTextSize / font.Size;
 
-                var sizeCaret = editText.CaretWidth / fontScale.X;
                 var caretWorldMatrix = element.WorldMatrixInternal;
-                caretWorldMatrix.M42 += editText.TextOffset.Y;
+                var linespace = editText.LineCount * lineSpacing;
+                caretWorldMatrix.M42 += editText.TextOffset.Y + (1f - editText.CaretScale.Y) * linespace * 0.5f;
                 caretWorldMatrix.M41 += offsetTextStart + offsetAlignment + (editText.CaretPosition > editText.SelectionStart? selectionSize: 0) + editText.TextOffset.X;
-                var caretScaleVector = new Vector3(sizeCaret, editText.LineCount * lineSpacing, 0);
+                var caretScaleVector = new Vector3(editText.CaretScale.X, editText.CaretScale.Y * linespace, 0f);
                 Batch.DrawRectangle(ref caretWorldMatrix, ref caretScaleVector, ref caretColor, context.DepthBias + 3);
             }
         }
