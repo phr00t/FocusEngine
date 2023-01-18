@@ -975,52 +975,23 @@ namespace Xenko.UI
                 Arrange(DesiredSizeWithMargins, false);
             }
 
-            // try to get quick sizes
-            float xsize = RenderSize.X > 0f || float.IsNaN(Width) ? RenderSize.X : Width;
-            float ysize = RenderSize.Y > 0f || float.IsNaN(Height) ? RenderSize.Y : Height;
+            bool badX = float.IsNaN(Width);
+            bool badY = float.IsNaN(Height);
 
-            if (xsize == 0f)
+            if (badX || badY)
             {
-                // got bullshit xsize
-                UIElement parent = Parent;
-                while (parent != null)
-                {
-                    float pwidth = parent.RenderSize.X > 0f || float.IsNaN(parent.Width) ? parent.RenderSize.X : parent.Width;
-                    if (pwidth > 0f)
-                    {
-                        xsize = pwidth;
-                        break;
-                    }
-                    parent = parent.Parent;
-                }
+                Vector2 fixedSize;
 
-                // still got trash? default it is!
-                if (xsize == 0f)
-                    xsize = uiComponent?.Resolution.X ?? 1280f;
+                if (Parent != null)
+                    fixedSize = Parent.GetNoBullshitSize(uiComponent);
+                else if (uiComponent != null)
+                    fixedSize = uiComponent.Resolution.XY();
+                else fixedSize = RenderSize.XY();
+
+                return new Vector2(badX ? fixedSize.X : Width, badY ? fixedSize.Y : Height);
             }
-
-            if (ysize == 0f)
-            {
-                // got bullshit ysize
-                UIElement parent = Parent;
-                while (parent != null)
-                {
-                    float pheight = parent.RenderSize.Y > 0f || float.IsNaN(parent.Height) ? parent.RenderSize.Y : parent.Height;
-                    if (pheight > 0f)
-                    {
-                        ysize = pheight;
-                        break;
-                    }
-                    parent = parent.Parent;
-                }
-
-                // still got trash? default it is!
-                if (ysize == 0f)
-                    ysize = uiComponent?.Resolution.Y ?? 720f;
-            }
-
-            // god that was terrible
-            return new Vector2(xsize, ysize);
+            
+            return new Vector2(Width, Height);
         }
 
         /// <inheritdoc/>
