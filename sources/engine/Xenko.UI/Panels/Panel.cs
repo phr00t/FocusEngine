@@ -294,12 +294,20 @@ namespace Xenko.UI.Panels
         /// <param name="sorter">Function to sort UIElements. Use null to default to sorting by UIElement's area</param>
         /// <param name="newlineForThese">If the organizer comes across a UIelement in this list, start a newline for placing it</param>
         /// <param name="uiComponent">Provide the uiComponent for better default resolution sizing/fitting, not required for default 1280x720 UI components</param>
+        /// <param name="skipThese">Don't organize these elements.</param>
         /// <returns>Returns a Vector2 of the TopLeft position after all UIElements have been placed</returns>
         public Vector2 OrganizeChildren(float XMargin = 10f, float YMargin = 10f, List<Type> typesToCenter = null,
                                         ORGANIZE_SORT_OPTIONS sort_options = ORGANIZE_SORT_OPTIONS.NORMAL_SORT,
-                                        Comparison<UIElement> sorter = null, List<UIElement> newlineForThese = null, UIComponent uiComponent = null)
+                                        Comparison<UIElement> sorter = null, List<UIElement> newlineForThese = null, UIComponent uiComponent = null,
+                                        List<UIElement> skipThese = null)
         {
             var allChildren = new List<UIElement>(Children);
+
+            if (skipThese != null)
+            {
+                for (int i = 0; i < skipThese.Count; i++)
+                    allChildren.Remove(skipThese[i]);
+            }
 
             if (sort_options != ORGANIZE_SORT_OPTIONS.NO_SORTING)
             {
