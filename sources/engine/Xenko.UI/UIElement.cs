@@ -968,13 +968,6 @@ namespace Xenko.UI
         /// </summary>
         public Vector2 GetNoBullshitSize(UIComponent uiComponent = null)
         {
-            // wait, is the size invalid?
-            if (IsMeasureValid == false)
-            {
-                Measure(previousProvidedMeasureSize);
-                Arrange(DesiredSizeWithMargins, false);
-            }
-
             bool badX = float.IsNaN(Width);
             bool badY = float.IsNaN(Height);
 
@@ -986,7 +979,17 @@ namespace Xenko.UI
                     fixedSize = Parent.GetNoBullshitSize(uiComponent);
                 else if (uiComponent != null)
                     fixedSize = uiComponent.Resolution.XY();
-                else fixedSize = RenderSize.XY();
+                else
+                {
+                    // wait, is the size invalid?
+                    if (IsMeasureValid == false)
+                    {
+                        Measure(previousProvidedMeasureSize);
+                        Arrange(DesiredSizeWithMargins, false);
+                    }
+
+                    fixedSize = RenderSize.XY();
+                }
 
                 return new Vector2(badX ? fixedSize.X : Width, badY ? fixedSize.Y : Height);
             }
