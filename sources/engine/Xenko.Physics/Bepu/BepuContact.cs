@@ -11,6 +11,20 @@ namespace Xenko.Physics.Bepu
         public BepuPhysicsComponent A, B;
         public Xenko.Core.Mathematics.Vector3 Normal, Offset;
 
+        /// <summary>
+        /// Swaps A and B so that B is always the "other" body, and A is myBody (if it wasn't already)
+        /// </summary>
+        /// <param name="myBody">The "host" body of the contact</param>
+        /// <returns>Returns the "other" body that hit myBody</returns>
+        public BepuPhysicsComponent SwapIfNeeded(BepuRigidbodyComponent myBody)
+        {
+            if (B == myBody) Swap();
+            return B;
+        }
+
+        /// <summary>
+        /// Swaps A and B. Also flips the normal and corrects offset
+        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Swap()
         {
