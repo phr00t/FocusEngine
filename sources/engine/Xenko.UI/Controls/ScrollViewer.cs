@@ -169,8 +169,8 @@ namespace Xenko.UI.Controls
         /// </summary>
         [DataMember]
         [Display(category: BehaviorCategory)]
-        [DefaultValue(1.0f)]
-        public float MouseWheelScrollSensitivity { get; set; } = 10.0f;
+        [DefaultValue(15.0f)]
+        public float MouseWheelScrollSensitivity { get; set; } = 15.0f;
 
         /// <summary>
         /// Gets or sets the value indicating if the element should snap its scrolling to anchors.
@@ -385,11 +385,17 @@ namespace Xenko.UI.Controls
             if (elapsedSeconds < MathUtil.ZeroTolerance)
                 return;
 
-            if (MouseWheelScrollSensitivity != 0f &&
-                InputManager.instance != null &&
-                MouseOverState != MouseOverState.MouseOverNone)
+            if (MouseOverState != MouseOverState.MouseOverNone && MouseWheelScrollSensitivity != 0f && InputManager.instance != null)
             {
-                WheelScroll(InputManager.instance.MouseWheelDelta);
+                // other methods to scroll this
+                var VRD = VirtualReality.VRDeviceSystem.GetSystem;
+                if (VRD != null && VRD.Enabled && VRD.Device != null)
+                {
+                    var scrollVector = VRD.GetController(VirtualReality.TouchControllerHand.Left)?.ThumbstickAxis ?? Vector2.Zero +
+                                       VRD.GetController(VirtualReality.TouchControllerHand.Right)?.ThumbstickAxis ?? Vector2.Zero;
+                    scrollVector *= (float)time.Elapsed.TotalSeconds;
+                    WheelScroll(ScrollMode == ScrollingMode.Vertical ? scrollVector.Y : scrollVector.X);
+                } else WheelScroll(InputManager.instance.MouseWheelDelta);
             }
 
             if (IsUserScrollingViewer || userManuallyScrolled) // scrolling is controlled by the user.
