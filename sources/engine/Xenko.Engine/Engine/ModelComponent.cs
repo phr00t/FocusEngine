@@ -256,6 +256,32 @@ namespace Xenko.Engine
             return 0;
         }
 
+        /// <summary>
+        /// Generate an oriented bounding box for this ModelComponent. Automatically includes all meshes transformed by its world matrix.
+        /// </summary>
+        /// <param name="updateModelBounds">Update the model's bounding box? Useful if meshes changed. Will be done if Model.BoundingBox is Empty anyway.</param>
+        /// <param name="updateWorldMatrix">Update the entity's transform worldmatrix? This is useful if you recently moved the object and it hasn't been rendered yet.</param>
+        /// <returns>An oriented bounding box containing meshes, transformed according to the world matrix</returns>
+        /// <exception cref="InvalidOperationException">Raises an exception if this ModelComponent has no model</exception>
+        public OrientedBoundingBox GetOrientedBox(bool updateModelBounds = false, bool updateWorldMatrix = false)
+        {
+            if (Model == null)
+                throw new InvalidOperationException("Can't get Oriented Box of ModelComponent '" + Entity.Name + "' without a Model");
+
+            // make sure our transforms are all set
+            if (updateModelBounds || Model.BoundingBox == BoundingBox.Empty)
+                Model.UpdateBoundingBox();
+            if (updateWorldMatrix)
+                Entity.Transform.UpdateWorldMatrix();
+
+            // make the box
+            OrientedBoundingBox box = new OrientedBoundingBox(Model.BoundingBox);
+            box.Transformation = Matrix.Transformation(Vector3.One, Entity.Transform.WorldRotation(), Entity.Transform.WorldPosition());
+            Vector3 scale = Entity.Transform.WorldScale();
+            box.Scale(ref scale);
+            return box;
+        }
+
         private void ModelUpdated()
         {
             if (model != null)
