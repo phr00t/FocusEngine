@@ -259,11 +259,12 @@ namespace Xenko.Engine
         /// <summary>
         /// Generate an oriented bounding box for this ModelComponent. Automatically includes all meshes transformed by its world matrix.
         /// </summary>
+        /// <param name="scale">Scales the result by this scalar. 1f is default, which is the scale of the model including its world transformation scale.</param>
         /// <param name="updateModelBounds">Update the model's bounding box? Useful if meshes changed. Will be done if Model.BoundingBox is Empty anyway.</param>
         /// <param name="updateWorldMatrix">Update the entity's transform worldmatrix? This is useful if you recently moved the object and it hasn't been rendered yet.</param>
         /// <returns>An oriented bounding box containing meshes, transformed according to the world matrix</returns>
         /// <exception cref="InvalidOperationException">Raises an exception if this ModelComponent has no model</exception>
-        public OrientedBoundingBox GetOrientedBox(bool updateModelBounds = false, bool updateWorldMatrix = false)
+        public OrientedBoundingBox GetOrientedBox(float scale = 1f, bool updateModelBounds = false, bool updateWorldMatrix = false)
         {
             if (Model == null)
                 throw new InvalidOperationException("Can't get Oriented Box of ModelComponent '" + Entity.Name + "' without a Model");
@@ -277,8 +278,9 @@ namespace Xenko.Engine
             // make the box
             OrientedBoundingBox box = new OrientedBoundingBox(Model.BoundingBox);
             box.Transformation = Matrix.Transformation(Vector3.One, Entity.Transform.WorldRotation(), Entity.Transform.WorldPosition());
-            Vector3 scale = Entity.Transform.WorldScale();
-            box.Scale(ref scale);
+            Vector3 worldscale = Entity.Transform.WorldScale();
+            if (scale != 1f) worldscale *= scale;
+            box.Scale(ref worldscale);
             return box;
         }
 
