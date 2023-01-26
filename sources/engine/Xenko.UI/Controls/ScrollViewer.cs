@@ -895,7 +895,7 @@ namespace Xenko.UI.Controls
                 lastFrameTranslation[index] -= translation[index];
 
             accumulatedTranslation += lastFrameTranslation;
-            if (!IsUserScrollingViewer && accumulatedTranslation.Length() > ScrollStartThreshold)
+            if (!IsUserScrollingViewer && CheckScrollThreshold())
             {
                 IsUserScrollingViewer = true;
                 lastFrameTranslation = accumulatedTranslation;
@@ -903,6 +903,19 @@ namespace Xenko.UI.Controls
 
             if (IsUserScrollingViewer)
                 args.Handled = true;
+        }
+
+        private bool CheckScrollThreshold()
+        {
+            switch (ScrollMode)
+            {
+                case ScrollingMode.Horizontal:
+                    return accumulatedTranslation.X > ScrollStartThreshold;
+                case ScrollingMode.Vertical:
+                    return accumulatedTranslation.Y > ScrollStartThreshold;
+                default:
+                    return accumulatedTranslation.Length() > ScrollStartThreshold;
+            }
         }
 
         private static void RaiseLeaveTouchEventToHierarchyChildren(UIElement parent, TouchEventArgs args)
