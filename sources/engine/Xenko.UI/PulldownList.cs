@@ -86,7 +86,7 @@ namespace Xenko.UI
         /// What is selected right now?
         /// </summary>
         /// <returns>Selected option, null otherwise</returns>
-        public object GetSelection()
+        public override object GetSelection()
         {
             return currentSelection;
         }

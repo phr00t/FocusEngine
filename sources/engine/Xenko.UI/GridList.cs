@@ -78,6 +78,22 @@ namespace Xenko.UI
         }
 
         /// <summary>
+        /// What is selected right now? Only supports lists with 1 possible selection. Use GetEntries if more than 1 can be selected.
+        /// </summary>
+        /// <returns>Selected item on list of ToggleButtons, null otherwise</returns>
+        /// <exception cref="InvalidOperationException">Exception raised if this list can support multiple selections</exception>
+        virtual public object GetSelection()
+        {
+            if (MaxCheckedAllowed > 1)
+                throw new InvalidOperationException(myGrid.Name + " GridList can have multiple selections. Use GetEntries instead.");
+
+            var selected = GetEntries(true);
+            if (selected.Count == 1) return selected[0];
+
+            return null;
+        }
+
+        /// <summary>
         /// How many toggle buttons are checked?
         /// </summary>
         virtual public int GetSelectedCount()
