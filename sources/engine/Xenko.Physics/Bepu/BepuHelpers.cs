@@ -413,19 +413,36 @@ namespace Xenko.Physics.Bepu
         /// <returns>Returns false if no mesh could be made</returns>
         public static unsafe bool GenerateMeshShape(Entity e, out BepuPhysics.Collidables.Mesh outMesh, out BepuUtilities.Memory.BufferPool poolUsed, bool skipAlreadyHasCollider = false)
         {
+            // strike out my transform so it isn't included in shape
+            Vector3 originalPosition = e.Transform.Position;
+            Quaternion originalRotation = e.Transform.Rotation;
+            Vector3 originalScale = e.Transform.Scale;
+            e.Transform.Position = Vector3.Zero;
+            e.Transform.Scale = Vector3.One;
+            e.Transform.Rotation = Quaternion.Identity;
             // get all meshes
-            List<Xenko.Rendering.Mesh> meshes = new List<Xenko.Rendering.Mesh>();
+            List<MeshTransformed> meshes = new List<MeshTransformed>();
             CollectMeshes(e, meshes, skipAlreadyHasCollider);
+            // restore e transform
+            e.Transform.Position = originalPosition;
+            e.Transform.Scale = originalScale;
+            e.Transform.Rotation = originalRotation;
+            e.Transform.UpdateWorldMatrix(true, false);
             List<Vector3> allPositions = new List<Vector3>();
             List<int> allIndicies = new List<int>();
             for (int i = 0; i < meshes.Count; i++)
             {
-                getMeshOutputs(meshes[i], out var pos, out var indicies);
+                MeshTransformed mt = meshes[i];
+                getMeshOutputs(mt.mesh, out var pos, out var indicies);
                 for (int j = 0; j < indicies.Count; j++)
-                {
                     allIndicies.Add(indicies[j] + allPositions.Count);
+                if (mt.matrix.Equals(Matrix.Identity))
+                    allPositions.AddRange(pos);
+                else
+                {
+                    for (int j = 0; j < pos.Count; j++)
+                        allPositions.Add((Vector3)Vector3.Transform(pos[j], mt.matrix));
                 }
-                allPositions.AddRange(pos);
             }
 
             if (allIndicies.Count == 0 || allPositions.Count == 0)
@@ -438,18 +455,28 @@ namespace Xenko.Physics.Bepu
             return GenerateMeshShape(allPositions, allIndicies, out outMesh, out poolUsed, e.Transform.WorldScale());
         }
 
-        private static void CollectMeshes(Entity e, List<Xenko.Rendering.Mesh> meshes, bool skipAlreadyDone)
+        private class MeshTransformed
+        {
+            public Xenko.Rendering.Mesh mesh;
+            public Matrix matrix;
+        }
+
+        private static void CollectMeshes(Entity e, List<MeshTransformed> meshes, bool skipAlreadyDone)
         {
             // skip stuff that already has a component (so we don't double it up)
             if (skipAlreadyDone && e.Get<BepuStaticColliderComponent>() != null) return;
 
+            // make sure worldmatrix is updated
+            e.Transform.UpdateWorldMatrix(true, false);
+
             foreach(ModelComponent mc in e.GetAll<ModelComponent>())
             {
                 if (mc.Model == null) continue;
+                Matrix wm = e.Transform.WorldMatrix;
                 for (int i=0;i<mc.Model.Meshes.Count; i++)
                 {
                     var m = mc.Model.Meshes[i];
-                    if (m != null) meshes.Add(m);
+                    if (m != null) meshes.Add(new MeshTransformed() { matrix = wm, mesh = m });
                 }
             }
             foreach (Entity child in e.GetChildren())
@@ -498,19 +525,36 @@ namespace Xenko.Physics.Bepu
         public static unsafe bool GenerateBigMeshStaticColliders(Entity e, CollisionFilterGroups group = CollisionFilterGroups.DefaultFilter, CollisionFilterGroupFlags collidesWith = CollisionFilterGroupFlags.AllFilter,
                                                                  float friction = 0.5f, float maximumRecoverableVelocity = 1f, SpringSettings? springSettings = null, bool disposeOnDetach = false, bool skipAlreadyHasCollider = true)
         {
+            // strike out my transform so it isn't included in shape
+            Vector3 originalPosition = e.Transform.Position;
+            Quaternion originalRotation = e.Transform.Rotation;
+            Vector3 originalScale = e.Transform.Scale;
+            e.Transform.Position = Vector3.Zero;
+            e.Transform.Scale = Vector3.One;
+            e.Transform.Rotation = Quaternion.Identity;
             // get all meshes
-            List<Xenko.Rendering.Mesh> meshes = new List<Xenko.Rendering.Mesh>();
+            List<MeshTransformed> meshes = new List<MeshTransformed>();
             CollectMeshes(e, meshes, skipAlreadyHasCollider);
+            // restore e transform
+            e.Transform.Position = originalPosition;
+            e.Transform.Scale = originalScale;
+            e.Transform.Rotation = originalRotation;
+            e.Transform.UpdateWorldMatrix(true, false);
             List<Vector3> allPositions = new List<Vector3>();
             List<int> allIndicies = new List<int>();
             for (int i=0; i<meshes.Count; i++)
             {
-                getMeshOutputs(meshes[i], out var pos, out var indicies);
+                MeshTransformed mt = meshes[i];
+                getMeshOutputs(mt.mesh, out var pos, out var indicies);
                 for (int j=0; j<indicies.Count; j++)
-                {
                     allIndicies.Add(indicies[j] + allPositions.Count);
+                if (mt.matrix.Equals(Matrix.Identity))
+                    allPositions.AddRange(pos);
+                else
+                {
+                    for (int j = 0; j < pos.Count; j++)
+                        allPositions.Add((Vector3)Vector3.Transform(pos[j], mt.matrix));
                 }
-                allPositions.AddRange(pos);
             }
 
             if (allIndicies.Count == 0 || allPositions.Count == 0) return false;
