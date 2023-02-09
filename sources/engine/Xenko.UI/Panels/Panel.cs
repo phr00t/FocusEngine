@@ -308,7 +308,7 @@ namespace Xenko.UI.Panels
             for (int i = 0; i < allChildren.Count; i++)
             {
                 var c = allChildren[i];
-                if (c.Visibility != Visibility.Visible ||
+                if (c.Visibility == Visibility.Collapsed ||
                     skipThese != null && skipThese.Contains(c))
                 {
                     allChildren.RemoveAt(i);
