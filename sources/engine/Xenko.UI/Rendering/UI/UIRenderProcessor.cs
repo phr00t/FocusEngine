@@ -34,11 +34,12 @@ namespace Xenko.Rendering.UI
                 if (renderUIElement.Enabled)
                 {
                     if (uiComponent.IsFullScreen == false) {
-                        renderUIElement.BoundingBox.Center = uiComponent.Entity.Transform.WorldPosition();
+                        renderUIElement.BoundingBox.Center = renderUIElement.WorldMatrix3D.TranslationVector;
                         renderUIElement.WorldMatrix3D.GetScale(out renderUIElement.BoundingBox.Extent);
-                        renderUIElement.BoundingBox.Extent.X *= 0.5f * uiComponent.Resolution.X;
+                        float halfx = 0.5f * uiComponent.Resolution.X;
+                        renderUIElement.BoundingBox.Extent.X *= halfx;
+                        renderUIElement.BoundingBox.Extent.Z *= halfx;
                         renderUIElement.BoundingBox.Extent.Y *= 0.5f * uiComponent.Resolution.Y;
-                        renderUIElement.BoundingBox.Extent.Z *= 0.5f * uiComponent.Resolution.Z;
                     }
                     else {
                         renderUIElement.BoundingBox.Extent = Vector3.Zero; // always draw this
