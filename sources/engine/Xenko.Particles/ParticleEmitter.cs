@@ -816,9 +816,9 @@ namespace Xenko.Particles
         {
             public Vector3 _position;
             public Color4 _color;
-            public Quaternion _rotation;
             public Vector3 _velocity;
-            public float _lifetime, _size;
+            public Quaternion _rotation;
+            public float _lifetime, _size, _angle;
             public uint _seed;
         }
 
@@ -828,8 +828,8 @@ namespace Xenko.Particles
         /// Emit a single particle with specific parameters. Values provided as arguments here will be replaced by initializers,
         /// so only set what isn't being initialized by the particle system. Returns false if the particle system doesn't have capacity
         /// </summary>
-        public bool EmitSpecificParticle(Vector3 pos, Color4? color = null, Quaternion? rotation = null, float? size = null,
-                                         float life = 1f, Vector3? velocity = null, uint? seed = null, bool prioritize = false)
+        public bool EmitSpecificParticle(Vector3 pos, Color4? color = null, Quaternion? rotation3D = null, float? size = null,
+                                         float life = 1f, Vector3? velocity = null, uint? seed = null, bool prioritize = false, float? angle = null)
         {
             // first sanity check
             if (pool.AvailableParticles <= 0) return false;
@@ -846,7 +846,8 @@ namespace Xenko.Particles
                     pool.SpecificColors.Length < pool.ParticleCapacity)
                     pool.SpecificColors = new Color4[pool.ParticleCapacity];
             }
-            if (rotation.HasValue) pool.AddField(ParticleFields.Quaternion);
+            if (angle.HasValue) pool.AddField(ParticleFields.Rotation);
+            if (rotation3D.HasValue) pool.AddField(ParticleFields.Quaternion);
             if (size.HasValue)
             {
                 pool.AddField(ParticleFields.Size);
@@ -861,7 +862,8 @@ namespace Xenko.Particles
             {
                 _position = pos,
                 _color = color ?? Color4.White,
-                _rotation = rotation ?? Quaternion.Identity,
+                _angle = angle ?? 0f,
+                _rotation = rotation3D ?? Quaternion.Identity,
                 _size = size ?? 1f,
                 _velocity = velocity ?? Vector3.Zero,
                 _lifetime = life,
@@ -946,7 +948,7 @@ namespace Xenko.Particles
                     if (velField.IsValid()) *((Vector3*)particle[velField]) = sp._velocity;
                     if (clrField.IsValid()) *((Color4*)particle[clrField]) = sp._color;
                     if (sizeField.IsValid()) *((float*)particle[sizeField]) = sp._size;
-                    if (angField.IsValid()) *((float*)particle[angField]) = 0f;
+                    if (angField.IsValid()) *((float*)particle[angField]) = sp._angle;
 
                     if (pool.SpecificColors != null) pool.SpecificColors[particleIndex] = sp._color;
                     if (pool.SpecificSizes != null) pool.SpecificSizes[particleIndex] = sp._size;
