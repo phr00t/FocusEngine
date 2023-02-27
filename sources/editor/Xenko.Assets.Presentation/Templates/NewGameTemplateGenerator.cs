@@ -406,6 +406,7 @@ namespace Xenko.Assets.Presentation.Templates
             var logger = parameters.Logger;
 
             var presentationPackageFile = PackageStore.Instance.GetPackageFileName("Xenko.Samples.Templates", new PackageVersionRange(new PackageVersion(Xenko.Samples.Templates.ThisPackageVersion.Current)));
+            if (presentationPackageFile == null) return;
             var assetPackagesDir = UDirectory.Combine(presentationPackageFile.GetFullDirectory(), @"Templates\Samples\Templates\Packs");
             var assetPacks = parameters.TryGetTag(AssetsKey);
             if (assetPacks == null)
