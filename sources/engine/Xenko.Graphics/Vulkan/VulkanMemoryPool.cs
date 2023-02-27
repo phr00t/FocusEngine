@@ -24,15 +24,15 @@ namespace Xenko.Graphics
             Vortice.Vulkan.Vulkan.vkGetPhysicalDeviceMemoryProperties(pDevice, out var physicalDeviceMemoryProperties);
 
             var typeBits = memoryRequirements.memoryTypeBits;
-            for (int i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; i++)
+            for (uint i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; i++)
             {
                 if ((typeBits & 1) == 1)
                 {
                     // Type is available, does it match user properties?
-                    var memoryType = physicalDeviceMemoryProperties.memoryTypes[i];
+                    var memoryType = *(&physicalDeviceMemoryProperties.memoryTypes_0 + i);
                     if ((memoryType.propertyFlags & memoryProperties) == memoryProperties)
                     {
-                        allocateInfo.memoryTypeIndex = (uint)i;
+                        allocateInfo.memoryTypeIndex = i;
                         break;
                     }
                 }

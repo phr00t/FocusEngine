@@ -1,6 +1,7 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
+// set this define if we want to debug Vulkan. Requires Framework v4.8 runtime for some weird reason (might be a Vortice.Vulkan version thing)
 //#define VULKAN_DEBUG
 
 #if XENKO_GRAPHICS_API_VULKAN
@@ -214,7 +215,7 @@ namespace Xenko.Graphics
                 if (enableDebugReport)
                 {
                     var createDebugReportCallbackName = Marshal.StringToHGlobalAnsi("vkCreateDebugReportCallbackEXT");
-                    var createDebugReportCallback = (CreateDebugReportCallbackDelegate)Marshal.GetDelegateForFunctionPointer(new System.IntPtr(vkGetInstanceProcAddr(NativeInstance, (byte*)createDebugReportCallbackName)), typeof(CreateDebugReportCallbackDelegate));
+                    var createDebugReportCallback = (CreateDebugReportCallbackDelegate)Marshal.GetDelegateForFunctionPointer(vkGetInstanceProcAddr(NativeInstance, (byte*)createDebugReportCallbackName), typeof(CreateDebugReportCallbackDelegate));
 
                     debugReport = DebugReport;
                     var createInfo = new VkDebugReportCallbackCreateInfoEXT
@@ -231,12 +232,12 @@ namespace Xenko.Graphics
                 {
                     var beginDebugMarkerName = System.Text.Encoding.ASCII.GetBytes("vkCmdDebugMarkerBeginEXT");
 
-                    var ptr = new System.IntPtr(vkGetInstanceProcAddr(NativeInstance, (byte*)Core.Interop.Fixed(beginDebugMarkerName)));
+                    var ptr = vkGetInstanceProcAddr(NativeInstance, (byte*)Core.Interop.Fixed(beginDebugMarkerName));
                     if (ptr != IntPtr.Zero)
                         BeginDebugMarker = (BeginDebugMarkerDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(BeginDebugMarkerDelegate));
 
                     var endDebugMarkerName = System.Text.Encoding.ASCII.GetBytes("vkCmdDebugMarkerEndEXT");
-                    ptr = new System.IntPtr(vkGetInstanceProcAddr(NativeInstance, (byte*)Core.Interop.Fixed(endDebugMarkerName)));
+                    ptr = vkGetInstanceProcAddr(NativeInstance, (byte*)Core.Interop.Fixed(endDebugMarkerName));
                     if (ptr != IntPtr.Zero)
                         EndDebugMarker = (EndDebugMarkerDelegate)Marshal.GetDelegateForFunctionPointer(ptr, typeof(EndDebugMarkerDelegate));
                 }
