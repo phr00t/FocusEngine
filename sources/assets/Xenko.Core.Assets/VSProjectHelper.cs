@@ -162,25 +162,14 @@ namespace Xenko.Core.Assets
         {
             await Task.Run(() =>
             {
-                var pc = new Microsoft.Build.Evaluation.ProjectCollection();
-
-                try
-                {
-                    var parameters = new BuildParameters(pc)
-                    {
-                        Loggers = new[] { new LoggerRedirect(logger, true) } //Instance of ILogger instantiated earlier
-                    };
-
-                    // Run a MSBuild /t:Restore <projectfile>
-                    var request = new BuildRequestData(projectPath, new Dictionary<string, string>(), null, new[] { "Restore" }, null, BuildRequestDataFlags.None);
-
-                    mainBuildManager.Build(parameters, request);
-                }
-                finally
-                {
-                    pc.UnloadAllProjects();
-                    pc.Dispose();
-                }
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
+                System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
+                startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+                startInfo.FileName = "dotnet";
+                startInfo.Arguments = "restore " + projectPath;
+                process.StartInfo = startInfo;
+                process.Start();
+                process.WaitForExit();
             });
         }
 
