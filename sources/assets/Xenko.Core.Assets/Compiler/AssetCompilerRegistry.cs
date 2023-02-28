@@ -207,7 +207,7 @@ namespace Xenko.Core.Assets.Compiler
             }
             catch (Exception e)
             {
-                log.Warning($"Unable to register asset compilers from assembly [{assembly}]", e);
+                log.Warning($"Unable to register asset compilers from assembly [{assembly}]");
             }
         }
 
