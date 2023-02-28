@@ -18,11 +18,8 @@ namespace Xenko.Core.Assets
     {
         static bool assembliesResolved;
         static object assembliesLock = new object();
-        /*static Dictionary<string, string> assemblyLocation = new Dictionary<string, string>(), assemblyLocationWithoutVersion = new Dictionary<string, string>();
-
-        static Dictionary<string, string> extraLocationsx86 = new Dictionary<string, string>();
-        static Dictionary<string, string> extraLocations = new Dictionary<string, string>();*/
-        static List<string> assemblies;
+        static Dictionary<string, string> assemblyLocationWithVersion = new Dictionary<string, string>();
+        static Dictionary<string, List<string>> allAssemblies = new Dictionary<string, List<string>>();
 
         internal static void DisableAssemblyResolve()
         {
@@ -73,139 +70,7 @@ namespace Xenko.Core.Assets
             // Note: we perform nuget restore inside the assembly resolver rather than top level module ctor (otherwise it freezes)
             AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) =>
             {
-                // Check if already loaded.
-                // Somehow it happens for Microsoft.NET.Build.Tasks -> NuGet.ProjectModel, probably due to the specific way it's loaded.
-                var matchingAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName == eventArgs.Name);
-                if (matchingAssembly != null)
-                    return matchingAssembly;
-
-                if (!assembliesResolved)
-                {
-                    lock (assembliesLock)
-                    {
-                        // Note: using NuGet will try to recursively resolve NuGet.*.resources.dll, so set assembliesResolved right away so that it bypasses everything
-                        assembliesResolved = true;
-
-                        var logger = new Logger();
-
-#if STRIDE_NUGET_RESOLVER_UX
-                        var dialogNotNeeded = new TaskCompletionSource<bool>();
-                        var dialogClosed = new TaskCompletionSource<bool>();
-
-                        // Display splash screen after a 500 msec (when NuGet takes some time to restore)
-                        var newWindowThread = new Thread(() =>
-                        {
-                            Thread.Sleep(500);
-                            if (!dialogNotNeeded.Task.IsCompleted)
-                            {
-                                var splashScreen = new Stride.NuGetResolver.SplashScreenWindow();
-                                splashScreen.Show();
-
-                                // Register log
-                                logger.SetupLogAction((level, message) =>
-                                {
-                                    splashScreen.Dispatcher.InvokeAsync(() =>
-                                    {
-                                        splashScreen.AppendMessage(level, message);
-                                    });
-                                });
-
-                                dialogNotNeeded.Task.ContinueWith(t =>
-                                {
-                                    splashScreen.Dispatcher.Invoke(() => splashScreen.Close());
-                                });
-
-                                splashScreen.Closed += (sender2, e2) =>
-                                    splashScreen.Dispatcher.InvokeShutdown();
-
-                                System.Windows.Threading.Dispatcher.Run();
-
-                                splashScreen.Close();
-                            }
-                            dialogClosed.SetResult(true);
-                        });
-                        newWindowThread.SetApartmentState(ApartmentState.STA);
-                        newWindowThread.IsBackground = true;
-                        newWindowThread.Start();
-#endif
-
-                        var previousSynchronizationContext = SynchronizationContext.Current;
-                        try
-                        {
-                            // Since we execute restore synchronously, we don't want any surprise concerning synchronization context (i.e. Avalonia one doesn't work with this)
-                            SynchronizationContext.SetSynchronizationContext(null);
-
-                            // Determine current TFM
-                            var framework = metadataAssembly
-                                .GetCustomAttribute<TargetFrameworkAttribute>()?
-                                .FrameworkName ?? ".NETFramework,Version=v4.7.2";
-                            var nugetFramework = NuGetFramework.ParseFrameworkName(framework, DefaultFrameworkNameProvider.Instance);
-
-#if NETCOREAPP
-                            // Add TargetPlatform to net6.0 TFM (i.e. net6.0 to net6.0-windows7.0)
-                            var platform = metadataAssembly?.GetCustomAttribute<TargetPlatformAttribute>()?.PlatformName ?? string.Empty;
-                            if (framework.StartsWith(FrameworkConstants.FrameworkIdentifiers.NetCoreApp) && platform != string.Empty)
-                            {
-                                var platformParseResult = Regex.Match(platform, @"([a-zA-Z]+)(\d+.*)");
-                                if (platformParseResult.Success && Version.TryParse(platformParseResult.Groups[2].Value, out var platformVersion))
-                                {
-                                    var platformName = platformParseResult.Groups[1].Value;
-                                    nugetFramework = new NuGetFramework(nugetFramework.Framework, nugetFramework.Version, platformName, platformVersion);
-                                }
-                            }
-#endif
-
-                            // Only allow this specific version
-                            var versionRange = new VersionRange(new NuGetVersion(packageVersion), true, new NuGetVersion(packageVersion), true);
-                            var (request, result) = RestoreHelper.Restore(logger, nugetFramework, "win", packageName, versionRange);
-                            if (!result.Success)
-                            {
-                                throw new InvalidOperationException($"Could not restore NuGet packages");
-                            }
-
-                            assemblies = RestoreHelper.ListAssemblies(result.LockFile);
-                        }
-                        catch (Exception e)
-                        {
-#if STRIDE_NUGET_RESOLVER_UX
-                            logger.LogError($@"Error restoring NuGet packages: {e}");
-                            dialogClosed.Task.Wait();
-#else
-                            // Display log in console
-                            var logText = $@"Error restoring NuGet packages!
-==== Exception details ====
-{e}
-==== Log ====
-{string.Join(Environment.NewLine, logger.Logs.Select(x => $"[{x.Level}] {x.Message}"))}
-";
-                            Console.WriteLine(logText);
-#endif
-                            Environment.Exit(1);
-                        }
-                        finally
-                        {
-#if STRIDE_NUGET_RESOLVER_UX
-                            dialogNotNeeded.TrySetResult(true);
-#endif
-                            SynchronizationContext.SetSynchronizationContext(previousSynchronizationContext);
-                        }
-                    }
-                }
-
-                if (assemblies != null)
-                {
-                    var aname = new AssemblyName(eventArgs.Name);
-                    if (aname.Name.StartsWith("Microsoft.Build") && aname.Name != "Microsoft.Build.Locator")
-                        return null;
-                    var assemblyPath = assemblies.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == aname.Name);
-                    if (assemblyPath != null)
-                    {
-                        return Assembly.LoadFrom(assemblyPath);
-                    }
-                }
-                return null;
-
-                /*lock (assembliesLock)
+                lock (assembliesLock)
                 {
                     if (!assembliesResolved)
                     {
@@ -213,49 +78,18 @@ namespace Xenko.Core.Assets
                         var settings = NuGet.Configuration.Settings.LoadDefaultSettings(null);
                         var packageSourceProvider = new PackageSourceProvider(settings);
                         var installPath = SettingsUtility.GetGlobalPackagesFolder(settings);
-                        var assemblies = new List<string>(Directory.GetFiles(installPath, "*.dll", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
-                        assemblies.AddRange(Directory.GetFiles(installPath, "*.exe", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
+                        var nugetAssemblies = new List<string>(Directory.GetFiles(installPath, "*.dll", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
+                        nugetAssemblies.AddRange(Directory.GetFiles(installPath, "*.exe", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
 
                         var extraPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles) + "\\dotnet\\shared\\Microsoft.NETCore.App";
-                        var extraAssemblies = new List<string>(Directory.GetFiles(extraPath, "*.dll", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
-
                         var extraPath86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) + "\\dotnet\\shared\\Microsoft.NETCore.App";
-                        var extraAssemblies86 = new List<string>(Directory.GetFiles(extraPath, "*.dll", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
-
-                        // grab any latest numerics from here
-                        for (int i=0; i<extraAssemblies.Count; i++)
-                        {
-                            var ea = extraAssemblies[i];
-                            var assName = Path.GetFileNameWithoutExtension(ea);
-
-                            if (extraLocations.ContainsKey(assName) == false)
-                            {
-                                // find the right match
-                                System.Console.Error.WriteLine("found extra: " + ea);
-
-                                extraLocations[assName] = ea;
-                            }
-                        }
-
-                        // grab any latest numerics from here
-                        for (int i = 0; i < extraAssemblies86.Count; i++)
-                        {
-                            var ea = extraAssemblies86[i];
-                            var assName = Path.GetFileNameWithoutExtension(ea);
-
-                            if (extraLocationsx86.ContainsKey(assName) == false)
-                            {
-                                // find the right match
-                                System.Console.Error.WriteLine("found extra: " + ea);
-
-                                extraLocationsx86[assName] = ea;
-                            }
-                        }
+                        var extraAssemblies = new List<string>(Directory.GetFiles(extraPath, "*.dll", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
+                        extraAssemblies.AddRange(Directory.GetFiles(extraPath86, "*.dll", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
 
                         // only include stuff we want
-                        for (int i=0; i<assemblies.Count; i++)
+                        for (int i=0; i<nugetAssemblies.Count; i++)
                         {
-                            var assembly = assemblies[i];
+                            var assembly = nugetAssemblies[i];
 
                             if (assembly.Contains("linux") || assembly.Contains("osx"))
                                 continue;
@@ -270,16 +104,25 @@ namespace Xenko.Core.Assets
                                 versionProcessed += ".0";
                             var key = assmName + "-" + versionProcessed;
 
-                            if (assemblyLocationWithoutVersion.ContainsKey(assmName) == false)
-                                assemblyLocationWithoutVersion[assmName] = assembly;
+                            if (assemblyLocationWithVersion.ContainsKey(key) == false)
+                                assemblyLocationWithVersion[key] = assembly;
 
-                            if (assemblyLocation.ContainsKey(key) == false)
-                            {
-                                // find the right match
-                                System.Console.Error.WriteLine("Added: " + assembly + " key " + key);
+                            if (allAssemblies.TryGetValue(assmName, out var list))
+                                list.Add(assembly);
+                            else
+                                allAssemblies[assmName] = new List<string>() { assembly };
+                        }
 
-                                assemblyLocation[key] = assembly;
-                            }
+                        // get the rest of assembly versions
+                        for (int i=0; i<extraAssemblies.Count; i++)
+                        {
+                            var assembly = extraAssemblies[i];
+                            var assmName = Path.GetFileNameWithoutExtension(assembly);
+
+                            if (allAssemblies.TryGetValue(assmName, out var list))
+                                list.Add(assembly);
+                            else
+                                allAssemblies[assmName] = new List<string>() { assembly };
                         }
                     }
 
@@ -292,11 +135,9 @@ namespace Xenko.Core.Assets
                         List<string> keysToTry = new List<string>();
                         string assemblyPath;
 
+                        // numerics has terrible version naming
                         if (aname.Name == "System.Numerics.Vectors")
                         {
-                            // find the right match
-                            System.Console.Error.WriteLine("numerics version: " + aname.Version.ToString());
-
                             keysToTry.Add(aname.Name + "-4.4.0.0");
                             keysToTry.Add(aname.Name + "-4.5.0.0");
                         } else keysToTry.Add(aname.Name + "-" + aname.Version.ToString());
@@ -305,10 +146,7 @@ namespace Xenko.Core.Assets
                         {
                             var key = keysToTry[i];
 
-                            // find the right match
-                            System.Console.Error.WriteLine("Trying to load: " + key);
-
-                            if (assemblyLocation.TryGetValue(key, out assemblyPath))
+                            if (assemblyLocationWithVersion.TryGetValue(key, out assemblyPath))
                             {
                                 try
                                 {
@@ -316,48 +154,25 @@ namespace Xenko.Core.Assets
                                 } 
                                 catch (Exception e) { } // try another key
                             }
-                        }
-                        
-                        try
+                        }                       
+
+                        // fallback searching all assemblies
+                        if (allAssemblies.TryGetValue(aname.Name, out var list))
                         {
-                            // if this is numerics, try loading the latest fallback
-                            if (extraLocationsx86.TryGetValue(aname.Name, out assemblyPath))
+                            for(int i=0; i<list.Count; i++)
                             {
-                                System.Console.Error.WriteLine("Fallback extra86 version for " + aname.Name + ", version " + aname.Version.ToString());
-
-                                return Assembly.LoadFrom(assemblyPath);
-                            }
-                        } catch (Exception e) { }
-
-                        try
-                        {
-                            // if this is numerics, try loading the latest fallback
-                            if (extraLocations.TryGetValue(aname.Name, out assemblyPath))
-                            {
-                                System.Console.Error.WriteLine("Fallback extra version for " + aname.Name + ", version " + aname.Version.ToString());
-
-                                return Assembly.LoadFrom(assemblyPath);
+                                try
+                                {
+                                    if ((aname.Version.Major == 6 || list[i].Contains("\\6.")) && list[i].Contains("runtimes")) continue; // version 6 stuff don't use runtime libraries
+                                    if (list[i].Contains("\\ref\\") || list[i].Contains("netcoreapp3.1")) continue; // don't use these things in backups
+                                    return Assembly.LoadFrom(list[i]);
+                                }
+                                catch (Exception e) { }
                             }
                         }
-                        catch (Exception e) { }
-
-                        // fallback to no version attempt to load
-                        try
-                        {
-                            if (assemblyLocationWithoutVersion.TryGetValue(aname.Name, out assemblyPath))
-                            {
-                                System.Console.Error.WriteLine("Fallback without version for " + aname.Name + ", version " + aname.Version.ToString());
-
-                                return Assembly.LoadFrom(assemblyPath);
-                            }
-                        }
-                        catch (Exception e) { }
                     }
                 }
-
-                System.Console.Error.WriteLine("Couldn't find any working package...");
-
-                return null;*/
+                return null;
             };
         }
 
