@@ -47,7 +47,7 @@ namespace Xenko.Native
         [ModuleInitializer]
         public static void Initialize()
         {
-            Core.Native.NativeInvoke.Setup();
+
         }
     }
 }

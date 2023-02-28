@@ -279,7 +279,7 @@ namespace Xenko.Graphics
                 depthClamp = features.depthClamp,
             };
 
-            var extensionProperties = vkEnumerateDeviceExtensionProperties(NativePhysicalDevice);
+            var extensionProperties = vkEnumerateDeviceExtensionProperties(NativePhysicalDevice, null);
             var availableExtensionNames = new List<string>();
             var desiredExtensionNames = new List<string>();
 

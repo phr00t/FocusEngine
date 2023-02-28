@@ -29,49 +29,5 @@ namespace Xenko.Core.Native
         {
             NativeLibrary.PreloadLibrary(LibraryName, typeof(NativeInvoke));
         }
-
-        /// <summary>
-        /// Suspends current thread for <paramref name="ms"/> milliseconds.
-        /// </summary>
-        /// <param name="ms">Number of milliseconds to sleep.</param>
-        [SuppressUnmanagedCodeSecurity]
-        [DllImport(Library, EntryPoint = "cnSleep", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void Sleep(int ms);
-
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-        private delegate void ManagedLogDelegate(string log);
-
-        private static ManagedLogDelegate managedLogDelegateSingleton;
-
-#if XENKO_PLATFORM_IOS
-        [MonoPInvokeCallback(typeof(ManagedLogDelegate))]
-#endif
-        private static void ManagedLog(string log)
-        {
-            Debug.WriteLine(log);
-        }
-
-        public static void Setup()
-        {
-            managedLogDelegateSingleton = ManagedLog;
-
-#if !XENKO_PLATFORM_IOS
-            var ptr = Marshal.GetFunctionPointerForDelegate(managedLogDelegateSingleton);
-#else
-            var ptr = managedLogDelegateSingleton;
-#endif
-
-            CoreNativeSetup(ptr);
-        }
-
-#if !XENKO_PLATFORM_IOS
-        [SuppressUnmanagedCodeSecurity]
-        [DllImport(Library, EntryPoint = "cnSetup", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void CoreNativeSetup(IntPtr logger);
-#else
-        [SuppressUnmanagedCodeSecurity]
-        [DllImport(Library, EntryPoint = "cnSetup", CallingConvention = CallingConvention.Cdecl)]
-        private static extern void CoreNativeSetup(ManagedLogDelegate logger);
-#endif
     }
 }

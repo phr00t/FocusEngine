@@ -30,6 +30,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using Xenko.Core.Annotations;
 using Xenko.Core.Native;
 
@@ -767,12 +768,7 @@ namespace Xenko.Core
         /// <param name="sleepTime">The duration of sleep.</param>
         public static void Sleep(TimeSpan sleepTime)
         {
-            var ms = (long)sleepTime.TotalMilliseconds;
-            if (ms < 0 || ms > int.MaxValue)
-            {
-                throw new ArgumentOutOfRangeException(nameof(sleepTime), "Sleep time must be a duration less than '2^31 - 1' milliseconds.");
-            }
-            NativeInvoke.Sleep((int)ms);
+            Thread.Sleep((int)sleepTime.TotalMilliseconds);
         }
 
         /// <summary>
@@ -781,7 +777,7 @@ namespace Xenko.Core
         /// <param name="sleepTimeInMillis">The duration of sleep in milliseconds.</param>
         public static void Sleep(int sleepTimeInMillis)
         {
-            NativeInvoke.Sleep(sleepTimeInMillis);
+            Thread.Sleep(sleepTimeInMillis);
         }
 
         /// <summary>

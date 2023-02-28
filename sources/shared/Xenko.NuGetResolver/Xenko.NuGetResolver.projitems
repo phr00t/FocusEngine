@@ -10,7 +10,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)NuGetAssemblyResolver.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)RestoreHelper.cs" />
   </ItemGroup>
   <PropertyGroup>
     <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeNuGetResolverAssemblies</TargetsForTfmSpecificBuildOutput>
