@@ -19,6 +19,7 @@ namespace Xenko.Core.Assets
         static bool assembliesResolved;
         static object assembliesLock = new object();
         static Dictionary<string, string> assemblyLocationWithVersion = new Dictionary<string, string>();
+        static Dictionary<string, string> xenkoAssemblies = new Dictionary<string, string>();
         static Dictionary<string, List<string>> allAssemblies = new Dictionary<string, List<string>>();
 
         internal static void DisableAssemblyResolve()
@@ -66,6 +67,7 @@ namespace Xenko.Core.Assets
                 }
                 folder = Path.GetDirectoryName(folder);
             }
+            string xenkoLibFolder = xenkoFolder == null ? null : Path.Combine(xenkoFolder, @"sources\editor\Xenko.GameStudio\bin\Release");
 
             // Note: we perform nuget restore inside the assembly resolver rather than top level module ctor (otherwise it freezes)
             AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) =>
@@ -85,6 +87,12 @@ namespace Xenko.Core.Assets
                         var extraPath86 = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) + "\\dotnet\\shared\\Microsoft.NETCore.App";
                         var extraAssemblies = new List<string>(Directory.GetFiles(extraPath, "*.dll", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
                         extraAssemblies.AddRange(Directory.GetFiles(extraPath86, "*.dll", SearchOption.AllDirectories).OrderByDescending(f => new FileInfo(f).CreationTime));
+
+                        if (xenkoLibFolder != null)
+                        {
+                            foreach (string f in Directory.GetFiles(xenkoLibFolder, "*.dll", SearchOption.AllDirectories))
+                                xenkoAssemblies[Path.GetFileNameWithoutExtension(f)] = f;
+                        }
 
                         // only include stuff we want
                         for (int i=0; i<nugetAssemblies.Count; i++)
@@ -132,8 +140,19 @@ namespace Xenko.Core.Assets
                         if (aname.Name.StartsWith("Microsoft.Build") && aname.Name != "Microsoft.Build.Locator")
                             return null;
 
-                        List<string> keysToTry = new List<string>();
                         string assemblyPath;
+
+                        // if we are xenko, use the xenko built stuff first
+                        if (xenkoAssemblies.TryGetValue(aname.Name, out assemblyPath))
+                        {
+                            try
+                            {
+                                return Assembly.LoadFrom(assemblyPath);
+                            }
+                            catch (Exception e) { } // try another key
+                        }
+
+                        List<string> keysToTry = new List<string>();
 
                         // numerics has terrible version naming
                         if (aname.Name == "System.Numerics.Vectors")
