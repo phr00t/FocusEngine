@@ -1,6 +1,7 @@
 // Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using Xenko.Core.Mathematics;
 using Xenko.Engine;
@@ -33,24 +34,22 @@ namespace Xenko.Rendering.UI
 
                 if (renderUIElement.Enabled)
                 {
-                    if (uiComponent.IsFullScreen == false) {
-                        renderUIElement.BoundingBox.Center = renderUIElement.WorldMatrix3D.TranslationVector;
-                        renderUIElement.WorldMatrix3D.GetScale(out renderUIElement.BoundingBox.Extent);
-                        float halfx = 0.5f * uiComponent.Resolution.X;
-                        renderUIElement.BoundingBox.Extent.X *= halfx;
-                        renderUIElement.BoundingBox.Extent.Z *= halfx;
-                        renderUIElement.BoundingBox.Extent.Y *= 0.5f * uiComponent.Resolution.Y;
-                    }
-                    else {
-                        renderUIElement.BoundingBox.Extent = Vector3.Zero; // always draw this
-                    }
-
                     // Copy values from ECS to render object
                     renderUIElement.Component = uiComponent;
                     renderUIElement.WorldMatrix = uiComponent.Entity.Transform.WorldMatrix;
                     renderUIElement.RenderGroup = uiComponent.RenderGroup;
                     renderUIElement.DistanceSortFudge = uiComponent.IsFullScreen ? -10000f : uiComponent.DistanceSortFudge;
                     renderUIElement.SmallFactorMultiplier = renderUIElement.IsFixedSize || uiComponent.IsFullScreen ? 0f : uiComponent.SmallFactorMultiplier;
+
+                    if (uiComponent.IsFullScreen == false) {
+                        renderUIElement.BoundingBox.Center = renderUIElement.WorldMatrix.TranslationVector;
+                        renderUIElement.WorldMatrix.GetScale(out renderUIElement.BoundingBox.Extent);
+                        float max = uiComponent.Resolution.X > uiComponent.Resolution.Y ? uiComponent.Resolution.X : uiComponent.Resolution.Y;
+                        renderUIElement.BoundingBox.Extent *= max * 0.5f;
+                    }
+                    else {
+                        renderUIElement.BoundingBox.Extent = Vector3.Zero; // always draw this
+                    }
                 }
             }
         }
