@@ -86,18 +86,17 @@ namespace Xenko.Assets.Presentation
         {
             // Load templates
             // Currently hardcoded, this will need to change with plugin system
-            foreach (var packageInfo in new[] { new { Name = "Xenko.Assets.Presentation", Version = XenkoVersion.NuGetVersion }, new { Name = "Xenko.SpriteStudio.Offline", Version = XenkoVersion.NuGetVersion }, new { Name = "Xenko.Samples.Templates", Version = Xenko.Samples.Templates.ThisPackageVersion.Current } })
+            foreach (var packageInfo in new[] { new { Name = "Xenko.Assets.Presentation", Version = XenkoVersion.NuGetVersion }})
             {
                 var logger = new LoggerResult();
-                var packageFile = PackageStore.Instance.GetPackageFileName(packageInfo.Name, new PackageVersionRange(new PackageVersion(packageInfo.Version)));
-                if (packageFile == null)
+                var packageFile = PackageStore.Instance.GetPackageFileName(packageInfo.Name, new PackageVersionRange(new PackageVersion("9.9.1-nugt99")), null, true, true, true);
+                var package = Package.Load(logger, packageFile.ToWindowsPath(), new PackageLoadParameters()
                 {
-                    logger.Warning("Package '" + packageInfo.Name + "' file couldn't be found.");
-                    continue;
-                }
-                var package = Package.Load(logger, packageFile.ToWindowsPath());
-                if (logger.HasErrors)
-                    throw new InvalidOperationException($"Could not load package {packageInfo.Name}:{Environment.NewLine}{logger.ToText()}");
+                    LoadAssemblyReferences = false,
+                    RegisterPackageAssemblies = false,
+                    AutoCompileProjects = false,
+                    AutoLoadTemporaryAssets = true,
+                });
 
                 TemplateManager.RegisterPackage(package);
             }

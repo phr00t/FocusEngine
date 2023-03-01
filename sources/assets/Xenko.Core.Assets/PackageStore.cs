@@ -10,6 +10,7 @@ using Xenko.Core.Diagnostics;
 using Xenko.Core.IO;
 using System.Threading.Tasks;
 using Xenko.Core.Packages;
+using System.Reflection;
 
 namespace Xenko.Core.Assets
 {
@@ -85,7 +86,7 @@ namespace Xenko.Core.Assets
         /// <param name="allowUnlisted">if set to <c>true</c> [allow unlisted].</param>
         /// <returns>A location on the disk to the specified package or null if not found.</returns>
         /// <exception cref="System.ArgumentNullException">packageName</exception>
-        public UFile GetPackageFileName(string packageName, PackageVersionRange versionRange = null, ConstraintProvider constraintProvider = null, bool allowPreleaseVersion = true, bool allowUnlisted = false)
+        public UFile GetPackageFileName(string packageName, PackageVersionRange versionRange = null, ConstraintProvider constraintProvider = null, bool allowPreleaseVersion = true, bool allowUnlisted = false, bool searchXenko = false)
         {
             if (packageName == null) throw new ArgumentNullException(nameof(packageName));
 
@@ -103,6 +104,14 @@ namespace Xenko.Core.Assets
             packageFile = UPath.Combine(UPath.Combine(packageRoot, (UDirectory)"xenko"), packageFilename);
             if (File.Exists(packageFile))
                 return packageFile;
+
+            if (searchXenko)
+            {
+                // finally, look in executing assembly structure
+                var path = Path.GetFullPath(Path.Combine(Assembly.GetExecutingAssembly().Location, @"..\..\..\..\..\"));
+                var files = Directory.GetFiles(path, packageFilename.ToString(), SearchOption.AllDirectories);
+                if (files.Length > 0) return new UFile(files[0]);
+            }
 
             return null;
         }

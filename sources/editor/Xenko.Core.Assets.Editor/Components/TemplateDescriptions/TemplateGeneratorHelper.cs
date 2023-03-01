@@ -38,14 +38,14 @@ namespace Xenko.Core.Assets.Editor.Components.TemplateDescriptions
             }
             catch (Exception e)
             {
-                parameters.Logger.Error(Tr._p("Log", "An exception occurred while generating the template."), e);
+                parameters.Logger.Error(Tr._p("Log", "An exception occurred while generating the template. Reopen it or just remove broken stuff."), e);
             }
 
-            if (parameters.Logger.HasErrors || !success)
+            /*if (parameters.Logger.HasErrors || !success)
             {
                 workProgress?.ServiceProvider.Get<IEditorDialogService>().ShowProgressWindow(workProgress, 0);
                 return false;
-            }
+            }*/
 
             workProgress?.ServiceProvider.Get<IEditorDialogService>().ShowProgressWindow(workProgress, 500);
 
@@ -57,12 +57,12 @@ namespace Xenko.Core.Assets.Editor.Components.TemplateDescriptions
                 }
                 catch (Exception e)
                 {
-                    parameters.Logger.Error(Tr._p("Log", "An exception occurred while generating the template."), e);
-                    return false;
+                    parameters.Logger.Error(Tr._p("Log", "An exception occurred while generating the template. Reopen it or just remove broken stuff."), e);
+                    return true;
                 }
             });
 
-            return result && !parameters.Logger.HasErrors;
+            return true;
         }
     }
 }

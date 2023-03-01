@@ -31,7 +31,7 @@ msgstr ""
 #: ../editor/Xenko.Core.Assets.Editor/Components/TemplateDescriptions/TemplateGeneratorHelper.cs:41
 #: ../editor/Xenko.Core.Assets.Editor/Components/TemplateDescriptions/TemplateGeneratorHelper.cs:60
 msgctxt "Log"
-msgid "An exception occurred while generating the template."
+msgid "An exception occurred while generating the template. Try clearing the nuget cache or just browse and reopen."
 msgstr ""
 
 #: ../editor/Xenko.Core.Assets.Editor/Components/TemplateDescriptions/Views/ProjectSelectionWindow.xaml.cs:28
@@ -418,7 +418,7 @@ msgstr ""
 #. Log message displayed when an exception occurs while opening a session.
 #: ../editor/Xenko.Core.Assets.Editor/ViewModel/SessionViewModel.cs:399
 msgctxt "Log"
-msgid "There was a problem opening the solution."
+msgid "There was a problem opening the solution. Try clearing nuget cache."
 msgstr ""
 
 #: ../editor/Xenko.Core.Assets.Editor/ViewModel/SessionViewModel.cs:446

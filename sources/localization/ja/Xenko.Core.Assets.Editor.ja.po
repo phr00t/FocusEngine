@@ -32,7 +32,7 @@ msgstr "この操作は中止しました"
 #: ../editor/Xenko.Core.Assets.Editor/Components/TemplateDescriptions/TemplateGeneratorHelper.cs:41
 #: ../editor/Xenko.Core.Assets.Editor/Components/TemplateDescriptions/TemplateGeneratorHelper.cs:60
 msgctxt "Log"
-msgid "An exception occurred while generating the template."
+msgid "An exception occurred while generating the template. Try clearing the nuget cache or just browse and reopen."
 msgstr "テンプレートを作る際に例外が発生しました。"
 
 #: ../editor/Xenko.Core.Assets.Editor/Components/TemplateDescriptions/Views/ProjectSelectionWindow.xaml.cs:28
