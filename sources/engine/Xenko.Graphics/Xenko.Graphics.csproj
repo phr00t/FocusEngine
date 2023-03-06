@@ -69,7 +69,7 @@
     <ProjectReference Include="..\Xenko\Xenko.csproj" />
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
     <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" Condition="'$(XenkoPlatform)' == 'Windows'" />
-    <PackageReference Include="Vortice.Mathematics" Version="1.4.19" />
+    <PackageReference Include="Vortice.Mathematics" Version="1.4.26" />
     <PackageReference Include="Vortice.Vulkan" Version="1.2.170.2" />
   </ItemGroup>
   <ItemGroup>
