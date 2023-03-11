@@ -105,14 +105,20 @@ namespace Xenko.Cinematics
         }
 
         /// <summary>
-        /// Plays the CinematicAnimation, if it isn't paused
+        /// internal flag to prevent modifications to animation while its playing
+        /// </summary>
+        private bool DontModifyActions = false;
+
+        /// <summary>
+        /// Plays the CinematicAnimation, if it isn't paused. Returns false if nothing is left to play or will loop next play
         /// </summary>
         /// <param name="time_delta">Amount of time to progress the animation</param>
-        public void Play(float time_delta)
+        public bool Play(float time_delta)
         {
-            if (Paused) return;
+            if (Paused) return !IsDone;
             if (Looping && RemainingActions.Count == 0 && AllActions.Count > 0) Reset();
             CurrentTime += time_delta;
+            DontModifyActions = true;
             for (int i = 0; i < RemainingActions.Count; i++)
             {
                 CinematicAction ca = RemainingActions[i];
@@ -131,6 +137,8 @@ namespace Xenko.Cinematics
                 }
                 else break; // since we are sorted, once we are past CurrentTime, everything else will be too
             }
+            DontModifyActions = false;
+            return !IsDone;
         }
 
         /// <summary>
@@ -144,6 +152,9 @@ namespace Xenko.Cinematics
         /// <param name="endTime">When to end this action?</param>
         public void AddAction(ACTION_TYPE type, TransformComponent target, object endArgument, float startTime, object startArgument = null, float endTime = 0f)
         {
+            if (DontModifyActions)
+                throw new InvalidOperationException("Animation is currently in Play call -- you can't modify it at the same time!");
+
             CinematicAction ca = new CinematicAction()
             {
                 Type = type,
@@ -170,6 +181,9 @@ namespace Xenko.Cinematics
         /// <param name="endTime">Keep running the action until this time, default is 0 which means always just run this once</param>
         public void AddMethod(Action<ActionInfo> method, float startTime, float endTime = 0f)
         {
+            if (DontModifyActions)
+                throw new InvalidOperationException("Animation is currently in Play call -- you can't modify it at the same time!");
+
             CinematicAction ca = new CinematicAction()
             {
                 Type = ACTION_TYPE.DELEGATE,
@@ -295,6 +309,9 @@ namespace Xenko.Cinematics
         /// </summary>
         public void Reset()
         {
+            if (DontModifyActions)
+                throw new InvalidOperationException("Animation is currently in Play call -- you can't modify it at the same time!");
+
             CurrentTime = 0f;
             RemainingActions.Clear();
             for (int i = 0; i < AllActions.Count; i++)
