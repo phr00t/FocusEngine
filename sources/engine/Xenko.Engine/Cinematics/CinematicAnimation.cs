@@ -40,7 +40,7 @@ namespace Xenko.Cinematics
         public int CompareTo(CinematicAction other)
         {
             if (startTime == other.startTime)
-                return 1;
+                return 0;
 
             return startTime.CompareTo(other.startTime);
         }
