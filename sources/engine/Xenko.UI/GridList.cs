@@ -40,6 +40,11 @@ namespace Xenko.UI
         /// </summary>
         public Action<object> EntrySelectedAction = (value) => { };
 
+        /// <summary>
+        /// Action to take when anything is selected, clicked or deselected.
+        /// </summary>
+        public Action AnyChangeAction = null;
+
         protected bool UpdateEntryWidth()
         {
             float newWidth = myGrid.Width;
@@ -226,7 +231,11 @@ namespace Xenko.UI
             if (uie is ToggleButton tbn)
             {
                 tbn.Click += delegate {
-                    if (tbn.State == ToggleState.UnChecked) return;
+                    if (tbn.State == ToggleState.UnChecked)
+                    {
+                        AnyChangeAction?.Invoke();
+                        return;
+                    }
                     int alreadyChecked = GetSelectedCount();
                     if (alreadyChecked == 2 && MaxCheckedAllowed == 1)
                     {
@@ -244,12 +253,14 @@ namespace Xenko.UI
                         // check made
                         EntrySelectedAction?.Invoke(value);
                     }
+                    AnyChangeAction?.Invoke();
                 };
             }
             else if (uie is Button bn)
             {
                 bn.Click += delegate {
                     EntrySelectedAction?.Invoke(value);
+                    AnyChangeAction?.Invoke();
                 };
             }
         }

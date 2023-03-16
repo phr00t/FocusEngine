@@ -211,6 +211,7 @@ namespace Xenko.UI
                 base.ResetSelected(value);
                 currentSelection = value;
                 EntrySelectedAction?.Invoke(value);
+                AnyChangeAction?.Invoke();
             };
         }
 
