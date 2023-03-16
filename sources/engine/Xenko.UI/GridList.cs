@@ -224,6 +224,7 @@ namespace Xenko.UI
                     }
                 }
             }
+            AnyChangeAction?.Invoke();
         }
 
         virtual protected void SetInternalClickAction(ButtonBase uie, object value)
