@@ -7,6 +7,7 @@ using System.Reflection;
 using Xenko.Core;
 using Xenko.Engine;
 using Xenko.Input;
+using Xenko.Rendering.UI;
 using Xenko.UI.Events;
 
 namespace Xenko.UI
@@ -519,6 +520,7 @@ namespace Xenko.UI
         protected virtual void OnTouchLeave(TouchEventArgs args)
         {
             IsTouched = false;
+            UIRenderFeature.ForceMouseOver = null;
         }
 
         private static void TouchMoveClassHandler(object sender, TouchEventArgs args)
@@ -551,6 +553,7 @@ namespace Xenko.UI
         /// <param name="args">The arguments of the event</param>
         protected virtual void OnTouchUp(TouchEventArgs args)
         {
+            UIRenderFeature.ForceMouseOver = null;
         }
 
         private static void KeyPressedClassHandler(object sender, KeyEventArgs args)

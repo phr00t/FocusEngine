@@ -10,6 +10,7 @@ using Xenko.Engine;
 using Xenko.Games;
 using Xenko.Graphics;
 using Xenko.Input;
+using Xenko.Rendering.UI;
 using Xenko.UI.Events;
 
 namespace Xenko.UI.Controls
@@ -435,6 +436,8 @@ namespace Xenko.UI.Controls
 
             SetValueFromTouchPosition(args.WorldPosition);
             IsTouchedDown = true;
+
+            UIRenderFeature.ForceMouseOver = this;
         }
 
         protected override void OnTouchUp(TouchEventArgs args)

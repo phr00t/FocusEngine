@@ -18,6 +18,8 @@ namespace Xenko.Rendering.UI
         [ThreadStatic]
         private static HashSet<UIElement> newlySelectedElementParents = new HashSet<UIElement>();
 
+        internal static UIElement ForceMouseOver;
+
         partial void PickingUpdate(RenderUIElement renderUIElement, Viewport viewport, ref Matrix worldViewProj, GameTime drawTime, List<PointerEvent> events)
         {
             if (renderUIElement.Page?.RootElement == null)
@@ -451,7 +453,7 @@ namespace Xenko.Rendering.UI
             var highestDepthBias = -1.0f;
             PerformRecursiveHitTest(rootElement, ref clickRay, ref worldViewProj, ref clickedElement, ref intersectionPoint, ref smallestDepth, ref highestDepthBias, false);
 
-            return clickedElement;
+            return ForceMouseOver ?? clickedElement;
         }
 
         /// <summary>
@@ -469,7 +471,7 @@ namespace Xenko.Rendering.UI
             var highestDepthBias = -1.0f;
             PerformRecursiveHitTest(rootElement, ref clickRay, ref worldViewProj, ref clickedElement, ref intersectionPoint, ref smallestDepth, ref highestDepthBias, true);
 
-            return clickedElement;
+            return ForceMouseOver ?? clickedElement;
         }
 
         /// <summary>
@@ -492,7 +494,7 @@ namespace Xenko.Rendering.UI
             if (!element.IsVisible)
                 return;
 
-            var canBeHit = element.CanBeHitByUser;
+            var canBeHit = element.CanBeHitByUser || ForceMouseOver != null;
             if (canBeHit || element.ClipToBounds)
             {
                 Vector3 intersection;
@@ -518,6 +520,14 @@ namespace Xenko.Rendering.UI
                         intersectionPoint = intersection;
                         hitElement = element;
                     }
+                }
+
+                if (ForceMouseOver != null)
+                {
+                    // clear if we didn't hit anything at all
+                    if (!intersect) ForceMouseOver = null;
+                    // return as we only check against root when forcing a uielement (e.g. slider we are moving)
+                    return;
                 }
             }
 
