@@ -111,6 +111,7 @@ namespace Xenko.Rendering.UI
             if (Math.Abs(uiRay.Position.X + uiRay.Direction.X * dist) > resolution.X * 0.5f ||
                 Math.Abs(uiRay.Position.Y + uiRay.Direction.Y * dist) > resolution.Y * 0.5f)
             {
+                ForceMouseOver = null;
                 return false;
             }
 
