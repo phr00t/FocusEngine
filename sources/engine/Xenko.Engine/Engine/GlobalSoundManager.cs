@@ -33,6 +33,16 @@ namespace Xenko.Engine
         public static float MasterVolume = 1f;
 
         /// <summary>
+        /// Volume to apply to streamed audio (e.g. music)
+        /// </summary>
+        public static float StreamedVolume = 1f;
+
+        /// <summary>
+        /// Volume to apply to non-streamed audio (e.g. effects)
+        /// </summary>
+        public static float NonStreamedVolume = 1f;
+
+        /// <summary>
         /// Sounds really close to the listener can cause jarring pan issues, so this will scoot sounds away to this distance. 0 to disable.
         /// </summary>
         public static float MinimumDistanceToListener = 1f;
@@ -68,7 +78,7 @@ namespace Xenko.Engine
             if (s != null)
             {
                 s.Pitch = pitch < 0f ? RandomPitch() : pitch;
-                s.Volume = volume * MasterVolume;
+                s.Volume = volume * MasterVolume * (s.DynamicSoundSource == null ? NonStreamedVolume : StreamedVolume);
                 s.IsLooping = looped;
                 s.Pan = pan;
                 if (s.IsSpatialized) s.Apply3D(AudioEngine.DefaultListener.Position);
@@ -104,7 +114,7 @@ namespace Xenko.Engine
             SoundInstance s = getFreeInstance(url, true);
             if (s == null) return null;
             s.Pitch = pitch < 0f ? RandomPitch() : pitch;
-            s.Volume = volume * MasterVolume;
+            s.Volume = volume * MasterVolume * (s.DynamicSoundSource == null ? NonStreamedVolume : StreamedVolume);
             s.IsLooping = looped;
             s.Pan = 0f;
             s.DistanceScale = distanceScale;
@@ -124,7 +134,7 @@ namespace Xenko.Engine
             SoundInstance s = getFreeInstance(url, true);
             if (s == null) return null;
             s.Pitch = pitch < 0f ? RandomPitch() : pitch;
-            s.Volume = volume * MasterVolume;
+            s.Volume = volume * MasterVolume * (s.DynamicSoundSource == null ? NonStreamedVolume : StreamedVolume);
             s.IsLooping = looped;
             s.Pan = 0f;
             s.DistanceScale = distanceScale;
