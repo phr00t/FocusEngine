@@ -44,6 +44,11 @@ namespace Xenko.VirtualReality
         /// <remarks>This will reduce the near clip plane of the cameras, it might induce depth issues.</remarks>
         public float BodyScaling { get; set; }
 
+        /// <summary>
+        /// Translate the player and controllers by this value, if it exists
+        /// </summary>
+        public Vector3? BodyOffset { get; set; }
+
         public abstract bool CanInitialize { get; }
 
         public abstract void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, VRDeviceSystem.MIRROR_OPTION requireMirror);

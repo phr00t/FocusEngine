@@ -358,6 +358,9 @@ namespace Xenko.VirtualReality
             headPos.X = views[0].Pose.Position.X;
             headPos.Y = views[0].Pose.Position.Y;
             headPos.Z = views[0].Pose.Position.Z;
+
+            headPos *= BodyScaling;
+            if (BodyOffset.HasValue) headPos += BodyOffset.Value;            
         }
 
         public override unsafe void Draw(GameTime gameTime)
