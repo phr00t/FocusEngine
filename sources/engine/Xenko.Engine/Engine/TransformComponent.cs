@@ -322,7 +322,8 @@ namespace Xenko.Engine
                     }
                     else
                         Entity.Scene = newParentScene;
-                }
+                } else
+                    Entity.Scene = null;
 
                 IsMovingInsideRootScene = false;
             }
