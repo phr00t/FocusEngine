@@ -388,6 +388,19 @@ namespace Xenko.Physics.Bepu
         public bool VRPhysicsCollisionCheckBeforeMove = true;
         public float VRPhysicsMoveThreshold = 0.2f;
 
+        /// <summary>
+        /// Removes any FOV reduction caused by movement or forced-on state. Same as calling SetVRLoadingBlackout(false)
+        /// </summary>
+        public void ResetVRFOV()
+        {
+            forceBlackout = false;
+
+            if (!VR || fovReduction == null) return;
+
+            fovReduction.Enabled = false;
+            fovReduction.Radius = 1f;
+        }
+
         private void UpdateVRFOV(bool ForceFOVReduction, float frameTime)
         {
             float desiredRadius;
