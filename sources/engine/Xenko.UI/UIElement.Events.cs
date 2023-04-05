@@ -2,6 +2,7 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using Xenko.Core;
@@ -54,7 +55,7 @@ namespace Xenko.UI
 
         #endregion
 
-        private static readonly Queue<List<RoutedEventHandlerInfo>> RoutedEventHandlerInfoListPool = new Queue<List<RoutedEventHandlerInfo>>();
+        private static readonly ConcurrentQueue<List<RoutedEventHandlerInfo>> RoutedEventHandlerInfoListPool = new ConcurrentQueue<List<RoutedEventHandlerInfo>>();
 
         static UIElement()
         {
@@ -117,9 +118,9 @@ namespace Xenko.UI
             if (eventsToHandlers.TryGetValue(routedEvent, out var handlers))
             {
                 // get a list of handler from the pool where we can copy the handler to trigger
-                if (RoutedEventHandlerInfoListPool.Count == 0)
-                    RoutedEventHandlerInfoListPool.Enqueue(new List<RoutedEventHandlerInfo>());
-                var pooledList = RoutedEventHandlerInfoListPool.Dequeue();
+                List<RoutedEventHandlerInfo> pooledList;
+                if (RoutedEventHandlerInfoListPool.TryDequeue(out pooledList) == false)
+                    pooledList = new List<RoutedEventHandlerInfo>();
 
                 // copy the RoutedEventHandlerEventInfo list into a list of the pool in order to be able to modify the handler list in the handler itself
                 pooledList.AddRange(handlers);
