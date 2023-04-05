@@ -277,8 +277,7 @@ namespace Xenko.VirtualReality
 
             currentVel *= baseHMD.BodyScaling;
             currentPos *= baseHMD.BodyScaling;
-
-            if (baseHMD.BodyOffset.HasValue) currentPos += baseHMD.BodyOffset.Value;
+            currentPos += baseHMD.BodyOffset;
 
             Quaternion? holdOffset = UseGripInsteadOfAimPose ? holdOffsetGrip : holdOffsetPoint;
 

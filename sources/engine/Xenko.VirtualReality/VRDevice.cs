@@ -47,7 +47,7 @@ namespace Xenko.VirtualReality
         /// <summary>
         /// Translate the player and controllers by this value, if it exists
         /// </summary>
-        public Vector3? BodyOffset { get; set; }
+        public Vector3 BodyOffset { get; set; } = Vector3.Zero;
 
         public abstract bool CanInitialize { get; }
 

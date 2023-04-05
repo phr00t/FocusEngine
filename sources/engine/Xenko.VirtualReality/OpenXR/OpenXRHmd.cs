@@ -360,7 +360,7 @@ namespace Xenko.VirtualReality
             headPos.Z = views[0].Pose.Position.Z;
 
             headPos *= BodyScaling;
-            if (BodyOffset.HasValue) headPos += BodyOffset.Value;            
+            headPos += BodyOffset;            
         }
 
         public override unsafe void Draw(GameTime gameTime)
@@ -857,7 +857,7 @@ namespace Xenko.VirtualReality
                 adjustedHeadMatrix.Row3 = new Vector4(0, 0, adjustedHeadMatrix.Row3.Length(), 0);
             }
 
-            eyeMat = adjustedHeadMatrix * Matrix.Scaling(BodyScaling) * cameraRotation * Matrix.Translation(cameraPosition);
+            eyeMat = adjustedHeadMatrix * Matrix.Scaling(BodyScaling) * cameraRotation * Matrix.Translation(cameraPosition + BodyOffset);
             eyeMat.Decompose(out scale, out rot, out pos);
             var finalUp = Vector3.TransformCoordinate(new Vector3(0, 1, 0), rot);
             var finalForward = Vector3.TransformCoordinate(new Vector3(0, 0, -1), rot);
