@@ -279,7 +279,7 @@ namespace Xenko.Rendering.UI
         {
             bool VRcontrollerUsed = VirtualReality.VRDeviceSystem.VRActive && (TransformComponent.LastLeftHandTracked != null || TransformComponent.LastRightHandTracked != null);
 
-            if (input == null || !input.HasMouse && VRcontrollerUsed == false)
+            if (input == null || !input.HasMouse && VRcontrollerUsed == false || VRcontrollerUsed && state.Source is UIComponent uicomp && uicomp.IsFullScreen)
                 return false;
 
             var intersectionPoint = Vector3.Zero;
@@ -306,6 +306,11 @@ namespace Xenko.Rendering.UI
                         UIElementUnderMouseCursor = GetElementAtWorldPosition(rootElement, ref uiRay, ref worldViewProj, ref intersectionPoint);
                         if (UIElementUnderMouseCursor != null)
                         {
+                            // is this a forced element from another uicomponent?
+                            if (ForceMouseOver == UIElementUnderMouseCursor && state.Source is UIComponent uic &&
+                                uic.Page?.RootElement?.VisualChildren is UIElementCollection coll &&
+                                coll.Contains(ForceMouseOver) == false) continue;
+
                             // wait, are we selecting this element?
                             VirtualReality.TouchController tc = VirtualReality.VRDeviceSystem.GetSystem.GetController(swappedIndex == 0 ? VirtualReality.TouchControllerHand.Right : VirtualReality.TouchControllerHand.Left);
 
