@@ -328,12 +328,17 @@ namespace Xenko.Rendering.UI
                                     MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Moved, 0, Vector2.Zero, Vector2.Zero, intersectionPoint, state.LastIntersectionPoint - intersectionPoint, time);
 
                                 // check the second button
-                                else if (tc.IsTouchedDown(VirtualReality.VRDeviceSystem.UIActivationButton2) || tc.IsPressedDown(VirtualReality.VRDeviceSystem.UIActivationButton2))
-                                    MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Pressed, 2, Vector2.Zero, Vector2.Zero, intersectionPoint, Vector3.Zero, time);
-                                else if (tc.IsTouchReleased(VirtualReality.VRDeviceSystem.UIActivationButton2) || tc.IsPressReleased(VirtualReality.VRDeviceSystem.UIActivationButton2))
-                                    MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Released, 2, Vector2.Zero, Vector2.Zero, intersectionPoint, Vector3.Zero, time);
-                                else if (tc.IsTouched(VirtualReality.VRDeviceSystem.UIActivationButton2) || tc.IsPressed(VirtualReality.VRDeviceSystem.UIActivationButton2))
-                                    MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Moved, 2, Vector2.Zero, Vector2.Zero, intersectionPoint, state.LastIntersectionPoint - intersectionPoint, time);
+                                else if (VirtualReality.VRDeviceSystem.UIActivationButton2.HasValue)
+                                {
+                                    var button = VirtualReality.VRDeviceSystem.UIActivationButton2.Value;
+
+                                    if (tc.IsTouchedDown(button) || tc.IsPressedDown(button))
+                                        MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Pressed, 2, Vector2.Zero, Vector2.Zero, intersectionPoint, Vector3.Zero, time);
+                                    else if (tc.IsTouchReleased(button) || tc.IsPressReleased(button))
+                                        MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Released, 2, Vector2.Zero, Vector2.Zero, intersectionPoint, Vector3.Zero, time);
+                                    else if (tc.IsTouched(button) || tc.IsPressed(button))
+                                        MakeTouchEvent(UIElementUnderMouseCursor, lastMouseOverElement, PointerEventType.Moved, 2, Vector2.Zero, Vector2.Zero, intersectionPoint, state.LastIntersectionPoint - intersectionPoint, time);
+                                }
 
                                 state.LastIntersectionPoint = intersectionPoint;
                             }
