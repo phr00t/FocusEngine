@@ -309,6 +309,23 @@ namespace Xenko.UI
         }
 
         /// <summary>
+        /// Get the UIElement of type T in the entry of value.
+        /// </summary>
+        /// <typeparam name="T">Type of UIElement to look for (e.g. TextBlock)</typeparam>
+        /// <param name="value">Value of the entry to get the UIElement from</param>
+        /// <returns>UIElement of type T if found, null otherwise</returns>
+        public T GetEntryElement<T>(object value) where T : UIElement
+        {
+            if (entryElements.TryGetValue(value, out var uie))
+            {
+                foreach (var e in uie.Values)
+                    if (e is T eT) return eT;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Removes an entry from the list
         /// </summary>
         /// <param name="value">value of entry to remove</param>
