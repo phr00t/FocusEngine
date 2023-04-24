@@ -131,7 +131,7 @@ namespace Xenko.Physics.Bepu
         }
 
         /// <summary>
-        /// If flying is true, gravity is zero and Donttouch_Y is false
+        /// If flying is true, gravity is set to zero and Donttouch_Y is set to false
         /// </summary>
         public bool Flying
         {
@@ -263,9 +263,14 @@ namespace Xenko.Physics.Bepu
         public Vector3? ApplySingleImpulse;
 
         /// <summary>
-        /// Only operate on X/Z? Useful for non-flying characters
+        /// Only operate on X/Z in all situations? Useful for non-flying characters
         /// </summary>
         public bool DontTouch_Y = true;
+
+        /// <summary>
+        /// Even if we are flying, should we ignore VR headset Y changes for physics positioning? You generally should leave this as true.
+        /// </summary>
+        public bool IgnoreVRHeadsetYPhysics = true;
 
         /// <summary>
         /// Push the character with forces (true) or set velocity directly (false)
@@ -343,7 +348,7 @@ namespace Xenko.Physics.Bepu
             if (Camera != null && VR)
             {
                 Vector3 finalpos = Camera.Entity.Transform.WorldPosition();
-                if (DontTouch_Y) finalpos.Y = Body.Position.Y;
+                if (DontTouch_Y || IgnoreVRHeadsetYPhysics) finalpos.Y = Body.Position.Y;
                 float xDist = Body.Position.X - finalpos.X;
                 float yDist = Body.Position.Y - finalpos.Y;
                 float zDist = Body.Position.Z - finalpos.Z;
