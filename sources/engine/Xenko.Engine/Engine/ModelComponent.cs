@@ -277,7 +277,7 @@ namespace Xenko.Engine
 
             // make the box
             OrientedBoundingBox box = new OrientedBoundingBox(Model.BoundingBox);
-            box.Transformation = Matrix.Transformation(Vector3.One, Entity.Transform.WorldRotation(), Entity.Transform.WorldPosition());
+            box.Transform(Matrix.Transformation(Vector3.One, Entity.Transform.WorldRotation(), Entity.Transform.WorldPosition()));
             Vector3 worldscale = Entity.Transform.WorldScale();
             if (scale != 1f) worldscale *= scale;
             box.Scale(ref worldscale);
