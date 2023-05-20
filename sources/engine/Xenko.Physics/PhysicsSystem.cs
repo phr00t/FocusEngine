@@ -273,6 +273,9 @@ namespace Xenko.Physics
                                 rb.ActionPerSimulationTick(rb, time);
 
                             rb.UpdateTransformationComponent(e);
+
+                            for (int i = 0; i < rb.PostSimulationTickActions.Count; i++)
+                                rb.PostSimulationTickActions[i](rb, time);
                         });
                     }
 

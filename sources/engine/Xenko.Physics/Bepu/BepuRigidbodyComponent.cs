@@ -44,6 +44,12 @@ namespace Xenko.Physics.Bepu
         [DataMemberIgnore]
         public Action<BepuRigidbodyComponent, float> ActionPerSimulationTick;
 
+        /// <summary>
+        /// Any actions to take with this rigidbody each tick, after it has been fully processed
+        /// </summary>
+        [DataMemberIgnore]
+        public List<Action<BepuRigidbodyComponent, float>> PostSimulationTickActions = new List<Action<BepuRigidbodyComponent, float>>();
+
         [DataMemberIgnore]
         internal ConcurrentQueue<Action<BepuRigidbodyComponent>> queuedActions = new ConcurrentQueue<Action<BepuRigidbodyComponent>>();
 
