@@ -658,7 +658,7 @@ namespace Xenko.Physics.Bepu
             };
             using(simulationLocker.ReadLock())
             {
-                lock (internalSimulation.BroadphaseLocker)
+                using (internalSimulation.BroadphaseLocker.ReadLock())
                 {
                     internalSimulation.RayCast(new System.Numerics.Vector3(from.X, from.Y, from.Z), new System.Numerics.Vector3(direction.X, direction.Y, direction.Z), length, ref rhch);
                 }
@@ -685,10 +685,10 @@ namespace Xenko.Physics.Bepu
             };
             using (simulationLocker.ReadLock())
             {
-                if (Monitor.TryEnter(internalSimulation.BroadphaseLocker))
+                if (internalSimulation.BroadphaseLocker.TryEnterReadLock(0))
                 {
                     internalSimulation.RayCast(new System.Numerics.Vector3(from.X, from.Y, from.Z), new System.Numerics.Vector3(direction.X, direction.Y, direction.Z), length, ref rhch);
-                    Monitor.Exit(internalSimulation.BroadphaseLocker);
+                    internalSimulation.BroadphaseLocker.ExitReadLock();
                     result = rhch.HitCollidable;
                     return true;
                 }
@@ -736,7 +736,7 @@ namespace Xenko.Physics.Bepu
             };
             using (simulationLocker.ReadLock())
             {
-                lock (internalSimulation.BroadphaseLocker)
+                using (internalSimulation.BroadphaseLocker.ReadLock())
                 {
                     internalSimulation.RayCast(new System.Numerics.Vector3(from.X, from.Y, from.Z), new System.Numerics.Vector3(direction.X, direction.Y, direction.Z), length, ref rhch);
                 }
@@ -895,7 +895,7 @@ namespace Xenko.Physics.Bepu
             rp.Orientation.W = rotation.W;
             using (simulationLocker.ReadLock())
             {
-                lock (internalSimulation.BroadphaseLocker)
+                using (internalSimulation.BroadphaseLocker.ReadLock())
                 {
                     internalSimulation.Sweep(shape, rp, new BodyVelocity(new System.Numerics.Vector3(direction.X, direction.Y, direction.Z)), length, safeBufferPool, ref sshh);
                 }
@@ -952,7 +952,7 @@ namespace Xenko.Physics.Bepu
             rp.Orientation.W = rotation.W;
             using (simulationLocker.ReadLock())
             {
-                lock (internalSimulation.BroadphaseLocker)
+                using (internalSimulation.BroadphaseLocker.ReadLock())
                 {
                     internalSimulation.Sweep(shape, rp, new BodyVelocity(new System.Numerics.Vector3(direction.X, direction.Y, direction.Z)), length, safeBufferPool, ref sshh);
                 }
