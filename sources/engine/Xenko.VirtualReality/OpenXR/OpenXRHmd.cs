@@ -80,10 +80,10 @@ namespace Xenko.VirtualReality
         {
             // Get the swapchain image
             var swapchainIndex = 0u;
-            var acquireInfo = new SwapchainImageAcquireInfo() { Type = StructureType.TypeSwapchainImageAcquireInfo };
+            var acquireInfo = new SwapchainImageAcquireInfo() { Type = StructureType.SwapchainImageAcquireInfo };
             CheckResult(Xr.AcquireSwapchainImage(globalSwapchain, in acquireInfo, ref swapchainIndex), "AcquireSwapchainImage");
 
-            var waitInfo = new SwapchainImageWaitInfo(timeout: long.MaxValue) { Type = StructureType.TypeSwapchainImageWaitInfo };
+            var waitInfo = new SwapchainImageWaitInfo(timeout: long.MaxValue) { Type = StructureType.SwapchainImageWaitInfo };
             swapImageCollected = Xr.WaitSwapchainImage(globalSwapchain, in waitInfo) == Result.Success;
 
             return images[swapchainIndex].Image;
@@ -108,7 +108,7 @@ namespace Xenko.VirtualReality
             Xr.EnumerateInstanceExtensionProperties((byte*)null, 0, &propCount, null);
 
             ExtensionProperties[] props = new ExtensionProperties[propCount];
-            for (int i = 0; i < props.Length; i++) props[i].Type = StructureType.TypeExtensionProperties;
+            for (int i = 0; i < props.Length; i++) props[i].Type = StructureType.ExtensionProperties;
 
             fixed (ExtensionProperties* pptr = &props[0])
                 Xr.EnumerateInstanceExtensionProperties((byte*)null, propCount, ref propCount, pptr);
@@ -272,13 +272,13 @@ namespace Xenko.VirtualReality
             begunFrame = false;
 
             // Release the swapchain image
-            var releaseInfo = new SwapchainImageReleaseInfo() { Type = StructureType.TypeSwapchainImageReleaseInfo };
+            var releaseInfo = new SwapchainImageReleaseInfo() { Type = StructureType.SwapchainImageReleaseInfo };
             CheckResult(Xr.ReleaseSwapchainImage(globalSwapchain, in releaseInfo), "ReleaseSwapchainImage");
 
             // https://github.com/dotnet/Silk.NET/blob/b0b31779ce4db9b68922977fa11772b95f506e09/examples/CSharp/OpenGL%20Demos/OpenGL%20VR%20Demo/OpenXR/Renderer.cs#L507
             var frameEndInfo = new FrameEndInfo()
             {
-                Type = StructureType.TypeFrameEndInfo,
+                Type = StructureType.FrameEndInfo,
                 DisplayTime = globalFrameState.PredictedDisplayTime,
                 EnvironmentBlendMode = EnvironmentBlendMode.Opaque
             };
@@ -321,7 +321,7 @@ namespace Xenko.VirtualReality
 
             ActionsSyncInfo actions_sync_info = new ActionsSyncInfo()
             {
-                Type = StructureType.TypeActionsSyncInfo,
+                Type = StructureType.ActionsSyncInfo,
                 CountActiveActionSets = 1,
                 ActiveActionSets = &active_actionsets,
             };
@@ -334,7 +334,7 @@ namespace Xenko.VirtualReality
             // --- Create projection matrices and view matrices for each eye
             ViewLocateInfo view_locate_info = new ViewLocateInfo()
             {
-                Type = StructureType.TypeViewLocateInfo,
+                Type = StructureType.ViewLocateInfo,
                 ViewConfigurationType = ViewConfigurationType.PrimaryStereo,
                 DisplayTime = globalFrameState.PredictedDisplayTime,
                 Space = globalPlaySpace
@@ -342,7 +342,7 @@ namespace Xenko.VirtualReality
 
             ViewState view_state = new ViewState()
             {
-                Type = StructureType.TypeViewState
+                Type = StructureType.ViewState
             };
 
             uint view_count;
@@ -369,7 +369,7 @@ namespace Xenko.VirtualReality
             // --- Wait for our turn to do head-pose dependent computation and render a frame
             FrameWaitInfo frame_wait_info = new FrameWaitInfo()
             {
-                Type = StructureType.TypeFrameWaitInfo,
+                Type = StructureType.FrameWaitInfo,
             };
 
             CheckResult(Xr.WaitFrame(globalSession, in frame_wait_info, ref globalFrameState), "WaitFrame");
@@ -464,17 +464,20 @@ namespace Xenko.VirtualReality
             Prepare();
 
             SystemProperties system_props = new SystemProperties() {
-                Type = StructureType.TypeSystemProperties,
+                Type = StructureType.SystemProperties,
             };
 
             CheckResult(Xr.GetSystemProperties(Instance, system_id, &system_props), "GetSystemProperties");
 
-            ViewConfigurationView vcv = new ViewConfigurationView()
+            viewconfig_views = new ViewConfigurationView[32];
+            for (int i=0; i<viewconfig_views.Length; i++)
             {
-                Type = StructureType.TypeViewConfigurationView,
-            };
+                viewconfig_views[i] = new ViewConfigurationView()
+                {
+                    Type = StructureType.ViewConfigurationView,                     
+                };
+            }
 
-            viewconfig_views = new ViewConfigurationView[128];
             fixed (ViewConfigurationView* viewspnt = &viewconfig_views[0])
                 CheckResult(Xr.EnumerateViewConfigurationView(Instance, system_id, view_type, (uint)viewconfig_views.Length, ref view_count, viewspnt), "EnumerateViewConfigurationView");
             Array.Resize<ViewConfigurationView>(ref viewconfig_views, (int)view_count);
@@ -485,7 +488,7 @@ namespace Xenko.VirtualReality
 
             GraphicsRequirementsVulkanKHR vulk = new GraphicsRequirementsVulkanKHR()
             {
-                Type = StructureType.TypeGraphicsRequirementsVulkanKhr
+                Type = StructureType.GraphicsRequirementsVulkanKhr
             };
 
             Silk.NET.Core.PfnVoidFunction func = new Silk.NET.Core.PfnVoidFunction();
@@ -561,7 +564,7 @@ namespace Xenko.VirtualReality
                 Window.GenerateGenericError(null, "OpenXR couldn't find a physical device.\n\nIs an OpenXR runtime running (e.g. SteamVR)?");
 
             SessionCreateInfo session_create_info = new SessionCreateInfo() {
-                Type = StructureType.TypeSessionCreateInfo,
+                Type = StructureType.SessionCreateInfo,
                 Next = &graphics_binding_vulkan,
                 SystemId = system_id
             };
@@ -585,10 +588,10 @@ namespace Xenko.VirtualReality
                 swapchain = new Swapchain();
                 swapchain_lengths = new uint[1];
                 SwapchainCreateInfo swapchain_create_info = new SwapchainCreateInfo() {
-                    Type = StructureType.TypeSwapchainCreateInfo,
-                    UsageFlags = SwapchainUsageFlags.SwapchainUsageTransferDstBit |
-                                 SwapchainUsageFlags.SwapchainUsageSampledBit |
-                                 SwapchainUsageFlags.SwapchainUsageColorAttachmentBit,
+                    Type = StructureType.SwapchainCreateInfo,
+                    UsageFlags = SwapchainUsageFlags.TransferDstBit |
+                                 SwapchainUsageFlags.SampledBit |
+                                 SwapchainUsageFlags.ColorAttachmentBit,
                     CreateFlags = 0,
                     Format = (long)43, // VK_FORMAT_R8G8B8A8_SRGB = 43
                     SampleCount = 1, //viewconfig_views[0].RecommendedSwapchainSampleCount,
@@ -678,12 +681,12 @@ namespace Xenko.VirtualReality
             // Do not allocate these every frame to save some resources
             views = new View[view_count]; //(XrView*)malloc(sizeof(XrView) * view_count);
             for (int i = 0; i < view_count; i++)
-                views[i].Type = StructureType.TypeView;
+                views[i].Type = StructureType.View;
 
             projection_views = new CompositionLayerProjectionView[view_count]; //(XrCompositionLayerProjectionView*)malloc(sizeof(XrCompositionLayerProjectionView) * view_count);
             for (int i = 0; i < view_count; i++)
             {
-                projection_views[i].Type = StructureType.TypeCompositionLayerProjectionView; //XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW;
+                projection_views[i].Type = StructureType.CompositionLayerProjectionView; //XR_TYPE_COMPOSITION_LAYER_PROJECTION_VIEW;
                 projection_views[i].SubImage.Swapchain = swapchain;
                 projection_views[i].SubImage.ImageArrayIndex = 0;
                 projection_views[i].SubImage.ImageRect.Offset.X = (renderSize.Width * i) / 2;
@@ -744,7 +747,7 @@ namespace Xenko.VirtualReality
             // --- Begin session */
             SessionBeginInfo session_begin_info = new SessionBeginInfo()
             {
-                Type = StructureType.TypeSessionBeginInfo,
+                Type = StructureType.SessionBeginInfo,
                 PrimaryViewConfigurationType = view_type
             };
 
@@ -752,7 +755,7 @@ namespace Xenko.VirtualReality
 
             SessionActionSetsAttachInfo actionset_attach_info = new SessionActionSetsAttachInfo()
             {
-	            Type = StructureType.TypeSessionActionSetsAttachInfo,
+	            Type = StructureType.SessionActionSetsAttachInfo,
 	            CountActionSets = 1,
 	            ActionSets = &gameplay_actionset
             };
@@ -760,7 +763,7 @@ namespace Xenko.VirtualReality
             CheckResult(Xr.AttachSessionActionSets(session, &actionset_attach_info), "AttachSessionActionSets");
 
             // figure out what interaction profile we are using, and determine if it has a touchpad/thumbstick or both
-            handProfileState.Type = StructureType.TypeInteractionProfileState;
+            handProfileState.Type = StructureType.InteractionProfileState;
             Xr.StringToPath(Instance, "/user/hand/left", ref leftHandPath);
         }
 

@@ -146,7 +146,7 @@ namespace Xenko.Importer.Assimp
             return ProcessAnimations(scene);
         }
 
-        public unsafe Skeleton ConvertSkeleton(string inputFilename, string outputFilename)
+        public unsafe Xenko.Rendering.Skeleton ConvertSkeleton(string inputFilename, string outputFilename)
         {
             uint importFlags = 0;
             var postProcessFlags = PostProcessSteps.None;
@@ -229,7 +229,7 @@ namespace Xenko.Importer.Assimp
             return modelData;
         }
 
-        private unsafe Skeleton ProcessSkeleton(Scene* scene)
+        private unsafe Xenko.Rendering.Skeleton ProcessSkeleton(Scene* scene)
         {
             var nodeNames = new Dictionary<IntPtr, string>();
             GenerateNodeNames(scene, nodeNames);
@@ -238,7 +238,7 @@ namespace Xenko.Importer.Assimp
             var meshIndexToNodeIndex = new Dictionary<int, List<int>>();
             RegisterNodes(scene->MRootNode, -1, nodeNames, meshIndexToNodeIndex);
 
-            return new Skeleton
+            return new Xenko.Rendering.Skeleton
             {
                 Nodes = nodes.ToArray()
             };
