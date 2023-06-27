@@ -28,7 +28,10 @@ namespace Xenko.VirtualReality
         public Session globalSession;
         public Swapchain globalSwapchain;
         public Space globalPlaySpace;
-        public FrameState globalFrameState;
+        public FrameState globalFrameState = new FrameState()
+        {
+            Type = StructureType.FrameState
+        };
         public ReferenceSpaceType play_space_type = ReferenceSpaceType.Stage; //XR_REFERENCE_SPACE_TYPE_LOCAL;
         //public SwapchainImageVulkan2KHR[] images;
         //public SwapchainImageVulkan2KHR[] depth_images;
