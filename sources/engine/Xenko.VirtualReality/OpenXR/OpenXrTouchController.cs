@@ -252,6 +252,14 @@ namespace Xenko.VirtualReality
             baseHMD.Xr.LocateSpace(UseGripInsteadOfAimPose ? myGripSpace : myAimSpace, baseHMD.globalPlaySpace,
                                    baseHMD.globalFrameState.PredictedDisplayTime, ref handLocation);
 
+            // apply scaling and offset early, which might be needed for velocity backup calculation
+            handLocation.Pose.Position.X *= baseHMD.BodyScaling;
+            handLocation.Pose.Position.Y *= baseHMD.BodyScaling;
+            handLocation.Pose.Position.Z *= baseHMD.BodyScaling;
+            handLocation.Pose.Position.X += baseHMD.BodyOffset.X;
+            handLocation.Pose.Position.Y += baseHMD.BodyOffset.Y;
+            handLocation.Pose.Position.Z += baseHMD.BodyOffset.Z;
+
             if ((sv.VelocityFlags & SpaceVelocityFlags.SpaceVelocityLinearValidBit) == 0 || sv.LinearVelocity.X == 0f && sv.LinearVelocity.Y == 0f && sv.LinearVelocity.Z == 0f)
             {
                 // invalid linear velocity, try calculating it based on position difference
@@ -276,8 +284,6 @@ namespace Xenko.VirtualReality
             currentPos.Z = handLocation.Pose.Position.Z;
 
             currentVel *= baseHMD.BodyScaling;
-            currentPos *= baseHMD.BodyScaling;
-            currentPos += baseHMD.BodyOffset;
 
             Quaternion? holdOffset = UseGripInsteadOfAimPose ? holdOffsetGrip : holdOffsetPoint;
 
