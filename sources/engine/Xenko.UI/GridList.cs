@@ -115,6 +115,14 @@ namespace Xenko.UI
         }
 
         /// <summary>
+        /// How many entries are in this list in total?
+        /// </summary>
+        virtual public int GetCount()
+        {
+            return entryElements.Count;
+        }
+
+        /// <summary>
         /// Clear all checked ToggleButtons and clears last button pressed, if any
         /// </summary>
         virtual public void ResetSelected(object ignoreValue = null)
