@@ -149,6 +149,10 @@ namespace Xenko.Core.Assets
                 folder = Path.GetDirectoryName(folder);
             }
             string xenkoLibFolder = xenkoFolder == null ? null : Path.Combine(xenkoFolder, @"sources\editor\Xenko.GameStudio\bin\Release");
+            if (xenkoLibFolder != null && !Directory.Exists(xenkoLibFolder))
+                xenkoLibFolder = xenkoFolder;
+            else
+                xenkoLibFolder = null;
 
             // Note: we perform nuget restore inside the assembly resolver rather than top level module ctor (otherwise it freezes)
             AppDomain.CurrentDomain.AssemblyResolve += (sender, eventArgs) =>
