@@ -56,7 +56,7 @@ namespace Xenko.Physics.Bepu
         /// Make a new BepuCharacterController helper for an entity, also useful for VR. Automatically will break off VR-tracked from Camera to base if using VR
         /// </summary>
         public BepuCharacterController(Entity baseBody, float height = 1.7f, float radius = 0.5f, bool VRMode = false, CollisionFilterGroups physics_group = CollisionFilterGroups.CharacterFilter,
-                                       CollisionFilterGroupFlags collides_with = CollisionFilterGroupFlags.StaticFilter | CollisionFilterGroupFlags.KinematicFilter |
+                                       CollisionFilterGroupFlags collides_with = CollisionFilterGroupFlags.StaticFilter | CollisionFilterGroupFlags.KinematicFilter | CollisionFilterGroupFlags.DefaultFilter |
                                        CollisionFilterGroupFlags.EnemyFilter | CollisionFilterGroupFlags.CharacterFilter, HashSet<Entity> AdditionalVREntitiesToDisconnectFromCamera = null)
         {
             Height = height;

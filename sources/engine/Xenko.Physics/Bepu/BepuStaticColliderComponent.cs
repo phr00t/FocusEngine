@@ -55,6 +55,7 @@ namespace Xenko.Physics.Bepu
         {
             staticDescription.Pose.Orientation.W = 1f;
             myStaticHandle.Value = -1;
+            CollisionGroup = CollisionFilterGroups.StaticFilter;
         }
 
         [DataMember]
