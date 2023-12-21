@@ -43,7 +43,24 @@ namespace Xenko.Core.Extensions
                         {
                             AllAssemblies.AddRange(AssemblyRegistry.Find(AssemblyCommonCategories.Assets));
                         }
-                        AllInstantiableTypes.AddRange(AllAssemblies.SelectMany(x => x.GetTypes().Where(IsInstantiableType)));
+                        for (int i = 0; i < AllAssemblies.Count; i++)
+                        {
+                            var assembly = AllAssemblies[i];
+                            try
+                            {
+                                var types = assembly.GetExportedTypes();
+                                for (int j=0; j<types.Length; j++)
+                                {
+                                    try
+                                    {
+                                        if (IsInstantiableType(types[j]))
+                                            AllInstantiableTypes.Add(types[j]);
+                                    }
+                                    catch (Exception e) { }
+                                }
+                            } catch (Exception e) { }
+                        }
+                        //AllInstantiableTypes.AddRange(AllAssemblies.SelectMany(x => x.GetTypes().Where(IsInstantiableType)));
                     }
 
                     result = AllInstantiableTypes.Where(type.IsAssignableFrom).ToList();

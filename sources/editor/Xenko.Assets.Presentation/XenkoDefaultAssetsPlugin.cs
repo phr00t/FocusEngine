@@ -307,9 +307,23 @@ namespace Xenko.Assets.Presentation
             return (ascending ? filtered.OrderBy(t => t.order) : filtered.OrderByDescending(t => t.order)).Select(t => t.type);
         }
 
+        private static List<Type> GetCleanTypes()
+        {
+            List<Type> allTypes = new List<Type>();
+            foreach (var aa in AssetRegistry.AssetAssemblies)
+            {
+                try
+                {
+                    allTypes.AddRange(aa.GetExportedTypes());
+                }
+                catch (Exception e) { }
+            }
+            return allTypes;
+        }
+
         private static void RegisterGizmoTypes()
         {
-            var allTypes = AssetRegistry.AssetAssemblies.SelectMany(x => x.GetTypes());
+            var allTypes = GetCleanTypes();
             foreach (var type in allTypes)
             {
                 if (typeof(IGizmo).IsAssignableFrom(type))
@@ -325,7 +339,7 @@ namespace Xenko.Assets.Presentation
 
         private static void RegisterAssetHighlighterTypes()
         {
-            var allTypes = AssetRegistry.AssetAssemblies.SelectMany(x => x.GetTypes());
+            var allTypes = GetCleanTypes();
             foreach (var type in allTypes)
             {
                 if (typeof(AssetHighlighter).IsAssignableFrom(type))
@@ -342,7 +356,7 @@ namespace Xenko.Assets.Presentation
         {
             // TODO: iterate on plugin assembly or register component type in the plugin registry
             var hashSet = new HashSet<int>();
-            var componentTypes = AssetRegistry.AssetAssemblies.SelectMany(x => x.GetTypes().Where(y => typeof(EntityComponent).IsAssignableFrom(y)));
+            var componentTypes = GetCleanTypes().Where(y => typeof(EntityComponent).IsAssignableFrom(y));
             var orders = new List<(Type, int)>();
             foreach (var type in componentTypes)
             {

@@ -91,7 +91,7 @@ namespace Xenko.Assets.Presentation.AssetEditors
                 return;
             }
 
-            var types = assembly.GetTypes();
+            var types = assembly.GetExportedTypes();
 
             var typesDict = new Dictionary<string, List<Type>>();
 

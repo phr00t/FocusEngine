@@ -27,6 +27,19 @@ namespace Xenko.Editor
         private readonly Dictionary<object, object> enumImagesDictionary = new Dictionary<object, object>();
         private readonly List<ITemplateProvider> templateProviderList = new List<ITemplateProvider>();
 
+        public static List<Type> GetCleanTypes(IEnumerable<Assembly> assemblies)
+        {
+            List<Type> types = new List<Type>();
+            foreach(var a in assemblies)
+            {
+                try
+                {
+                    types.AddRange(a.GetExportedTypes());
+                } catch(Exception e) { }
+            }
+            return types;
+        }
+
         protected virtual void RegisterResourceDictionary(ResourceDictionary dictionary)
         {
             foreach (object entry in dictionary.Keys)
@@ -62,7 +75,7 @@ namespace Xenko.Editor
         /// <inheritdoc />
         public override void RegisterPrimitiveTypes(ICollection<Type> primitiveTypes)
         {
-            foreach (var type in AssemblyRegistry.FindAll().SelectMany(x => x.GetTypes()))
+            foreach (var type in GetCleanTypes(AssemblyRegistry.FindAll()))
             {
                 var serializer = SerializerSelector.AssetWithReuse.GetSerializer(type);
                 if (serializer != null)
