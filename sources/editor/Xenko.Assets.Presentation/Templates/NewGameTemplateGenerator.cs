@@ -326,39 +326,6 @@ namespace Xenko.Assets.Presentation.Templates
             // Create the ground entity
             var groundEntity = new Entity("Ground") { new ModelComponent(AttachedReferenceManager.CreateProxyObject<Model>(groundModelAssetItem.Id, groundModelAssetItem.Location)) };
 
-            // Copy file in Resources
-            var skyboxFilename = (UFile)(isHDR ? "skybox_texture_hdr.dds" : "skybox_texture_ldr.dds");
-            try
-            {
-                var resources = UPath.Combine(package.RootDirectory, (UDirectory)"Resources");
-                Directory.CreateDirectory(resources.ToWindowsPath());
-
-                // TODO: Hardcoded due to the fact that part of the template is in another folder in dev build
-                // We might want to extend TemplateFolder to support those cases
-                var dataDirectory = ProjectTemplateGeneratorHelper.GetTemplateDataDirectory(parameters.Description);
-                var skyboxFullPath = UPath.Combine(dataDirectory, skyboxFilename).ToWindowsPath();
-                File.Copy(skyboxFullPath, UPath.Combine(resources, skyboxFilename).ToWindowsPath(), true);
-            }
-            catch (Exception ex)
-            {
-                logger.Error("Unexpected exception while copying cubemap", ex);
-            }
-
-            // Create the texture asset
-            var skyboxTextureAsset = new TextureAsset { Source = Path.Combine(@"../Resources", skyboxFilename), IsCompressed = isHDR, Type = new ColorTextureType { UseSRgbSampling = false } };
-            var skyboxTextureAssetItem = new AssetItem("Skybox texture", skyboxTextureAsset);
-            package.Assets.Add(skyboxTextureAssetItem);
-            skyboxTextureAssetItem.IsDirty = true;
-
-            // Create the skybox asset
-            var skyboxAsset = new SkyboxAsset
-            {
-                CubeMap = AttachedReferenceManager.CreateProxyObject<Texture>(skyboxTextureAssetItem.Id, skyboxTextureAssetItem.Location)
-            };
-            var skyboxAssetItem = new AssetItem("Skybox", skyboxAsset);
-            package.Assets.Add(skyboxAssetItem);
-            skyboxAssetItem.IsDirty = true;
-
             // Create the scene
             var defaultSceneAsset = isHDR ? SceneHDRFactory.Create() : SceneLDRFactory.Create();
 
@@ -378,16 +345,6 @@ namespace Xenko.Assets.Presentation.Templates
             {
                 ((GameSettingsAsset)gameSettingsAsset.Asset).DefaultScene = AttachedReferenceManager.CreateProxyObject<Scene>(sceneAssetItem.Id, sceneAssetItem.Location);
                 gameSettingsAsset.IsDirty = true;
-            }
-
-            var skyboxEntity = defaultSceneAsset.Hierarchy.Parts.Select(x => x.Value.Entity).Single(x => x.Name == SceneBaseFactory.SkyboxEntityName);
-            skyboxEntity.Get<BackgroundComponent>().Texture = skyboxAsset.CubeMap;
-            if (isHDR)
-            {
-                skyboxEntity.Get<LightComponent>().Type = new LightSkybox
-                {
-                    Skybox = AttachedReferenceManager.CreateProxyObject<Skybox>(skyboxAssetItem.Id, skyboxAssetItem.Location)
-                };
             }
 
             var cameraEntity = defaultSceneAsset.Hierarchy.Parts.Select(x => x.Value.Entity).Single(x => x.Name == SceneBaseFactory.CameraEntityName);
