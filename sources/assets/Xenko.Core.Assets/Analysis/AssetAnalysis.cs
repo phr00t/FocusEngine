@@ -132,7 +132,7 @@ namespace Xenko.Core.Assets.Analysis
                 {
                     if (parameters.IsLoggingAssetNotFoundAsError)
                     {
-                        log.Error(package, contentReference, AssetMessageCode.AssetForPackageNotFound, contentReference, packageName);
+                        log.Warning(package, contentReference, AssetMessageCode.AssetForPackageNotFound, contentReference, packageName);
 
                         var packageFound = package.Session.Packages.FirstOrDefault(x => x.FindAsset(contentReference.Location) != null);
                         if (packageFound != null)
