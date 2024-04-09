@@ -120,6 +120,7 @@ namespace Xenko.Engine
             if (data == null || declaration == null || data.Length <= 0) return false;
             VertexElement[] elements = declaration.VertexElements;
             int datalen = data.Length - data_offset;
+            datalen -= datalen % declaration.VertexStride; // handle any offset that might not have been accounted for above
             int totalEntries = datalen / declaration.VertexStride;
             positions = new Vector3[totalEntries];
             int[] eoffsets = new int[elements.Length];
