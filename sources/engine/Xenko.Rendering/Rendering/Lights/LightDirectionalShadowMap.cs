@@ -20,7 +20,7 @@ namespace Xenko.Rendering.Lights
         /// </summary>
         public LightDirectionalShadowMap()
         {
-            CascadeCount = LightShadowMapCascadeCount.FourCascades;
+            CascadeCount = LightShadowMapCascadeCount.OneCascade;
             DepthRange = new DepthRangeParameters();
             PartitionMode = new PartitionLogarithmic();
             StabilizationMode = LightShadowMapStabilizationMode.ProjectionSnapping;
@@ -32,7 +32,7 @@ namespace Xenko.Rendering.Lights
         /// <value>The number of cascades for this shadow.</value>
         /// <userdoc>The number of cascades for the shadows.</userdoc>
         [DataMember(50)]
-        [DefaultValue(LightShadowMapCascadeCount.FourCascades)]
+        [DefaultValue(LightShadowMapCascadeCount.OneCascade)]
         public LightShadowMapCascadeCount CascadeCount { get; set; }
 
         /// <summary>
