@@ -363,7 +363,7 @@ namespace Xenko.Core.IO
 
             if (anchorDirectory.HasDrive != HasDrive)
             {
-                throw new InvalidOperationException("Path should have no drive information/or both drive information simultaneously");
+                throw new InvalidOperationException("Path '" + this.ToString() + "' with anchor '" + anchorDirectory.ToString() + "' should have no drive information/or both drive information simultaneously");
             }
 
             // Return a "." when the directory is the same
