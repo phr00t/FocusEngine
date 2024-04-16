@@ -673,7 +673,7 @@ namespace Xenko.Graphics
 
    internal abstract class ResourcePool<T> : ComponentBase
     {
-        private const int CHECK_COMPLETED_INTERVAL = 8;
+        private const int CHECK_COMPLETED_INTERVAL = 12;
 
         protected readonly GraphicsDevice GraphicsDevice;
         private int checkCompleted;
@@ -683,21 +683,22 @@ namespace Xenko.Graphics
         protected ResourcePool(GraphicsDevice graphicsDevice)
         {
             GraphicsDevice = graphicsDevice;
-            checkCompleted = CHECK_COMPLETED_INTERVAL;
+            checkCompleted = 0;
         }
 
         public T GetObject()
         {
             KeyValuePair<long, T>? firstAllocator = null;
 
-            if (Interlocked.Increment(ref checkCompleted) >= CHECK_COMPLETED_INTERVAL)
+            if (Interlocked.Increment(ref checkCompleted) == CHECK_COMPLETED_INTERVAL)
             {
-                checkCompleted = 0;
-
                 // this check is slow, so only do it occassionally
                 // this may cause more objects to get created, but that is fine
                 // more things will come safely off the queue when this updates
                 GraphicsDevice.GetCompletedValue();
+
+                // only start counting for another one when we were done with the above
+                checkCompleted = 0;
             }
 
             bool lockTaken = false;
