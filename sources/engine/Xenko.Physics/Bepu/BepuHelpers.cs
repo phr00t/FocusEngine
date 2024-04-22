@@ -409,6 +409,32 @@ namespace Xenko.Physics.Bepu
         }
 
         /// <summary>
+        /// Generate a mesh collider from a given mesh. The mesh must have a readable buffer behind it to generate veriticies from
+        /// </summary>
+        /// <returns>Returns false if no mesh could be made</returns>
+        public static unsafe bool GenerateMeshShape(Xenko.Rendering.Model model, out BepuPhysics.Collidables.Mesh outMesh, out BepuUtilities.Memory.BufferPool poolUsed, Vector3? scale = null)
+        {
+            List<Vector3> allPositions = new List<Vector3>();
+            List<int> allIndicies = new List<int>();
+            for (int i = 0; i < model.Meshes.Count; i++)
+            {
+                getMeshOutputs(model.Meshes[i], out var pos, out var indicies);
+                for (int j = 0; j < indicies.Count; j++)
+                    allIndicies.Add(indicies[j] + allPositions.Count);
+                allPositions.AddRange(pos);
+            }
+
+            if (allIndicies.Count == 0 || allPositions.Count == 0)
+            {
+                outMesh = default;
+                poolUsed = null;
+                return false;
+            }
+
+            return GenerateMeshShape(allPositions, allIndicies, out outMesh, out poolUsed, scale);
+        }
+
+        /// <summary>
         /// Generate a mesh collider from all meshes in an entity. The meshes must have a readable buffer behind it to generate veriticies from.
         /// </summary>
         /// <returns>Returns false if no mesh could be made</returns>
