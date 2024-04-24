@@ -436,6 +436,7 @@ namespace Xenko.Engine
 
             object origVerts = origVerts0 == null ? origVerts1 : origVerts0;
             int len = origVerts0 == null ? origVerts1.Length : origVerts0.Length;
+            int auRunningcount = 0;
 
             Xenko.Core.Threading.Dispatcher.For(0, tUpdateCount, (i) =>
             {
@@ -455,7 +456,7 @@ namespace Xenko.Engine
                     }
                     else tempHiding[index] = false;
                 }
-                actuallyUpdated[Interlocked.Increment(ref auCount) - 1] = index;
+                actuallyUpdated[Interlocked.Increment(ref auRunningcount) - 1] = index;
                 Vector2 uvOffset = uvOffsets == null ? Vector2.Zero : uvOffsets[index];
                 Vector2 uvScale = uvScales == null ? Vector2.One : uvScales[index];
                 Color4? specialColor = colors == null ? null : colors[index];
@@ -506,6 +507,7 @@ namespace Xenko.Engine
                     });
                 }
             });
+            auCount = auRunningcount;
         }
 
         public void Dispose()
