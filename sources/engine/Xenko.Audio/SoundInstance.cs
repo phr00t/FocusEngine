@@ -219,8 +219,8 @@ namespace Xenko.Audio
 
             spos = Position;
             Vector3 vel = velocity ?? Vector3.Zero;
-            Vector3 dir = direction == null ? Vector3.UnitZ : Vector3.Transform(Vector3.UnitZ, direction.Value);
-            Vector3 up = direction == null ? Vector3.UnitY : Vector3.Transform(Vector3.UnitY, direction.Value);
+            Vector3 dir = direction == null ? Vector3.Zero : Vector3.Transform(-Vector3.UnitZ, direction.Value);
+            Vector3 up = direction == null ? Vector3.Zero : Vector3.Transform(Vector3.UnitY, direction.Value);
             Matrix m = Matrix.Transformation(Vector3.One, direction ?? Quaternion.Identity, Position);
 
             if (engine.State == AudioEngineState.Invalidated)

@@ -75,7 +75,7 @@ namespace Xenko.Audio
             {
                 listener.WorldTransform = tc.WorldMatrix;
                 var newPosition = listener.WorldTransform.TranslationVector;
-                listener.Velocity = (newPosition - listener.Position) * (float)gameTime.TimePerFrame.TotalSeconds; // estimate velocity from last and new position
+                listener.Velocity = (newPosition - listener.Position) / (float)gameTime.TimePerFrame.TotalSeconds; // estimate velocity from last and new position
                 listener.Position = newPosition;
                 listener.Forward = -tc.Forward(true);
                 listener.Up = tc.Up(true);
