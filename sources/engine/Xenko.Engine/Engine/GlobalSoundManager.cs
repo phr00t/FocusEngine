@@ -4,10 +4,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Xenko.Audio;
 using Xenko.Core;
 using Xenko.Core.Mathematics;
+using Xenko.Core.Threading;
 using Xenko.Games;
 
 namespace Xenko.Engine
@@ -145,9 +147,7 @@ namespace Xenko.Engine
                 soundInstance = s,
                 entity = parent,
             };
-            lock (currentAttached) {
-                currentAttached.Add(posSnd);
-            }
+            currentAttached.Add(posSnd);
             return s;
         }
 
@@ -181,20 +181,16 @@ namespace Xenko.Engine
         /// <param name="overrideTimePerFrame"></param>
         public static void UpdatePlayingSoundPositions(float? overrideTimePerFrame = null)
         {
-            for (int i = 0; i < currentAttached.Count; i++)
-            {
-                PositionalSound ps = currentAttached[i];
-                if (ps.entity.Scene == null)
+            foreach (PositionalSound ps in currentAttached) {
+                if (ps?.entity?.Scene == null)
                 {
-                    ps.soundInstance.Stop();
-                    currentAttached.RemoveAt(i);
-                    i--;
+                    ps?.soundInstance?.Stop();
+                    currentAttached.TryRemove(ps);
                     continue;
                 }
                 else if (ps.soundInstance.PlayState == Media.PlayState.Stopped)
                 {
-                    currentAttached.RemoveAt(i);
-                    i--;
+                    currentAttached.TryRemove(ps);
                     continue;
                 }
                 Vector3 newpos = ps.entity.Transform.WorldPosition();
@@ -213,10 +209,7 @@ namespace Xenko.Engine
                     si[i].Stop();
                 }
             }
-            lock (currentAttached)
-            {
-                currentAttached.Clear();
-            }
+            currentAttached.Clear();
         }
 
         public static void StopSound(string url)
@@ -260,7 +253,7 @@ namespace Xenko.Engine
 
         private static ConcurrentDictionary<string, Sound> Sounds = new ConcurrentDictionary<string, Sound>();
         private static ConcurrentDictionary<string, List<SoundInstance>> instances = new ConcurrentDictionary<string, List<SoundInstance>>();
-        private static List<PositionalSound> currentAttached = new List<PositionalSound>();
+        private static ConcurrentHashSet<PositionalSound> currentAttached = new ConcurrentHashSet<PositionalSound>();
         private static System.Random rand;
         private static Game internalGame;
 
