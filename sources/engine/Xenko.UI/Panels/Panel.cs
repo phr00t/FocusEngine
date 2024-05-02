@@ -285,6 +285,43 @@ namespace Xenko.UI.Panels
         };
 
         /// <summary>
+        /// Easy class for passing options to OrganizeChildren
+        /// </summary>
+        public class OrganizePanelSettings
+        {
+            public float XMargin = 10f, YMargin = 10f;
+            public List<Type> typesToCenter;
+            public ORGANIZE_SORT_OPTIONS sort_options = ORGANIZE_SORT_OPTIONS.NO_SORTING;
+            public Comparison<UIElement> sorter;
+            public HashSet<UIElement> newlineForThese, skipThese;
+            public bool resizeVertically, centerEverything;
+            public List<string> newlineForNames;
+        }
+
+        /// <summary>
+        /// An organization function that takes in a OrganizePanelSettings object. Handles easily organizing a menu system automatically based on provided options.
+        /// </summary>
+        /// <param name="settings">Settings to provide</param>
+        /// <param name="uiComponent">UIElement that this grid is on (can be helpful in resizing based on unusual resolutions/sizes of UIComponents)</param>
+        /// <returns></returns>
+        public Vector2 OrganizeChildren(OrganizePanelSettings settings, UIComponent uiComponent = null)
+        {
+            HashSet<UIElement> finalnewlines = settings.newlineForNames == null ? settings.newlineForThese : new HashSet<UIElement>();
+            if (settings.newlineForNames != null)
+            {
+                if (settings.newlineForThese != null)
+                    finalnewlines.UnionWith(settings.newlineForThese);
+
+                foreach(string s in settings.newlineForNames)
+                    if (FindName(s) is UIElement uie)
+                        finalnewlines.Add(uie);
+            }
+
+            return OrganizeChildren(settings.XMargin, settings.YMargin, settings.centerEverything ? new List<Type>() { typeof(UIElement) } : settings.typesToCenter,
+                                    settings.sort_options, settings.sorter, finalnewlines, uiComponent, settings.skipThese, settings.resizeVertically);
+        }
+
+        /// <summary>
         /// Neatly and automatically organizes all UIElements within this Grid/Panel
         /// </summary>
         /// <param name="XMargin">How much left/right space to put between UIElements?</param>
