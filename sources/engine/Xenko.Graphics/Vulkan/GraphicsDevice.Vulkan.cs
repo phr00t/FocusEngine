@@ -676,7 +676,7 @@ namespace Xenko.Graphics
         private const int CHECK_COMPLETED_INTERVAL = 12;
 
         protected readonly GraphicsDevice GraphicsDevice;
-        private int checkCompleted;
+        private static int checkCompleted;
         private SpinLock spinLock = new SpinLock();
         private readonly Queue<KeyValuePair<long, T>> liveObjects = new Queue<KeyValuePair<long, T>>();
 

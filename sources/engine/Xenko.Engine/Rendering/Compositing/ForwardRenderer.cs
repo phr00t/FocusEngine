@@ -630,14 +630,12 @@ namespace Xenko.Rendering.Compositing
 
         protected override void DrawCore(RenderContext context, RenderDrawContext drawContext)
         {
-            // Render Shadow maps
-            shadowMapRenderer?.Draw(drawContext);
-
             var viewport = drawContext.CommandList.Viewport;
 
             using (drawContext.PushRenderTargetsAndRestore())
             {
                 GlobalFog.PrepareFogConstantBuffer(context);
+                shadowMapRenderer?.Draw(drawContext);
 
                 if (VRSettings.Enabled && VRSettings.VRDevice != null)
                 {
