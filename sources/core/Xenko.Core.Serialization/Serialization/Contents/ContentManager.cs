@@ -119,6 +119,21 @@ namespace Xenko.Core.Serialization.Contents
             return (T)Load(typeof(T), url, settings);
         }
 
+        private Dictionary<string, object> QuickLoadedAssets = new Dictionary<string, object>();
+
+        /// <summary>
+        /// Loads an asset, but also caches the object for quick reuse.
+        /// </summary>
+        public T QuickLoad<T>(string url)
+        {
+            if (QuickLoadedAssets.TryGetValue(url, out var a))
+                return (T)a;
+
+            T asset = (T)Load(typeof(T), url, null);
+            QuickLoadedAssets[url] = asset;
+            return asset;
+        }
+
         /// <summary>
         /// Loads content from the specified URL.
         /// </summary>
