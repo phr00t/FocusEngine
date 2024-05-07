@@ -826,10 +826,10 @@ namespace Xenko.Physics.Bepu
         public Vector3? LocalPhysicsOffset = null;
 
         /// <summary>
-        /// Automatically use the bottom of this physics component for positioning the attached entity
+        /// If set non-zero, the attached entity will be slid up or down by this % of the body's Y size
         /// </summary>
         [DataMemberIgnore]
-        public bool AttachEntityAtBottom { get; set; }
+        public float AttachEntityBottomSlider { get; set; } = 0f;
 
         [DataMemberIgnore]
         public Vector3 VelocityLinearChange { get; private set; }
@@ -869,10 +869,14 @@ namespace Xenko.Physics.Bepu
             if (GetPoseFromEntity) return;
             if (IgnorePhysicsPosition == false)
             {
-                Vector3 pos = Position;
-                if (AttachEntityAtBottom) pos.Y = InternalBody.BoundingBox.Min.Y;
-                if (LocalPhysicsOffset.HasValue) pos += LocalPhysicsOffset.Value;
-                entity.Transform.Position = pos;
+                if (AttachEntityBottomSlider == 0f && LocalPhysicsOffset.HasValue == false)
+                    entity.Transform.Position = Position;
+                else
+                {
+                    Vector3 offset = LocalPhysicsOffset ?? Vector3.Zero;
+                    if (AttachEntityBottomSlider != 0f) offset.Y -= (Position.Y - InternalBody.BoundingBox.Min.Y) * AttachEntityBottomSlider;
+                    entity.Transform.Position = Position + offset * Rotation;
+                }
             }
             if (IgnorePhysicsRotation == false) entity.Transform.Rotation = Rotation;
         }

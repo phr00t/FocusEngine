@@ -90,7 +90,7 @@ namespace Xenko.Physics.Bepu
                 }
             }
 
-            Body.AttachEntityAtBottom = true;
+            Body.AttachEntityBottomSlider = 1f;
             Body.IgnorePhysicsRotation = true;
             Body.IgnorePhysicsPosition = VR && Camera != null;
             Body.RotationLock = true;
