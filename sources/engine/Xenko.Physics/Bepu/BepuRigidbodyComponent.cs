@@ -875,7 +875,10 @@ namespace Xenko.Physics.Bepu
                 {
                     Vector3 offset = LocalPhysicsOffset ?? Vector3.Zero;
                     if (AttachEntityBottomSlider != 0f) offset.Y -= (Position.Y - InternalBody.BoundingBox.Min.Y) * AttachEntityBottomSlider;
-                    entity.Transform.Position = Position + offset * Rotation;
+                    if (IgnorePhysicsRotation)
+                        entity.Transform.Position = Position + offset;
+                    else
+                        entity.Transform.Position = Position + offset * Rotation;
                 }
             }
             if (IgnorePhysicsRotation == false) entity.Transform.Rotation = Rotation;
