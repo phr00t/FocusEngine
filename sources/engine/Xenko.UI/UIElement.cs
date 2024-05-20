@@ -1576,7 +1576,8 @@ namespace Xenko.UI
         /// Shortcut function to set first TextBlock child of this to a certain text (can easily update button text, for example)
         /// </summary>
         /// <param name="text">What text to set?</param>
-        public void SetChildText(string text)
+        /// <param name="resize">Resize this after changing the text if this was a button?</param>
+        public void SetChildText(string text, bool resize = false)
         {
             for(int i=0; i<VisualChildren.Count; i++)
             {
@@ -1585,6 +1586,7 @@ namespace Xenko.UI
                 if (child is TextBlock tb)
                 {
                     tb.Text = text;
+                    if (resize && this is ButtonBase b) b.ResizeToChild();
                     break;
                 }
             }
