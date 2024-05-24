@@ -256,6 +256,8 @@ namespace Xenko.Games
             handler?.Invoke(this, e);
         }
 
+        public abstract void EmulateMouseEvent(bool pressDown, bool left, int positionX, int positionY);
+
         protected abstract void SetTitle(string title);
 
         #endregion

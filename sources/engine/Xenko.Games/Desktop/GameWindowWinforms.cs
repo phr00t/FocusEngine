@@ -42,6 +42,8 @@ namespace Xenko.Games
         {
         }
 
+        public override void EmulateMouseEvent(bool pressDown, bool left, int positionX, int positionY) { }
+
         public override WindowHandle NativeWindow
         {
             get

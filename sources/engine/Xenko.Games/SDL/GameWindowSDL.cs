@@ -212,6 +212,24 @@ namespace Xenko.Games
             }
         }
 
+        /// <summary>
+        /// Emulate a mouse press or release action.
+        /// </summary>
+        public override void EmulateMouseEvent(bool pressDown, bool left, int positionX, int positionY)
+        {
+            window.ProcessEvent(new SDL.SDL_Event()
+            {
+                button = new SDL.SDL_MouseButtonEvent()
+                {
+                    button = left ? (byte)SDL.SDL_BUTTON_LEFT : (byte)SDL.SDL_BUTTON_RIGHT,
+                    clicks = 1,
+                    type = pressDown ? SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN : SDL.SDL_EventType.SDL_MOUSEBUTTONUP,
+                    x = positionX,
+                    y = positionY
+                }
+            });
+        }
+
         protected override void SetTitle(string title)
         {
             if (window != null)
