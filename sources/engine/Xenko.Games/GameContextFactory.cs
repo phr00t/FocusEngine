@@ -10,7 +10,7 @@ namespace Xenko.Games
     /// </summary>
     public static class GameContextFactory
     {
-        internal static GameContext NewDefaultGameContext(int width = 1280, int height = 720, bool fullscreen = false)
+        internal static GameContext NewDefaultGameContext(int width = 1280, int height = 720, bool fullscreen = false, int displayindex = 0)
         {
             // Default context is Desktop
             AppContextType type = AppContextType.Desktop;
@@ -35,14 +35,14 @@ namespace Xenko.Games
 #elif XENKO_PLATFORM_IOS
             type = AppContextType.iOS;
 #endif
-            return NewGameContext(type, width, height, fullscreen);
+            return NewGameContext(type, width, height, fullscreen, displayindex);
         }
 
         /// <summary>
         /// Given a <paramref name="type"/> create the appropriate game Context for the current executing platform.
         /// </summary>
         /// <returns></returns>
-        public static GameContext NewGameContext(AppContextType type, int width, int height, bool fullscreen)
+        public static GameContext NewGameContext(AppContextType type, int width, int height, bool fullscreen, int displayindex)
         {
             GameContext res = null;
             switch (type)
@@ -54,7 +54,7 @@ namespace Xenko.Games
                     res = NewGameContextDesktop();
                     break;
                 case AppContextType.DesktopSDL:
-                    res = NewGameContextSDL(width, height, fullscreen);
+                    res = NewGameContextSDL(width, height, fullscreen, displayindex);
                     break;
                 case AppContextType.DesktopWpf:
                     res = NewGameContextWpf();
@@ -142,10 +142,10 @@ namespace Xenko.Games
 #endif
         }
 
-        public static GameContext NewGameContextSDL(int width, int height, bool fullscreen)
+        public static GameContext NewGameContextSDL(int width, int height, bool fullscreen, int displayindex)
         {
 #if XENKO_UI_SDL
-            return new GameContextSDL(null, width, height, fullscreen);
+            return new GameContextSDL(null, width, height, fullscreen, displayindex);
 #else
             return null;
 #endif

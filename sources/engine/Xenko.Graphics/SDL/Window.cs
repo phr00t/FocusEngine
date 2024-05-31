@@ -21,6 +21,8 @@ namespace Xenko.Graphics.SDL
 
         #region Initialization
 
+        private SDL.SDL_Rect displayBounds;
+        
         /// <summary>
         /// Initializes static members of the <see cref="Window"/> class.
         /// </summary>
@@ -62,6 +64,11 @@ namespace Xenko.Graphics.SDL
         public int GetWindowDisplay() {
             return SDL.SDL_GetWindowDisplayIndex(SdlHandle);
         }
+
+        /// <summary>
+        /// Debug method of generating a Vulkan crash report
+        /// </summary>
+        public static bool _GenerateVulkanDeviceLostCrash = false;
 
         /// <summary>
         /// Returns a list of supported resolutions and refresh rates.
@@ -121,7 +128,8 @@ namespace Xenko.Graphics.SDL
                                             "1280\n" +
                                             "720\n" +
                                             "window\n" +
-                                            "-1");
+                                            "-1\n" +
+                                            "0");
             } catch (Exception e2) { }
             SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Failed to Render To Screen", error, IntPtr.Zero);
             Console.Error.WriteLine(error);
@@ -140,12 +148,12 @@ namespace Xenko.Graphics.SDL
         /// Initializes a new instance of the <see cref="Window"/> class with <paramref name="title"/> as the title of the Window.
         /// </summary>
         /// <param name="title">Title of the window, see Text property.</param>
-        public Window(string title, int width, int height, bool fullscreen)
+        public Window(string title, int width, int height, bool fullscreen, int display_index)
         {
             var flags = SDL.SDL_WindowFlags.SDL_WINDOW_VULKAN | SDL.SDL_WindowFlags.SDL_WINDOW_ALLOW_HIGHDPI;
 
             // don't try using a resolution too large
-            SDL.SDL_GetDesktopDisplayMode(0, out SDL.SDL_DisplayMode mode);
+            SDL.SDL_GetDesktopDisplayMode(display_index, out SDL.SDL_DisplayMode mode);
             if (mode.w <= width || mode.h <= height)
             {
                 flags |= SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -157,10 +165,13 @@ namespace Xenko.Graphics.SDL
 
             OriginalSize = new Size2(width, height);
 
+            // bounds so we know where this display is
+            SDL.SDL_GetDisplayBounds(display_index, out displayBounds);
+
             try
             {
                 // Create the SDL window and then extract the native handle.
-                SdlHandle = SDL.SDL_CreateWindow(title, SDL.SDL_WINDOWPOS_CENTERED, SDL.SDL_WINDOWPOS_CENTERED, width, height, flags);
+                SdlHandle = SDL.SDL_CreateWindow(title, displayBounds.x + (displayBounds.w / 2) - (width / 2), displayBounds.y + (displayBounds.h / 2) - (height / 2), width, height, flags);
             }
             catch(Exception e)
             {
@@ -294,13 +305,15 @@ namespace Xenko.Graphics.SDL
                 if (IsFullScreen == value) return;
                 int displayIndex = SDL.SDL_GetWindowDisplayIndex(SdlHandle);
                 SDL.SDL_GetDesktopDisplayMode(displayIndex, out SDL.SDL_DisplayMode nativemode);
+                SDL.SDL_GetDisplayBounds(displayIndex, out displayBounds);
                 if (value) {
+                    Location = new Point(displayBounds.x, displayBounds.y);
                     SDL.SDL_SetWindowFullscreen(SdlHandle, nativemode.w <= ClientSize.Width || nativemode.h <= ClientSize.Height ? (uint)SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP : (uint)SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN);
-                    Location = Point.Zero;
                 }
                 else {
+                    Location = new Point(displayBounds.x + (int)((nativemode.w - ClientSize.Width) * 0.5f),
+                                         displayBounds.y + (int)((nativemode.h - ClientSize.Height) * 0.5));
                     SDL.SDL_SetWindowFullscreen(SdlHandle, 0);
-                    Location = new Point((int)((nativemode.w - ClientSize.Width) * 0.5f), (int)((nativemode.h - ClientSize.Height) * 0.5));
                 }
             }
         }
@@ -309,7 +322,9 @@ namespace Xenko.Graphics.SDL
         {
             int displayIndex = SDL.SDL_GetWindowDisplayIndex(SdlHandle);
             SDL.SDL_GetDesktopDisplayMode(displayIndex, out SDL.SDL_DisplayMode nativemode);
-            Location = new Point((int)((nativemode.w - ClientSize.Width) * 0.5f), (int)((nativemode.h - ClientSize.Height) * 0.5));
+            SDL.SDL_GetDisplayBounds(displayIndex, out displayBounds);
+            Location = new Point(displayBounds.x + (int)((nativemode.w - ClientSize.Width) * 0.5f),
+                                 displayBounds.y + (int)((nativemode.h - ClientSize.Height) * 0.5));
         }
 
         /// <summary>

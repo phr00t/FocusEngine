@@ -448,17 +448,18 @@ namespace Xenko.Games
         /// If AutoLoadDefaultSettings is true, these values will be set on game start. Set width & height to int.MaxValue to use highest native values.
         /// </summary>
         /// <returns>true if default settings changed</returns>
-        public bool SetDefaultSettings(int width, int height, bool fullscreen, float? fov = null)
+        public bool SetDefaultSettings(int width, int height, bool fullscreen, float? fov = null, int displayindex = 0)
         {
-            GetDefaultSettings(out int current_width, out int current_height, out bool current_fullscreen, out float outfov);
-            if (width == current_width && height == current_height && current_fullscreen == fullscreen && (fov.HasValue == false || fov == outfov)) return false;
+            GetDefaultSettings(out int current_width, out int current_height, out bool current_fullscreen, out float outfov, out int outindex);
+            if (width == current_width && height == current_height && current_fullscreen == fullscreen && (fov.HasValue == false || fov == outfov) && outindex == displayindex) return false;
             try
             {
                 System.IO.File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "/DefaultResolution.txt",
                                             width.ToString() + "\n" +
                                             height.ToString() + "\n" +
                                             (fullscreen ? "fullscreen" : "window") + "\n" +
-                                            (fov ?? outfov).ToString());
+                                            (fov ?? outfov).ToString() + "\n" +
+                                            displayindex.ToString());
                 return true;
             }
             catch (Exception e)
@@ -468,29 +469,31 @@ namespace Xenko.Games
         }
 
         private bool settingsOverride = false, settingsOverrideFS;
-        private int settingsOverrideW, settingsOverrideH;
+        private int settingsOverrideW, settingsOverrideH, settingsOverrideDisplay;
 
         /// <summary>
         /// Temporarily uses different settings this run, without changing the saved default settings. Set width & height to int.MaxValue to use highest native values.
         /// </summary>
-        public void OverrideDefaultSettings(int width, int height, bool fullscreen)
+        public void OverrideDefaultSettings(int width, int height, bool fullscreen, int displayindex = 0)
         {
             settingsOverride = true;
             settingsOverrideW = width;
             settingsOverrideH = height;
             settingsOverrideFS = fullscreen;
+            settingsOverrideDisplay = displayindex;
         }
 
         /// <summary>
         /// Gets default settings that will be used on game startup, if AutoLoadDefaultSettings is true. Caps resolution to native display resolution.
         /// </summary>
-        public void GetDefaultSettings(out int width, out int height, out bool fullscreen, out float fov, Window useSDLWindow = null)
+        public void GetDefaultSettings(out int width, out int height, out bool fullscreen, out float fov, out int displayindex, Window useSDLWindow = null)
         {
             string defaultFile = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "/DefaultResolution.txt";
             // default settings are maximum native resolution
             bool gotCustomWH = false;
             width = int.MaxValue;
             height = int.MaxValue;
+            displayindex = 0;
             fullscreen = true;
             fov = -1f;
             // wait, are we overriding settings?
@@ -499,6 +502,7 @@ namespace Xenko.Games
                 width = settingsOverrideW;
                 height = settingsOverrideH;
                 fullscreen = settingsOverrideFS;
+                displayindex = settingsOverrideDisplay;
                 gotCustomWH = true;
             }
             else if (File.Exists(defaultFile))
@@ -512,15 +516,17 @@ namespace Xenko.Games
                         fullscreen = vals[2].Trim().ToLower().StartsWith("full");
                     if (vals.Length >= 4)
                         float.TryParse(vals[3].Trim(), out fov);
+                    if (vals.Length >= 5)
+                        int.TryParse(vals[4].Trim(), out displayindex);
                 }
                 catch (Exception e) { }
             }
             try
             {
                 // cap values to native resolution (try to use display window)
-                int native_width, native_height, refresh_rate, index = 0;
-                if (useSDLWindow is Window gwsdl) index = gwsdl.GetWindowDisplay();
-                Graphics.SDL.Window.GetDisplayInformation(out native_width, out native_height, out refresh_rate, index);
+                int native_width, native_height, refresh_rate;
+                if (useSDLWindow is Window gwsdl) displayindex = gwsdl.GetWindowDisplay();
+                Graphics.SDL.Window.GetDisplayInformation(out native_width, out native_height, out refresh_rate, displayindex);
                 if (width >= native_width || height >= native_height)
                 {
                     // force fullscreen if using native or higher,
@@ -575,10 +581,10 @@ namespace Xenko.Games
 #if XENKO_GRAPHICS_API_VULKAN
             // get the resolution now, so we can create our window with the right settings right from the start
             GraphicsDeviceManager gdm = graphicsDeviceManager as GraphicsDeviceManager;
-            GetDefaultSettings(out gdm.preferredBackBufferWidth, out gdm.preferredBackBufferHeight, out bool fullScreen, out float fov, (gameContext as GameContextSDL)?.Control ?? null);
+            GetDefaultSettings(out gdm.preferredBackBufferWidth, out gdm.preferredBackBufferHeight, out bool fullScreen, out float fov, out int index, (gameContext as GameContextSDL)?.Control ?? null);
             gdm.IsFullScreen = fullScreen;
             // Gets the GameWindow Context
-            Context = gameContext ?? GameContextFactory.NewDefaultGameContext(gdm.preferredBackBufferWidth, gdm.preferredBackBufferHeight, fullScreen);
+            Context = gameContext ?? GameContextFactory.NewDefaultGameContext(gdm.preferredBackBufferWidth, gdm.preferredBackBufferHeight, fullScreen, index);
             PrepareContext(fov);
 #else
             Context = gameContext ?? GameContextFactory.NewDefaultGameContext();

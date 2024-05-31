@@ -11,8 +11,8 @@ namespace Xenko.Games
     public class GameContextSDL : GameContextWindows<Window>
     {
         /// <inheritDoc/>
-        public GameContextSDL(Window control, int requestedWidth = 1280, int requestedHeight = 720, bool fullscreen = false)
-            : base(control ?? new GameFormSDL(requestedWidth, requestedHeight, fullscreen), requestedWidth, requestedHeight, fullscreen) 
+        public GameContextSDL(Window control, int requestedWidth = 1280, int requestedHeight = 720, bool fullscreen = false, int displayindex = 0)
+            : base(control ?? new GameFormSDL(requestedWidth, requestedHeight, fullscreen, displayindex), requestedWidth, requestedHeight, fullscreen) 
         {
             ContextType = AppContextType.DesktopSDL;
         }
