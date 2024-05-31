@@ -4,6 +4,9 @@
 // set this define if we want to debug Vulkan. Requires Framework v4.8 runtime for some weird reason (might be a Vortice.Vulkan version thing)
 //#define VULKAN_DEBUG
 
+// use checkpoints to debut vulkan
+#define VULKAN_CHECKPOINT_DEBUG
+
 #if XENKO_GRAPHICS_API_VULKAN
 using System;
 using System.Collections.Generic;
@@ -84,6 +87,10 @@ namespace Xenko.Graphics
             };
             vkBeginCommandBuffer(currentCommandList.NativeCommandBuffer, &beginInfo);
 
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("BeginCommandBuffer", currentCommandList.NativeCommandBuffer);
+#endif
+
             activeStencilReference = null;
         }
 
@@ -95,6 +102,10 @@ namespace Xenko.Graphics
         {
             // End active render pass
             CleanupRenderPass();
+
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("CloseCommandBuffer", currentCommandList.NativeCommandBuffer);
+#endif
 
             vkEndCommandBuffer(currentCommandList.NativeCommandBuffer);
 
@@ -130,11 +141,17 @@ namespace Xenko.Graphics
 
             Reset();
 
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("FlushSetStencil", currentCommandList.NativeCommandBuffer);
+#endif
             // Restore states
             vkCmdSetStencilReference(currentCommandList.NativeCommandBuffer, VkStencilFaceFlags.FrontAndBack, activeStencilReference ?? 0);
 
             if (activePipeline != null)
             {
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("activePipeline != null binding Flush", currentCommandList.NativeCommandBuffer);
+#endif
                 vkCmdBindPipeline(currentCommandList.NativeCommandBuffer, VkPipelineBindPoint.Graphics, activePipeline.NativePipeline);
                 var descriptorSetCopy = descriptorSet;
                 vkCmdBindDescriptorSets(currentCommandList.NativeCommandBuffer, VkPipelineBindPoint.Graphics, activePipeline.NativeLayout, 0, 1, &descriptorSetCopy, 0, null);
@@ -202,6 +219,9 @@ namespace Xenko.Graphics
             if (!viewportDirty && !scissorsDirty)
                 return;
 
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("SetViewportImpl", currentCommandList.NativeCommandBuffer);
+#endif
             //// TODO D3D12 Hardcoded for one viewport
             var viewportCopy = Viewport;
             if (viewportDirty)
@@ -245,6 +265,10 @@ namespace Xenko.Graphics
         private unsafe void PrepareDraw()
         {
             SetViewportImpl();
+
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("PrepareDraw", currentCommandList.NativeCommandBuffer);
+#endif
 
             if (!activeStencilReference.HasValue)
             {
@@ -348,6 +372,10 @@ namespace Xenko.Graphics
                 }
             }
 
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("PrepareDrawBindDescriptor", currentCommandList.NativeCommandBuffer);
+#endif
+
             vkUpdateDescriptorSets(GraphicsDevice.NativeDevice, (uint)bindingCount, writes, 0, null);
             vkCmdBindDescriptorSets(currentCommandList.NativeCommandBuffer, VkPipelineBindPoint.Graphics, activePipeline.NativeLayout, 0, 1, &localDescriptorSet, 0, null);
         }
@@ -358,6 +386,10 @@ namespace Xenko.Graphics
         {
             if (activeStencilReference != stencilReference)
             {
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("SetStencilReference", currentCommandList.NativeCommandBuffer);
+#endif
+
                 activeStencilReference = (uint)stencilReference;
                 vkCmdSetStencilReference(currentCommandList.NativeCommandBuffer, VkStencilFaceFlags.FrontAndBack, activeStencilReference.Value);
             }
@@ -374,7 +406,18 @@ namespace Xenko.Graphics
             activePipeline = pipelineState;
 
             if (pipelineState.CurrentState() != PipelineState.PIPELINE_STATE.ERROR)
+            {
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("SetPipelineStateBind", currentCommandList.NativeCommandBuffer);
+#endif
                 vkCmdBindPipeline(currentCommandList.NativeCommandBuffer, VkPipelineBindPoint.Graphics, pipelineState.NativePipeline);
+            } 
+            else
+            {
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("SetPipelineStateBindFAILERROR", currentCommandList.NativeCommandBuffer);
+#endif
+            }
         }
 
         public unsafe void SetVertexBuffer(int index, Buffer buffer, int offset, int stride)
@@ -388,11 +431,18 @@ namespace Xenko.Graphics
             var bufferCopy = buffer.NativeBuffer;
             var offsetCopy = (ulong)offset;
 
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("SetVertexBuffer", currentCommandList.NativeCommandBuffer);
+#endif
+
             vkCmdBindVertexBuffers(currentCommandList.NativeCommandBuffer, (uint)index, 1, &bufferCopy, &offsetCopy);
         }
 
         public void SetIndexBuffer(Buffer buffer, int offset, bool is32bits)
         {
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("SetIndexBuffer", currentCommandList.NativeCommandBuffer);
+#endif
             vkCmdBindIndexBuffer(currentCommandList.NativeCommandBuffer, buffer.NativeBuffer, (ulong)offset, is32bits ? VkIndexType.Uint32 : VkIndexType.Uint16);
         }
 
@@ -454,6 +504,9 @@ namespace Xenko.Graphics
                 // End render pass, so barrier effects all commands in the buffer
                 CleanupRenderPass();
 
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("CmdPipelineBarrierTransition", currentCommandList.NativeCommandBuffer);
+#endif
                 var memoryBarrier = new VkImageMemoryBarrier(texture.NativeImage, new VkImageSubresourceRange(texture.NativeImageAspect, 0, uint.MaxValue, 0, uint.MaxValue), oldAccessMask, texture.NativeAccessMask, oldLayout, texture.NativeLayout);
                 vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, sourceStages, texture.NativePipelineStageMask, VkDependencyFlags.None, 0, null, 0, null, 1, &memoryBarrier);
             }
@@ -500,6 +553,9 @@ namespace Xenko.Graphics
 
             PrepareDraw();
 
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("Draw VC" + vertexCount.ToString(), currentCommandList.NativeCommandBuffer);
+#endif
             vkCmdDraw(currentCommandList.NativeCommandBuffer, (uint)vertexCount, 1, (uint)startVertexLocation, 0);
 
             GraphicsDevice.FrameTriangleCount += (uint)vertexCount;
@@ -671,11 +727,17 @@ namespace Xenko.Graphics
         /// <param name="query">The timestamp query.</param>
         public void WriteTimestamp(QueryPool queryPool, int index)
         {
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("Timestamp?", currentCommandList.NativeCommandBuffer);
+#endif
             vkCmdWriteTimestamp(currentCommandList.NativeCommandBuffer, VkPipelineStageFlags.AllCommands, queryPool.NativeQueryPool, (uint)index);
         }
 
         public void ResetQueryPool(QueryPool queryPool)
         {
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("Reset QueryPool", currentCommandList.NativeCommandBuffer);
+#endif
             vkCmdResetQueryPool(currentCommandList.NativeCommandBuffer, queryPool.NativeQueryPool, 0, (uint)queryPool.QueryCount);
         }
 
@@ -702,6 +764,10 @@ namespace Xenko.Graphics
             if ((options & DepthStencilClearOptions.Stencil) != 0)
                 clearRange.aspectMask |= VkImageAspectFlags.Stencil & depthStencilBuffer.NativeImageAspect;
 
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("ClearTexture: " + depthStencilBuffer.ToString(), currentCommandList.NativeCommandBuffer);
+#endif
+
             var memoryBarrier = new VkImageMemoryBarrier(depthStencilBuffer.NativeImage, barrierRange, depthStencilBuffer.NativeAccessMask, VkAccessFlags.TransferWrite, depthStencilBuffer.NativeLayout, VkImageLayout.TransferDstOptimal);
             vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, depthStencilBuffer.NativePipelineStageMask, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, 0, null, 1, &memoryBarrier);
 
@@ -727,6 +793,10 @@ namespace Xenko.Graphics
             CleanupRenderPass();
 
             var clearRange = new VkImageSubresourceRange(VkImageAspectFlags.Color, (uint)renderTarget.MipLevel, (uint)renderTarget.MipLevels, (uint)renderTarget.ArraySlice, (uint)renderTarget.ArraySize);
+
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("ClearRenderTargetTexture: " + renderTarget.ToString(), currentCommandList.NativeCommandBuffer);
+#endif
 
             var memoryBarrier = new VkImageMemoryBarrier(renderTarget.NativeImage, clearRange, renderTarget.NativeAccessMask, VkAccessFlags.TransferWrite, renderTarget.NativeLayout, VkImageLayout.TransferDstOptimal);
             vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, renderTarget.NativePipelineStageMask, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, 0, null, 1, &memoryBarrier);
@@ -850,6 +920,10 @@ namespace Xenko.Graphics
                     imageBarriers[imageBarrierCount++] = new VkImageMemoryBarrier(destinationParent.NativeImage, new VkImageSubresourceRange(destinationParent.NativeImageAspect, 0, uint.MaxValue, 0, uint.MaxValue), destinationTexture.NativeAccessMask, VkAccessFlags.TransferWrite, destinationTexture.NativeLayout, VkImageLayout.TransferDstOptimal);
                 }
 
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("CopyPipelineBarrier", currentCommandList.NativeCommandBuffer);
+#endif
+
                 vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, bufferBarrierCount, bufferBarriers, imageBarrierCount, imageBarriers);
 
                 // Copy
@@ -857,6 +931,9 @@ namespace Xenko.Graphics
                 {
                     if (sourceTexture.Usage == GraphicsResourceUsage.Staging)
                     {
+#if VULKAN_CHECKPOINT_DEBUG
+                        GraphicsDevice.RecordInfo("CmdCopyBuffer", currentCommandList.NativeCommandBuffer);
+#endif
                         var copy = new VkBufferCopy
                         {
                             srcOffset = 0,
@@ -867,6 +944,9 @@ namespace Xenko.Graphics
                     }
                     else
                     {
+#if VULKAN_CHECKPOINT_DEBUG
+                        GraphicsDevice.RecordInfo("CmdCopyImageToBuffer", currentCommandList.NativeCommandBuffer);
+#endif
                         var copy = new VkBufferImageCopy
                         {
                             imageSubresource = new VkImageSubresourceLayers(sourceParent.NativeImageAspect, (uint)sourceTexture.MipLevel, (uint)sourceTexture.ArraySlice, (uint)sourceTexture.ArraySize),
@@ -886,6 +966,9 @@ namespace Xenko.Graphics
 
                     if (sourceTexture.Usage == GraphicsResourceUsage.Staging)
                     {
+#if VULKAN_CHECKPOINT_DEBUG
+                        GraphicsDevice.RecordInfo("CmdCopyBufferToImage", currentCommandList.NativeCommandBuffer);
+#endif
                         var copy = new VkBufferImageCopy
                         {
                             imageSubresource = destinationSubresource,
@@ -895,6 +978,9 @@ namespace Xenko.Graphics
                     }
                     else
                     {
+#if VULKAN_CHECKPOINT_DEBUG
+                        GraphicsDevice.RecordInfo("CmdCopyImage", currentCommandList.NativeCommandBuffer);
+#endif
                         var copy = new VkImageCopy
                         {
                             srcSubresource = new VkImageSubresourceLayers(sourceParent.NativeImageAspect, (uint)sourceTexture.MipLevel, (uint)sourceTexture.ArraySlice, (uint)sourceTexture.ArraySize),
@@ -939,6 +1025,9 @@ namespace Xenko.Graphics
                     imageBarrierCount++;
                 }
 
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("CopyCmdPipelineBarrier2", currentCommandList.NativeCommandBuffer);
+#endif
                 vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, VkPipelineStageFlags.Transfer, sourceTexture.NativePipelineStageMask | destinationParent.NativePipelineStageMask, VkDependencyFlags.None, 0, null, bufferBarrierCount, bufferBarriers, imageBarrierCount, imageBarriers);
             }
             else
@@ -953,6 +1042,9 @@ namespace Xenko.Graphics
                     bufferBarriers[1] = new VkBufferMemoryBarrier(destinationBuffer.NativeBuffer, destinationBuffer.NativeAccessMask, VkAccessFlags.TransferWrite);
                     vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, sourceBuffer.NativePipelineStageMask, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, 2, bufferBarriers, 0, null);
 
+#if VULKAN_CHECKPOINT_DEBUG
+                    GraphicsDevice.RecordInfo("CopyCopyBuffer2", currentCommandList.NativeCommandBuffer);
+#endif
                     var copy = new VkBufferCopy
                     {
                         srcOffset = 0,
@@ -1055,6 +1147,9 @@ namespace Xenko.Graphics
 
                     if (sourceTexture.Usage == GraphicsResourceUsage.Staging)
                     {
+#if VULKAN_CHECKPOINT_DEBUG
+                        GraphicsDevice.RecordInfo("CopyBufferToImageRegion", currentCommandList.NativeCommandBuffer);
+#endif
                         var copy = new VkBufferImageCopy
                         {
                             imageSubresource = destinationSubresource,
@@ -1068,6 +1163,9 @@ namespace Xenko.Graphics
                     }
                     else
                     {
+#if VULKAN_CHECKPOINT_DEBUG
+                        GraphicsDevice.RecordInfo("CopyImageRegion", currentCommandList.NativeCommandBuffer);
+#endif
                         var copy = new VkImageCopy
                         {
                             srcSubresource = new VkImageSubresourceLayers(sourceParent.NativeImageAspect, (uint)sourceTexture.MipLevel, (uint)sourceTexture.ArraySlice, (uint)sourceTexture.ArraySize),
@@ -1186,6 +1284,10 @@ namespace Xenko.Graphics
                 var arraySlice = subResourceIndex / texture.MipLevels;
                 var subresourceRange = new VkImageSubresourceRange(VkImageAspectFlags.Color, (uint)mipSlice, 1, (uint)arraySlice, 1);
 
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("UpdateSubresource", currentCommandList.NativeCommandBuffer);
+#endif
+
                 var memoryBarrier = new VkImageMemoryBarrier(texture.NativeImage, subresourceRange, texture.NativeAccessMask, VkAccessFlags.TransferWrite, texture.NativeLayout, VkImageLayout.TransferDstOptimal);
                 vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, texture.NativePipelineStageMask | VkPipelineStageFlags.Host, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, 1, &uploadBufferMemoryBarrier, 1, &memoryBarrier);
 
@@ -1219,6 +1321,9 @@ namespace Xenko.Graphics
                         size = (ulong)lengthInBytes,
                     };
 
+#if VULKAN_CHECKPOINT_DEBUG
+                    GraphicsDevice.RecordInfo("UpdateSubresource2", currentCommandList.NativeCommandBuffer);
+#endif
                     memoryBarriers[0] = uploadBufferMemoryBarrier;
                     memoryBarriers[1] = new VkBufferMemoryBarrier(buffer.NativeBuffer, buffer.NativeAccessMask, VkAccessFlags.TransferWrite, bufferCopy.dstOffset, bufferCopy.size);
                     vkCmdPipelineBarrier(currentCommandList.NativeCommandBuffer, buffer.NativePipelineStageMask | VkPipelineStageFlags.Host, VkPipelineStageFlags.Transfer, VkDependencyFlags.None, 0, null, 2, memoryBarriers, 0, null);
@@ -1318,6 +1423,10 @@ namespace Xenko.Graphics
                     offsetInBytes += mipmap.DepthStride * mipmap.Depth * arraySlice;
                 }
             }
+
+#if VULKAN_CHECKPOINT_DEBUG
+            GraphicsDevice.RecordInfo("vkMapMemoryMapSubresource", currentCommandList.NativeCommandBuffer);
+#endif
 
             void* mappedMemory;
             vkMapMemory(GraphicsDevice.NativeDevice, resource.NativeMemory, (ulong)offsetInBytes, (ulong)lengthInBytes, VkMemoryMapFlags.None, &mappedMemory);
@@ -1420,6 +1529,9 @@ namespace Xenko.Graphics
                     Clear(depthStencilBuffer, DepthStencilClearOptions.DepthBuffer | DepthStencilClearOptions.Stencil);
                 }
 
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("StartingNewRenderPass", currentCommandList.NativeCommandBuffer);
+#endif
                 // Start new render pass
                 var renderPassBegin = new VkRenderPassBeginInfo
                 {
@@ -1438,6 +1550,9 @@ namespace Xenko.Graphics
         {
             if (activeRenderPass != VkRenderPass.Null)
             {
+#if VULKAN_CHECKPOINT_DEBUG
+                GraphicsDevice.RecordInfo("EndingCommandBufferRenderPass", currentCommandList.NativeCommandBuffer);
+#endif
                 vkCmdEndRenderPass(currentCommandList.NativeCommandBuffer);
                 activeRenderPass = VkRenderPass.Null;
             }

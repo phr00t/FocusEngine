@@ -74,6 +74,17 @@ namespace Xenko.Graphics
         public VkPhysicalDevice NativePhysicalDevice => Adapter.GetPhysicalDevice(IsDebugMode);
         public VkInstance NativeInstance => GraphicsAdapterFactory.GetInstance(IsDebugMode).NativeInstance;
 
+        public static volatile int CollectedInfoIndex;
+        public static string[] CollectedInfo = new string[2048];
+
+        public static unsafe void RecordInfo(string info, VkCommandBuffer buffer)
+        {
+            if (buffer == VkCommandBuffer.Null) return; // no buffer
+            int useindex = (Interlocked.Increment(ref CollectedInfoIndex) - 1) % CollectedInfo.Length;
+            CollectedInfo[useindex] = info;
+            vkCmdSetCheckpointNV(buffer, (void*)useindex);
+        }
+
         internal struct BufferInfo
         {
             public long FenceValue;
@@ -300,6 +311,7 @@ namespace Xenko.Graphics
             desiredExtensionNames.Add("VK_KHR_get_memory_requirements2");
             desiredExtensionNames.Add("VK_KHR_external_memory_win32");
             desiredExtensionNames.Add("VK_KHR_win32_keyed_mutex");
+            desiredExtensionNames.Add("VK_NV_device_diagnostic_checkpoints");
 
             if (!availableExtensionNames.Contains("VK_KHR_swapchain"))
                 throw new InvalidOperationException();
@@ -596,12 +608,29 @@ namespace Xenko.Graphics
                     if (nativeFences[i].Key <= lastCompletedFence)
                         continue;
 
-                    switch (vkGetFenceStatus(NativeDevice, nativeFences[i].Value))
+                    var gfs = Xenko.Graphics.SDL.Window._GenerateVulkanDeviceLostCrash ? VkResult.ErrorDeviceLost : vkGetFenceStatus(NativeDevice, nativeFences[i].Value);
+                    switch (gfs)
                     {
                         default:
                             return lastCompletedFence;
                         case VkResult.ErrorDeviceLost:
-                            throw new Exception("Vulkan device lost while checking GetCompletedValue()!");
+                            // god fucking dammit
+                            uint datalen = 0;
+                            //vkGetQueueCheckpointData2NV(NativeCommandQueue, &datalen, (VkCheckpointData2NV*)0);
+                            vkGetQueueCheckpointDataNV(NativeCommandQueue, &datalen, (VkCheckpointDataNV*)0);
+                            VkCheckpointDataNV[] data = new VkCheckpointDataNV[datalen];
+                            for (int j = 0; j < data.Length; j++) data[j].sType = VkStructureType.CheckpointDataNV;
+                            fixed (VkCheckpointDataNV* ptr = data)
+                            {
+                                vkGetQueueCheckpointDataNV(NativeCommandQueue, &datalen, ptr);
+                            }
+                            string log = "";
+                            foreach(VkCheckpointDataNV cp in data)
+                            {
+                                int index = (int)cp.pCheckpointMarker;
+                                log += index.ToString() + ": " + CollectedInfo[index] + " Stage: " + cp.stage.ToString() + "\n";
+                            }
+                            throw new Exception("Vulkan device lost while checking GetCompletedValue()! Log:\n" + log);
                         case VkResult.Success:
                             if (nativeFences[i].Key > lastCompletedFence)
                                 lastCompletedFence = nativeFences[i].Key;
