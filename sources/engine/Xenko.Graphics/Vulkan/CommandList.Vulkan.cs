@@ -5,7 +5,7 @@
 //#define VULKAN_DEBUG
 
 // use checkpoints to debut vulkan
-#define VULKAN_CHECKPOINT_DEBUG
+//#define VULKAN_CHECKPOINT_DEBUG
 
 #if XENKO_GRAPHICS_API_VULKAN
 using System;
