@@ -30,6 +30,8 @@ namespace Xenko.Graphics
 
         private CommandList commandList;
 
+        private const int POOLSIZE = 1024 * 1024 * 4;
+
         public ResourceGroupAllocator(GraphicsResourceAllocator allocator, CommandList commandList, int initialCount)
         {
             this.allocator = allocator;
@@ -39,7 +41,7 @@ namespace Xenko.Graphics
             SetupNextDescriptorPool();
 
             for (int i=0; i<initialCount; i++)
-                bufferPools.Add(currentBufferPool = BufferPool.New(allocator, graphicsDevice, 1024 * 1024, 4, commandList));
+                bufferPools.Add(currentBufferPool = BufferPool.New(allocator, graphicsDevice, POOLSIZE, 4, commandList));
         }
 
         protected override void Destroy()
@@ -131,7 +133,7 @@ namespace Xenko.Graphics
             currentBufferPoolIndex++;
             if (currentBufferPoolIndex >= bufferPools.Count)
             {
-                bufferPools.Add(currentBufferPool = BufferPool.New(allocator, graphicsDevice, 1024 * 1024, 4));
+                bufferPools.Add(currentBufferPool = BufferPool.New(allocator, graphicsDevice, POOLSIZE, 4));
                 currentBufferPool.Map(commandList);
             }
             else
