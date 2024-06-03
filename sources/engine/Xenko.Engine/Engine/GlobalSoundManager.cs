@@ -212,6 +212,37 @@ namespace Xenko.Engine
             currentAttached.Clear();
         }
 
+        /// <summary>
+        /// Returns all of the paused sounds for easy resuming ones you want
+        /// Make sure you either stop these if not resuming them, or resume them
+        /// </summary>
+        public static List<SoundInstance> PauseLoopedSounds()
+        {
+            List<SoundInstance> paused = new List<SoundInstance>();
+            foreach (List<SoundInstance> si in instances.Values)
+            {
+                for (int i = 0; i < si.Count; i++)
+                {
+                    if (si[i].IsLooping && si[i].PlayState == Media.PlayState.Playing)
+                    {
+                        si[i].Pause();
+                        paused.Add(si[i]);
+                    }
+                }
+            }
+            return paused;
+        }
+
+        /// <summary>
+        /// Helper function for resuming a list of paused, looped sounds usually provided from PauseLoopedSounds()
+        /// </summary>
+        public static void ResumeLoopedSounds(List<SoundInstance> paused_looped_sounds)
+        {
+            if (paused_looped_sounds == null) return;
+            foreach (SoundInstance si in paused_looped_sounds)
+                if (si.IsLooping && si.PlayState == Media.PlayState.Paused) si.Play();
+        }
+
         public static void StopSound(string url)
         {
             if (instances.TryGetValue(url, out var snds))
@@ -292,7 +323,7 @@ namespace Xenko.Engine
                 {
                     var snd = ins[i];
                     if (snd.PlayState == Media.PlayState.Stopped)
-                        return ins[i];
+                        return snd;
 
                     if (ReplacementPolicy != REPLACE_SOUND_POLICY.NO_REPLACING)
                     {
