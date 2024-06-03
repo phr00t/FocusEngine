@@ -106,7 +106,16 @@ namespace Xenko.Graphics.SDL
             if (e != null) error += "\n\nException: " + e.ToString();
             SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, title, error, IntPtr.Zero);
             Console.Error.WriteLine(error);
+            Console.Out.WriteLine(error);
             throw new Exception(error);
+        }
+
+        internal static void GenerateGenericInfo(string msg = null, string title = "Info")
+        {
+            string error = msg ?? "No info proivded!";
+            SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_INFORMATION, title, error, IntPtr.Zero);
+            Console.Error.WriteLine(error);
+            Console.Out.WriteLine(error);
         }
 
         internal static void GenerateCreationError(Exception e = null)
@@ -115,6 +124,7 @@ namespace Xenko.Graphics.SDL
             if (e != null) error += "\n\nException: " + e.ToString();
             SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Failed to make Game Window", error, IntPtr.Zero);
             Console.Error.WriteLine(error);
+            Console.Out.WriteLine(error);
             throw new Exception(error);
         }
 
@@ -133,6 +143,7 @@ namespace Xenko.Graphics.SDL
             } catch (Exception e2) { }
             SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Failed to Render To Screen", error, IntPtr.Zero);
             Console.Error.WriteLine(error);
+            Console.Out.WriteLine(error);
             throw new Exception(error);
         }
 
