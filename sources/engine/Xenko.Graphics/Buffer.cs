@@ -80,27 +80,27 @@ namespace Xenko.Graphics
         /// How many small buffers to preallocate for StagedMeshDraws? Only gets created when StagedMeshDraws gets used.
         /// </summary>
         [DataMemberIgnore]
-        public static ulong SmallPooledBufferCount = 5000;
+        public static ulong SmallPooledBufferCount = 3000;
 
         /// <summary>
         /// How many large buffers to preallocate for StagedMeshDraws? Only gets created when StagedMeshDraws gets used.
         /// </summary>
         [DataMemberIgnore]
-        public static ulong LargePooledBufferCount = 400;
+        public static ulong LargePooledBufferCount = 1000;
 
         /// <summary>
         /// How big is each small StagedMeshBufferSize? Make it big enough to store your biggest StagedMeshDraw. Total size is StagedMeshBufferSize * StagedMeshBufferCount. Only gets created
         /// when StageMeshDraws are used.
         /// </summary>
         [DataMemberIgnore]
-        public static ulong SmallPooledBufferSize = 12 * 4096;
+        public static ulong SmallPooledBufferSize = 90000;
 
         /// <summary>
         /// How big is each large StagedMeshBufferSize? Make it big enough to store your biggest StagedMeshDraw. Total size is StagedMeshBufferSize * StagedMeshBufferCount. Only gets created
         /// when StageMeshDraws are used.
         /// </summary>
         [DataMemberIgnore]
-        public static ulong LargePooledBufferSize = 48 * 4096;
+        public static ulong LargePooledBufferSize = 500000;
 
         [DataMemberIgnore]
         public static ulong LargestBufferSize { get; internal set; }

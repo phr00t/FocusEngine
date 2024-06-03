@@ -154,29 +154,29 @@ namespace Xenko.Graphics
         /// How big should the Vulkan "Large" StagedMeshBuffer be
         /// </summary>
         [DataMember(76)]
-        [DefaultValue(32 * 4096)]
-        public int LargePooledBufferSize { get; set; } = 48 * 4096;
+        [DefaultValue(500000)]
+        public int LargePooledBufferSize { get; set; } = 500000;
 
         /// <summary>
         /// How big should the Vulkan upload buffer be in megabytes? It is ring recycled. Bigger buffers may be needed for very frequent large uploads. Defaults to 128.
         /// </summary>
         [DataMember(77)]
-        [DefaultValue(1024)]
-        public int LargedPooledBufferCount { get; set; } = 400;
+        [DefaultValue(1000)]
+        public int LargedPooledBufferCount { get; set; } = 1000;
 
         /// <summary>
         /// How big should the Vulkan upload buffer be in megabytes? It is ring recycled. Bigger buffers may be needed for very frequent large uploads. Defaults to 128.
         /// </summary>
         [DataMember(78)]
-        [DefaultValue(2 * 4096)]
-        public int SmallPooledBufferSize { get; set; } = 12 * 4096;
+        [DefaultValue(90000)]
+        public int SmallPooledBufferSize { get; set; } = 90000;
 
         /// <summary>
         /// How big should the Vulkan upload buffer be in megabytes? It is ring recycled. Bigger buffers may be needed for very frequent large uploads. Defaults to 128.
         /// </summary>
         [DataMember(79)]
-        [DefaultValue(4096)]
-        public int SmallPooledBufferCount { get; set; } = 5000;
+        [DefaultValue(3000)]
+        public int SmallPooledBufferCount { get; set; } = 3000;
 
         /// <summary>
         /// Disable generating error log files in My Documents (default location)? Can be configured via ErrorFileLogger class
