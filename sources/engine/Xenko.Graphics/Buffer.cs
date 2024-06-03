@@ -71,10 +71,10 @@ namespace Xenko.Graphics
         public static int CaptureIndexBuffersOfSize = 8192;
 
         /// <summary>
-        /// How big should the Vulkan upload buffer be in megabytes? It is ring recycled. Bigger buffers may be needed for very frequent large uploads. Defaults to 128.
+        /// How big should the Vulkan upload buffer be in megabytes? It is ring recycled. Bigger buffers may be needed for very frequent large uploads. Defaults to 256.
         /// </summary>
         [DataMemberIgnore]
-        public static int UploadBufferSizeInMB = 160;
+        public static int UploadBufferSizeInMB = 256;
 
         /// <summary>
         /// How many small buffers to preallocate for StagedMeshDraws? Only gets created when StagedMeshDraws gets used.
