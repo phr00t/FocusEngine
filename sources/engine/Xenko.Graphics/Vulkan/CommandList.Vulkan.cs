@@ -376,6 +376,8 @@ namespace Xenko.Graphics
             GraphicsDevice.RecordInfo("PrepareDrawBindDescriptor", currentCommandList.NativeCommandBuffer);
 #endif
 
+            // POSSIBLE "device lost" is due to the following, I did have a report of a "VULKAN_DEVICE_LOST" with the line above
+            // however that was before the bufferpool fixes, so unsure this is still a thing
             vkUpdateDescriptorSets(GraphicsDevice.NativeDevice, (uint)bindingCount, writes, 0, null);
             vkCmdBindDescriptorSets(currentCommandList.NativeCommandBuffer, VkPipelineBindPoint.Graphics, activePipeline.NativeLayout, 0, 1, &localDescriptorSet, 0, null);
         }
