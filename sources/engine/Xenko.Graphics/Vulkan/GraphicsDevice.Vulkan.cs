@@ -615,8 +615,8 @@ namespace Xenko.Graphics
                             return lastCompletedFence;
                         case VkResult.ErrorDeviceLost:
                             // god fucking dammit
+                            Xenko.Graphics.SDL.Window.GenerateGenericInfo("Vulkan device lost! Trying to gather more info...", "Device Lost");
                             uint datalen = 0;
-                            //vkGetQueueCheckpointData2NV(NativeCommandQueue, &datalen, (VkCheckpointData2NV*)0);
                             vkGetQueueCheckpointDataNV(NativeCommandQueue, &datalen, (VkCheckpointDataNV*)0);
                             VkCheckpointDataNV[] data = new VkCheckpointDataNV[datalen];
                             for (int j = 0; j < data.Length; j++) data[j].sType = VkStructureType.CheckpointDataNV;
@@ -630,6 +630,7 @@ namespace Xenko.Graphics
                                 int index = (int)cp.pCheckpointMarker;
                                 log += index.ToString() + ": " + CollectedInfo[index] + " Stage: " + cp.stage.ToString() + "\n";
                             }
+                            Xenko.Graphics.SDL.Window.GenerateGenericInfo(log, "Device Lost Log");
                             throw new Exception("Vulkan device lost while checking GetCompletedValue()! Log:\n" + log);
                         case VkResult.Success:
                             if (nativeFences[i].Key > lastCompletedFence)
