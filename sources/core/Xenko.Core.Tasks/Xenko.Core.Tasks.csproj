@@ -27,9 +27,9 @@
       <HintPath>..\..\..\deps\libgit2\LibGit2Sharp.dll</HintPath>
     </Reference>
     <PackageReference Include="Microsoft.Build" Version="17.4.0" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.Build.Locator" Version="1.5.5" />
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30">
+    <PackageReference Include="Microsoft.Build.Locator" Version="1.6.10" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.4.0" ExcludeAssets="runtime" />
+	<PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </PackageReference>
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
