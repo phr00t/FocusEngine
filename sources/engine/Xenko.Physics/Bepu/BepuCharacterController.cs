@@ -27,6 +27,11 @@ namespace Xenko.Physics.Bepu
         /// </summary>
         public CameraComponent Camera { get; internal set; }
 
+        /// <summary>
+        /// What transform will we be moving with the mouse? Get's set to the Camera's if found, but can be replaced by anything.
+        /// </summary>
+        public TransformComponent LookTransform { get; set; }
+
         private VRFOV fovReduction;
         private static Game internalGame;
         private bool VR;
@@ -86,6 +91,7 @@ namespace Xenko.Physics.Bepu
                 if (camCheck != null)
                 {
                     Camera = camCheck;
+                    LookTransform = Camera.Entity.Transform;
                     break;
                 }
             }
@@ -458,10 +464,21 @@ namespace Xenko.Physics.Bepu
         /// </summary>
         public void SetPlayerLook(float? yaw = null, float? pitch = null)
         {
-            if (Camera == null || VR) return;
+            if (LookTransform == null || VR) return;
             this.yaw = this.desiredYaw = yaw ?? this.yaw;
             this.pitch = this.desiredPitch = pitch ?? this.pitch;
-            Camera.Entity.Transform.Rotation = Quaternion.RotationYawPitchRoll(this.yaw, this.pitch, 0f);
+            LookTransform.Rotation = Quaternion.RotationYawPitchRoll(this.yaw, this.pitch, 0f);
+        }
+
+        /// <summary>
+        /// Moves the camera look for a player character. Has no effect in VR
+        /// </summary>
+        public void MovePlayerLook(float? yaw = null, float? pitch = null)
+        {
+            if (LookTransform == null || VR) return;
+            this.yaw = this.desiredYaw += yaw ?? 0f;
+            this.pitch = this.desiredPitch += pitch ?? 0f;
+            LookTransform.Rotation = Quaternion.RotationYawPitchRoll(this.yaw, this.pitch, 0f);
         }
 
         /// <summary>
@@ -469,15 +486,15 @@ namespace Xenko.Physics.Bepu
         /// </summary>
         public void LookAt(Vector3 target, bool flattenY = false)
         {
-            Vector3 myPos = Camera != null ? Camera.Entity.Transform.WorldPosition() : Body.Position;
+            Vector3 myPos = LookTransform != null ? LookTransform.WorldPosition() : Body.Position;
             Vector3 diff = target - myPos;
             if (flattenY || VR) diff.Y = 0f;
-            if (Camera != null)
+            if (LookTransform != null)
             {
                 if (!VR)
                 {
-                    Quaternion.LookAt(ref Camera.Entity.Transform.Rotation, diff);
-                    var ypr = Camera.Entity.Transform.Rotation.YawPitchRoll;
+                    Quaternion.LookAt(ref LookTransform.Rotation, diff);
+                    var ypr = LookTransform.Rotation.YawPitchRoll;
                     yaw = desiredYaw = ypr.X;
                     pitch = desiredPitch = ypr.Y;
                 }
@@ -500,8 +517,8 @@ namespace Xenko.Physics.Bepu
         {
             float frame_time = (float)internalGame.UpdateTime.Elapsed.TotalSeconds;
 
-            if (Camera == null)
-                throw new ArgumentNullException("No camera to look with!");
+            if (LookTransform == null)
+                throw new ArgumentNullException("No LookTransform/camera to look with!");
 
             if (VR)
             {
@@ -589,7 +606,7 @@ namespace Xenko.Physics.Bepu
             desiredYaw = yaw -= 1.333f * rotationDelta.X * MouseSensitivity; // we want to rotate faster Horizontally and Vertically
             desiredPitch = pitch = MathUtil.Clamp(pitch - rotationDelta.Y * (InvertY ? -MouseSensitivity : MouseSensitivity), -MathUtil.PiOverTwo + 0.05f, MathUtil.PiOverTwo - 0.05f);
 
-            Camera.Entity.Transform.Rotation = Quaternion.RotationYawPitchRoll(yaw, pitch, 0);
+            LookTransform.Rotation = Quaternion.RotationYawPitchRoll(yaw, pitch, 0);
         }
 
         /// <summary>
@@ -597,10 +614,10 @@ namespace Xenko.Physics.Bepu
         /// </summary>
         public void SetPosition(Vector3 position, bool updateCamera = true)
         {
-            if (Camera != null && !VR && updateCamera) {
-                Camera.Entity.Transform.Position.X = 0f;
-                Camera.Entity.Transform.Position.Y = Height * CameraHeightPercent;
-                Camera.Entity.Transform.Position.Z = 0f;
+            if (LookTransform != null && !VR && updateCamera) {
+                LookTransform.Position.X = 0f;
+                LookTransform.Position.Y = Height * CameraHeightPercent;
+                LookTransform.Position.Z = 0f;
             }
             Body.Entity.Transform.Position = position;
             position.Y += Height * 0.5f;
