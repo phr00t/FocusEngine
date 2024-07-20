@@ -615,6 +615,57 @@ namespace Xenko.Engine
         }
 
         /// <summary>
+        /// Generate a batched model. Copies each model to all positions in its respective listOfTransforms into one batched model.
+        /// </summary>
+        /// <param name="model">Model to copy around</param>
+        /// <param name="listOfTransforms">2D List of transforms to place each model</param>
+        /// <param name="uvOffsets">Offsets for each model</param>
+        /// <param name="uvScales">UV scales for each model</param>
+        /// <returns>Returns batched model. Null if model coouldn't be made, like if buffers for meshes couldn't be found</returns>
+        public static Model GenerateBatch(List<Model> models, List<List<Matrix>> listOfTransforms, List<List<Vector2>> uvScales = null, List<List<Vector2>> uvOffsets = null)
+        {
+            var materials = new Dictionary<MaterialInstance, List<BatchingChunk>>();
+
+            for (int m = 0; m < models.Count; m++)
+            {
+                Model model = models[m];
+
+                if (ModelOKForBatching(model) == false) continue;
+                for (var index = 0; index < model.Materials.Count; index++)
+                {
+                    var material = model.Materials[index];
+
+                    for (int i = 0; i < listOfTransforms[m].Count; i++)
+                    {
+                        var chunk = new BatchingChunk { Entity = null, Model = model, MaterialIndex = index, Transform = listOfTransforms[m][i],
+                                                        uvOffset = (uvOffsets?[m].Count ?? 0) > 0 ? uvOffsets[m][i] : null,
+                                                        uvScale = (uvScales?[m].Count ?? 0) > 0 ? uvScales[m][i] : null };
+
+                        if (materials.TryGetValue(material, out var entities))
+                        {
+                            entities.Add(chunk);
+                        }
+                        else
+                        {
+                            materials[material] = new List<BatchingChunk> { chunk };
+                        }
+                    }
+                }
+            }
+
+            Model prefabModel = new Model();
+
+            foreach (var material in materials)
+            {
+                ProcessMaterial(material.Value, material.Key, prefabModel);
+            }
+
+            prefabModel.UpdateBoundingBox();
+
+            return prefabModel;
+        }
+
+        /// <summary>
         /// Generate a batched model. Copies the model to all positions in listOfTransforms into one batched model.
         /// </summary>
         /// <param name="model">Model to copy around</param>
