@@ -352,6 +352,10 @@ namespace Xenko.Rendering.Compositing
                             }
                         }
 
+                        // if we have a rotation override, set it here
+                        if (VRSettings.VRDevice.BaseRotationOverride != null)
+                            cameraRot = Matrix.RotationQuaternion(VRSettings.VRDevice.BaseRotationOverride.Value);
+
                         // Compute both view and projection matrices
                         for (var i = 0; i < 2; ++i)
                             VRSettings.VRDevice.ReadEyeParameters(i == 0 ? Eyes.Left : Eyes.Right, camera.NearClipPlane, camera.FarClipPlane, ref cameraPos, ref cameraRot, VRSettings.IgnoreDeviceRotation, VRSettings.IgnoreDevicePosition, out viewMatrices[i], out projectionMatrices[i]);

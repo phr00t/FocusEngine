@@ -49,6 +49,11 @@ namespace Xenko.VirtualReality
         /// </summary>
         public Vector3 BodyOffset { get; set; } = Vector3.Zero;
 
+        /// <summary>
+        /// If you want to ignore all camera (and parent) rotations and use this as the base rotation your head rotation is added to, set it here.
+        /// </summary>
+        public Quaternion? BaseRotationOverride { get; set; } = null;
+
         public abstract bool CanInitialize { get; }
 
         public abstract void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, VRDeviceSystem.MIRROR_OPTION requireMirror);
