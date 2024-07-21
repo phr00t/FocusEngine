@@ -407,44 +407,42 @@ namespace Xenko.Rendering.UI
                 {
                     Matrix.Scaling(ref renderObject.Component.Entity.Transform.Scale, out Matrix scalar);
                     worldMatrix = ReallyCloseUI * scalar;
+                    worldMatrix.TranslationVector += renderObject.Component.Entity.Transform.Position;
                 }
                 else
                 {
-                    if (renderObject.IsBillboard || renderObject.IsFullScreen)
+                    if (renderObject.IsBillboard)
                     {
                         Matrix viewInverse;
                         Matrix.Invert(ref viewMatrix, out viewInverse);
                         var diff = worldMatrix.TranslationVector - viewInverse.TranslationVector;
 
-                        if (renderObject.IsBillboard)
+                        switch (renderObject.Component.BillboardType)
                         {
-                            switch (renderObject.Component.BillboardType)
-                            {
-                                case UIComponent.BILLBOARD_TYPE.VIEW:
-                                    var viewInverseRow1 = viewInverse.Row1;
-                                    var viewInverseRow2 = viewInverse.Row2;
+                            case UIComponent.BILLBOARD_TYPE.VIEW:
+                                var viewInverseRow1 = viewInverse.Row1;
+                                var viewInverseRow2 = viewInverse.Row2;
 
-                                    // remove scale of the camera
-                                    viewInverseRow1 /= viewInverseRow1.XYZ().Length();
-                                    viewInverseRow2 /= viewInverseRow2.XYZ().Length();
+                                // remove scale of the camera
+                                viewInverseRow1 /= viewInverseRow1.XYZ().Length();
+                                viewInverseRow2 /= viewInverseRow2.XYZ().Length();
 
-                                    // set the scale of the object
-                                    viewInverseRow1 *= worldMatrix.Row1.XYZ().Length();
-                                    viewInverseRow2 *= worldMatrix.Row2.XYZ().Length();
+                                // set the scale of the object
+                                viewInverseRow1 *= worldMatrix.Row1.XYZ().Length();
+                                viewInverseRow2 *= worldMatrix.Row2.XYZ().Length();
 
-                                    // set the adjusted world matrix
-                                    worldMatrix.Row1 = viewInverseRow1;
-                                    worldMatrix.Row2 = viewInverseRow2;
-                                    worldMatrix.Row3 = viewInverse.Row3;
-                                    break;
-                                case UIComponent.BILLBOARD_TYPE.POSITION:
-                                    // generate a new matrix that looks at the camera's position
-                                    Quaternion look = new Quaternion();
-                                    Quaternion.LookAt(ref look, diff);
-                                    TransformComponent original = renderObject.Component.Entity.Transform;
-                                    worldMatrix = Matrix.Transformation(original.WorldScale(), look, original.WorldPosition());
-                                    break;
-                            }
+                                // set the adjusted world matrix
+                                worldMatrix.Row1 = viewInverseRow1;
+                                worldMatrix.Row2 = viewInverseRow2;
+                                worldMatrix.Row3 = viewInverse.Row3;
+                                break;
+                            case UIComponent.BILLBOARD_TYPE.POSITION:
+                                // generate a new matrix that looks at the camera's position
+                                Quaternion look = new Quaternion();
+                                Quaternion.LookAt(ref look, diff);
+                                TransformComponent original = renderObject.Component.Entity.Transform;
+                                worldMatrix = Matrix.Transformation(original.WorldScale(), look, original.WorldPosition());
+                                break;
                         }
 
                         if (renderObject.IsFixedSize)
