@@ -127,7 +127,7 @@ namespace Xenko.UI
         /// <returns>Returns the UIElement for the added entry</returns>
         public override UIElement AddEntry(string displayName, object value = null, bool rebuildVisualListAfter = true)
         {
-            if (currentSelection == null) currentSelection = value;
+            if (currentSelection == null) currentSelection = value ?? displayName;
             ButtonBase added = base.AddEntry(displayName, value, rebuildVisualListAfter) as ButtonBase;
             added.Click -= toggleChanger;
             added.Click += toggleChanger;
