@@ -320,7 +320,7 @@ namespace Xenko.Core.Mathematics
                     output.Write("L" + kvp.Key);
                     output.Write(l);
                 }
-                else throw new InvalidDataException("Can't process type: " + kvp.Value.GetType().Name);
+                else throw new InvalidDataException("Can't process type: " + (kvp.Value?.GetType()?.Name ?? "null"));
             }
         }
     }
