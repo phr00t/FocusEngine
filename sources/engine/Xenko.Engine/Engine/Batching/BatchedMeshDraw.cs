@@ -282,9 +282,16 @@ namespace Xenko.Engine
 
         /// <summary>
         /// If true, only copies within the camera's frustum will be updated.
-        /// May cause issues with shadows, but improves performance.
+        /// May cause issues with shadows, but improves performance. Make sure you set "AssociatedTransform" if this is not a root entity, so this
+        /// can be calculated correctly.
         /// </summary>
         public bool OptimizeForFrustum = true;
+
+        /// <summary>
+        /// If we are opimizing for frustum, and we are NOT a root entity, we need to know how these matricies are transformed to know if they are
+        /// within camera boundaries.
+        /// </summary>
+        public TransformComponent AssociatedTransform;
 
         /// <summary>
         /// Returns how many objects this BatchedMeshDraw can maintain. If you go over this number, you'll get out-of-bound exceptions.
@@ -445,7 +452,14 @@ namespace Xenko.Engine
                 Matrix tMatrix = internalTransforms[index];
                 if (OptimizeForFrustum)
                 {
-                    BoundingBox.Transform(ref originalBoundingBox, ref tMatrix, out BoundingBox newbb);
+                    BoundingBox newbb;
+                    if (AssociatedTransform == null)
+                        BoundingBox.Transform(ref originalBoundingBox, ref tMatrix, out newbb);
+                    else
+                    {
+                        Matrix adjusted = tMatrix * AssociatedTransform.WorldMatrix;
+                        BoundingBox.Transform(ref originalBoundingBox, ref adjusted, out newbb);
+                    }
                     if (frustum.Contains(ref newbb) == false)
                     {
                         // this isn't in the camera's frustum, so check next frame if it is
