@@ -308,7 +308,10 @@ namespace Xenko.Engine
             {
                 int checkindex = (i + PossibleFreeIndex) % internalTransforms.Length;
                 if (internalTransforms[checkindex] == dontdraw)
+                {
+                    PossibleFreeIndex = (checkindex + 1) % internalTransforms.Length;
                     return checkindex;
+                }
             }
 
             return -1;
