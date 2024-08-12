@@ -447,7 +447,8 @@ namespace Xenko.Rendering.UI
 
                         if (renderObject.IsFixedSize)
                         {
-                            var distVec = diff.Length();
+                            // 0.02222222 is 1/45, as 45 is usually the default camera vFoV
+                            var distVec = diff.Length() * vFoV * 0.02222222f;
 
                             worldMatrix.Row1 *= distVec;
                             worldMatrix.Row2 *= distVec;
