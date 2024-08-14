@@ -176,6 +176,8 @@ namespace Xenko.Physics
 
                 if (physicsScene.BepuSimulation != null)
                 {
+                    physicsScene.BepuSimulation.AlwaysExecuteBeforeSimulationStep?.Invoke(time);
+
                     // do anything before simulation (which might modify ToBeAdded or ToBeRemoved)
                     while (physicsScene.BepuSimulation.ActionsBeforeSimulationStep.TryDequeue(out Action<float> a)) a(time);
 

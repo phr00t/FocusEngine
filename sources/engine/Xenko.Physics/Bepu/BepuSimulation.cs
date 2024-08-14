@@ -39,6 +39,7 @@ namespace Xenko.Physics.Bepu
 
         public ReaderWriterLockSlim simulationLocker { get; private set; } = new ReaderWriterLockSlim();
 
+        public Action<float> AlwaysExecuteBeforeSimulationStep = null;
         public ConcurrentQueue<Action<float>> ActionsBeforeSimulationStep = new ConcurrentQueue<Action<float>>();
         public ConcurrentQueue<Action<float>> ActionsAfterSimulationStep = new ConcurrentQueue<Action<float>>();
         internal ConcurrentQueue<RBCriticalAction> CriticalActions = new ConcurrentQueue<RBCriticalAction>();
