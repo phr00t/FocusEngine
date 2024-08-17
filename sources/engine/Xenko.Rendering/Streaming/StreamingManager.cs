@@ -374,7 +374,7 @@ namespace Xenko.Streaming
             // Stream resource to the maximum level
             FullyLoadResource(resource);
 
-            using (resourceLocker.ReadLock())
+            using (resourceLocker.UpgradableReadLock())
             {
                 // Release streaming object
                 resource.Release();
