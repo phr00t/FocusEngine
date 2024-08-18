@@ -195,7 +195,7 @@ namespace Xenko.Engine
                 }
                 Vector3 newpos = ps.entity.Transform.WorldPosition();
                 float timePerFrame = overrideTimePerFrame ?? ((float)internalGame.UpdateTime.Elapsed.Ticks / TimeSpan.TicksPerSecond);
-                ps.soundInstance.Apply3D(ProcessMinDistPosition(newpos), (newpos - ps.oldpos) / timePerFrame, null);
+                ps.soundInstance.Apply3D(ProcessMinDistPosition(newpos), timePerFrame != 0f ? (newpos - ps.oldpos) / timePerFrame : AudioEngine.DefaultListener.Velocity, null);
                 ps.oldpos = newpos;
             }
         }
