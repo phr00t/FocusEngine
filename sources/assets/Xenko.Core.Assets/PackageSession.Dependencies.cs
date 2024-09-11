@@ -52,13 +52,7 @@ namespace Xenko.Core.Assets
 
                 var requestProject = request.Request.Project;
 
-                var projectRange = new LibraryRange()
-                {
-                    Name = projectName,
-                    VersionRange = new NuGet.Versioning.VersionRange(requestProject.Version),
-                    TypeConstraint = LibraryDependencyTarget.Project | LibraryDependencyTarget.ExternalProject
-                };
-
+                var projectRange = new LibraryRange(projectName, new NuGet.Versioning.VersionRange(requestProject.Version), LibraryDependencyTarget.Project | LibraryDependencyTarget.ExternalProject);
                 var framework = requestProject.TargetFrameworks.First();
                 var graphs = new List<GraphNode<RemoteResolveResult>>
                 {

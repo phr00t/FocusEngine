@@ -339,10 +339,7 @@ namespace Xenko.Core.Packages
                             FilePath = projectPath,
                             Dependencies = new List<LibraryDependency>()
                             {
-                                new LibraryDependency
-                                {
-                                    LibraryRange = new LibraryRange(packageId, new VersionRange(version.ToNuGetVersion()), LibraryDependencyTarget.Package),
-                                }
+                                new LibraryDependency(new LibraryRange(packageId, new VersionRange(version.ToNuGetVersion()), LibraryDependencyTarget.Package))
                             },
                             TargetFrameworks =
                             {
