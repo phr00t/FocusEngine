@@ -55,6 +55,11 @@ namespace Xenko.Engine
         public static bool PlayOutofRangeLoopedSounds = true;
 
         /// <summary>
+        /// System-wide disabling of doppler effect with 3D audio
+        /// </summary>
+        public static bool CompletelyDisableDopplerEffect = false;
+
+        /// <summary>
         /// Different policies for replacing existing sounds when new ones want to play (and we ran out of overlapping sounds)
         /// </summary>
         public enum REPLACE_SOUND_POLICY
@@ -195,7 +200,7 @@ namespace Xenko.Engine
                 }
                 Vector3 newpos = ps.entity.Transform.WorldPosition();
                 float timePerFrame = overrideTimePerFrame ?? ((float)internalGame.UpdateTime.Elapsed.Ticks / TimeSpan.TicksPerSecond);
-                ps.soundInstance.Apply3D(ProcessMinDistPosition(newpos), timePerFrame != 0f ? (newpos - ps.oldpos) / timePerFrame : AudioEngine.DefaultListener.Velocity, null);
+                ps.soundInstance.Apply3D(ProcessMinDistPosition(newpos), CompletelyDisableDopplerEffect ? null : (timePerFrame != 0f ? (newpos - ps.oldpos) / timePerFrame : AudioEngine.DefaultListener.Velocity), null);
                 ps.oldpos = newpos;
             }
         }
