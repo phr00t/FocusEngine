@@ -132,7 +132,7 @@ namespace Xenko.VirtualReality
                 }
             }
 
-            var appInfo = new ApplicationInfo(1, 1, new Version64(1, 0, 9));
+            var appInfo = new ApplicationInfo(1, 1, new Version64(1, 0, 40));
             string engName = "FocusEngine";
             string appName = AppDomain.CurrentDomain.FriendlyName;
             Marshal.Copy(engName.ToCharArray(), 0, (IntPtr)appInfo.EngineName, engName.Length);
