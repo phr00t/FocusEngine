@@ -132,40 +132,25 @@ namespace Xenko.VirtualReality
                 }
             }
 
-            InstanceCreateInfo instanceCreateInfo;
-
-            var appInfo = new ApplicationInfo()
-            {
-                ApiVersion = new Version64(1, 0, 9)
-            };
-
-            // We've got to marshal our strings and put them into global, immovable memory. To do that, we use
-            // SilkMarshal.
-            Span<byte> appName = new Span<byte>(appInfo.ApplicationName, 128);
-            Span<byte> engName = new Span<byte>(appInfo.EngineName, 128);
-            SilkMarshal.StringIntoSpan(System.AppDomain.CurrentDomain.FriendlyName, appName);
-            SilkMarshal.StringIntoSpan("FocusEngine", engName);
+            var appInfo = new ApplicationInfo(1, 1, new Version64(1, 0, 9));
+            string engName = "FocusEngine";
+            string appName = AppDomain.CurrentDomain.FriendlyName;
+            Marshal.Copy(engName.ToCharArray(), 0, (IntPtr)appInfo.EngineName, engName.Length);
+            Marshal.WriteByte((IntPtr)(appInfo.EngineName + engName.Length), 0);
+            Marshal.Copy(appName.ToCharArray(), 0, (IntPtr)appInfo.ApplicationName, appName.Length);
+            Marshal.WriteByte((IntPtr)(appInfo.ApplicationName + appName.Length), 0);
 
             var requestedExtensions = SilkMarshal.StringArrayToPtr(Extensions);
-            instanceCreateInfo = new InstanceCreateInfo
+            InstanceCreateInfo instanceCreateInfo = new InstanceCreateInfo
             (
                 applicationInfo: appInfo,
                 enabledExtensionCount: (uint)Extensions.Count,
                 enabledExtensionNames: (byte**)requestedExtensions
             );
 
-            // Now we're ready to make our instance!
-            CheckResult(Xr.CreateInstance(in instanceCreateInfo, ref Instance), "CreateInstance");
-
-            // For our benefit, let's log some information about the instance we've just created.
-            // skip this, as it crashes on Oculus runtime and is not needed
-            /*InstanceProperties properties = new();
-            CheckResult(Xr.GetInstanceProperties(Instance, ref properties), "GetInstanceProperties");
-
-            var runtimeName = SilkMarshal.PtrToString((nint)properties.RuntimeName);
-            var runtimeVersion = ((Version)(Version64)properties.RuntimeVersion).ToString(3);
-
-            Console.WriteLine($"[INFO] Application: Using OpenXR Runtime \"{runtimeName}\" v{runtimeVersion}");*/
+            Instance localInstance = new Instance(0);
+            CheckResult(Xr.CreateInstance(&instanceCreateInfo, &localInstance), "CreateInstance");
+            Instance = localInstance;
 
             // We're creating a head-mounted-display (HMD, i.e. a VR headset) example, so we ask for a runtime which
             // supports that form factor. The response we get is a ulong that is the System ID.
