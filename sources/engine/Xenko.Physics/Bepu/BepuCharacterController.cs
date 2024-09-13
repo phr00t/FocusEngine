@@ -445,17 +445,17 @@ namespace Xenko.Physics.Bepu
 
         private void SetRotateButKeepCameraPos(Quaternion rotation)
         {
-            var existingPosition = Camera.Entity.Transform.WorldPosition();
+            var existingPosition = LookTransform.WorldPosition();
             Body.Entity.Transform.Rotation = rotation;
-            var newPosition = Camera.Entity.Transform.WorldPosition(true);
+            var newPosition = LookTransform.WorldPosition(true);
             Body.Entity.Transform.Position -= (newPosition - existingPosition);
         }
 
         private void RotateButKeepCameraPos(Quaternion rotation)
         {
-            var existingPosition = Camera.Entity.Transform.WorldPosition();
+            var existingPosition = LookTransform.WorldPosition();
             Body.Entity.Transform.Rotation *= rotation;
-            var newPosition = Camera.Entity.Transform.WorldPosition(true);
+            var newPosition = LookTransform.WorldPosition(true);
             Body.Entity.Transform.Position -= (newPosition - existingPosition);
         }
 
@@ -501,8 +501,16 @@ namespace Xenko.Physics.Bepu
                 else
                 {
                     Quaternion temp = Quaternion.Identity;
-                    Quaternion camrot = Camera.Entity.Transform.Rotation;
-                    camrot.Invert();
+                    Quaternion camrot;
+                    if (LookTransform.Parent != null)
+                    {
+                        camrot = LookTransform.Parent.WorldRotation();
+                        camrot.Invert();
+                    }
+                    else
+                    {
+                        camrot = Quaternion.Identity;
+                    }
                     Quaternion.LookAt(ref temp, diff);
                     SetRotateButKeepCameraPos(temp * camrot);
                 }
