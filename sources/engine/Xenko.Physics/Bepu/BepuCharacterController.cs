@@ -98,7 +98,6 @@ namespace Xenko.Physics.Bepu
 
             Body.AttachEntityBottomSlider = 1f;
             Body.IgnorePhysicsRotation = true;
-            Body.IgnorePhysicsPosition = VR && Camera != null;
             Body.RotationLock = true;
             Body.ActionPerSimulationTick = UpdatePerSimulationTick;
 
@@ -116,6 +115,7 @@ namespace Xenko.Physics.Bepu
                         if (p.VRFOVFilter != null)
                         {
                             fovReduction = p.VRFOVFilter;
+                            p.Enabled = true;
                             break;
                         }
                     }
@@ -259,9 +259,9 @@ namespace Xenko.Physics.Bepu
         public Vector3 DesiredMovement;
 
         /// <summary>
-        /// How to dampen the different axis during updating? Defaults to (15,0,15)
+        /// How to dampen the different axis during updating? Defaults to (0.000003f,1,0.000003f). Set to null (or Vector3.One) to disable.
         /// </summary>
-        public Vector3? MoveDampening = new Vector3(15f, 0f, 15f);
+        public Vector3? MoveDampening = new Vector3(0.000003f, 1f, 0.000003f);
 
         /// <summary>
         /// Applying a single impulse to this (useful for jumps or pushes)
@@ -305,78 +305,66 @@ namespace Xenko.Physics.Bepu
 
         private Vector3 oldPos;
 
+        /// <summary>
+        /// If you need to set a velocity to this body, do it here so it doesn't conflict with the character controller velocity
+        /// </summary>
+        public Vector3? SetVelocity = null;
+
         private void UpdatePerSimulationTick(BepuRigidbodyComponent _body, float frame_time)
         {
             // make sure we are awake if we want to be moving
             if (Body.IsActive == false)
                 Body.IsActive = DesiredMovement != Vector3.Zero || ApplySingleImpulse.HasValue;
 
-            if (Body.IgnorePhysicsPosition)
+            if (SetVelocity == null)
             {
-                // use the last velocity to move our base
-                Body.Entity.Transform.Position += (Body.Position - oldPos);
-                oldPos = Body.Position;
-            }
-
-            // try to push our body
-            if (UseImpulseMovement)
-            {
-                // get rid of y if we are not operating on it
-                if (DontTouch_Y) DesiredMovement.Y = 0f;
-                Body.InternalBody.ApplyLinearImpulse(BepuHelpers.ToBepu(DesiredMovement * frame_time * Body.Mass * ImpulseMovementMultiplier));
-            }
-            else if (DontTouch_Y)
-            {
-                Vector3 originalVel = Body.LinearVelocity;
-                Vector3 newmove = new Vector3(DesiredMovement.X * VelocityMovementMultiplier, originalVel.Y, DesiredMovement.Z * VelocityMovementMultiplier);
-                Body.InternalBody.Velocity.Linear = BepuHelpers.ToBepu(newmove);
-            }
-            else Body.InternalBody.Velocity.Linear = BepuHelpers.ToBepu(DesiredMovement * VelocityMovementMultiplier);
-
-            // single impulse to apply?
-            if (ApplySingleImpulse.HasValue)
-            {
-                Body.InternalBody.ApplyLinearImpulse(BepuHelpers.ToBepu(ApplySingleImpulse.Value));
-                ApplySingleImpulse = null;
-            }
-
-            // apply MoveDampening, if any
-            if (MoveDampening != null)
-            {
-                var vel = Body.InternalBody.Velocity.Linear;
-                vel.X *= 1f - frame_time * MoveDampening.Value.X;
-                vel.Y *= 1f - frame_time * MoveDampening.Value.Y;
-                vel.Z *= 1f - frame_time * MoveDampening.Value.Z;
-                Body.InternalBody.Velocity.Linear = vel;
-            }
-
-            // do we need to move our base body toward our camera head?
-            if (Camera != null && VR)
-            {
-                Vector3 finalpos = Camera.Entity.Transform.WorldPosition();
-                if (DontTouch_Y || IgnoreVRHeadsetYPhysics) finalpos.Y = Body.Position.Y;
-                float xDist = Body.Position.X - finalpos.X;
-                float yDist = Body.Position.Y - finalpos.Y;
-                float zDist = Body.Position.Z - finalpos.Z;
-                if (xDist * xDist + yDist * yDist + zDist * zDist > VRPhysicsMoveThreshold * VRPhysicsMoveThreshold)
+                // try to push our body
+                if (UseImpulseMovement)
                 {
-                    if (VRPhysicsCollisionCheckBeforeMove)
-                    {
-                        Vector3 gravitybump = -(Body.OverrideGravity ? Body.Gravity : BepuSimulation.instance.Gravity);
-                        gravitybump.Normalize();
-                        gravitybump *= 0.05f;
-                        var result = BepuSimulation.instance.ShapeSweep<Capsule>((Capsule)Body.ColliderShape, Body.Position + gravitybump, Body.Rotation, finalpos + gravitybump, Body.CanCollideWith, Body);
-                        if (result.Succeeded == false)
-                        {
-                            Body.Position = finalpos;
-                            oldPos = finalpos;
-                        }
-                    }
-                    else
-                    {
-                        Body.Position = finalpos;
-                        oldPos = finalpos;
-                    }
+                    // get rid of y if we are not operating on it
+                    if (DontTouch_Y) DesiredMovement.Y = 0f;
+                    Body.InternalBody.ApplyLinearImpulse(BepuHelpers.ToBepu(DesiredMovement * frame_time * Body.Mass * ImpulseMovementMultiplier));
+                }
+                else if (DontTouch_Y)
+                {
+                    Vector3 originalVel = Body.LinearVelocity;
+                    Vector3 newmove = new Vector3(DesiredMovement.X * VelocityMovementMultiplier, originalVel.Y, DesiredMovement.Z * VelocityMovementMultiplier);
+                    Body.InternalBody.Velocity.Linear = BepuHelpers.ToBepu(newmove);
+                }
+                else Body.InternalBody.Velocity.Linear = BepuHelpers.ToBepu(DesiredMovement * VelocityMovementMultiplier);
+
+                // single impulse to apply?
+                if (ApplySingleImpulse.HasValue)
+                {
+                    Body.InternalBody.ApplyLinearImpulse(BepuHelpers.ToBepu(ApplySingleImpulse.Value));
+                    ApplySingleImpulse = null;
+                }
+
+                // apply MoveDampening, if any
+                if (MoveDampening.HasValue && MoveDampening.Value != Vector3.One)
+                {
+                    var vel = Body.InternalBody.Velocity.Linear;
+                    vel.X *= (float)Math.Pow(MoveDampening.Value.X, frame_time);
+                    vel.Y *= (float)Math.Pow(MoveDampening.Value.Y, frame_time);
+                    vel.Z *= (float)Math.Pow(MoveDampening.Value.Z, frame_time);
+                    Body.InternalBody.Velocity.Linear = vel;
+                }
+            }
+            else
+            {
+                Body.InternalBody.Velocity.Linear = BepuHelpers.ToBepu(SetVelocity.Value);
+                SetVelocity = null;
+            }
+
+            if (Camera != null && VR && VRBlackoutThroughWall < 1f && fovReduction != null)
+            {
+                Vector3 finalpos = Camera.Entity.Transform.WorldPosition() + Camera.Entity.Transform.Forward(true) * (Camera.NearClipPlane + 0.05f);
+                var hit = BepuSimulation.instance.Raycast(Body.Position, finalpos, CollisionFilterGroupFlags.StaticFilter | CollisionFilterGroupFlags.KinematicFilter | CollisionFilterGroupFlags.StaticFeaturesFilter);
+                if (hit.Succeeded)
+                {
+                    // wall blackout
+                    fovReduction.Radius = VRBlackoutThroughWall;
+                    fovReduction.Enabled = true;
                 }
             }
 
@@ -396,30 +384,33 @@ namespace Xenko.Physics.Bepu
         public bool VRComfortMode = false;
         public float VRFOVReductionMin = 0.55f;
         public float VRFOVReductionSpeed = 10f;
-        public bool VRPhysicsCollisionCheckBeforeMove = true;
-        public float VRPhysicsMoveThreshold = 0.2f;
 
         /// <summary>
-        /// Removes any FOV reduction caused by movement or forced-on state. Same as calling SetVRLoadingBlackout(false)
+        /// Set this to 1f to disable blacking out when trying to look through walls. Defaults to 0.1f, 0 will completely black out the screen.
         /// </summary>
-        public void ResetVRFOV()
+        public float VRBlackoutThroughWall = 0.05f;
+
+        /// <summary>
+        /// Sets the VR field of view reduction immediately to the select value. 1 is off (reset), 0 is completely black.
+        /// </summary>
+        public void SetVRFov(float radius)
         {
             forceBlackout = false;
 
             if (!VR || fovReduction == null) return;
 
             fovReduction.Enabled = false;
-            fovReduction.Radius = 1f;
+            fovReduction.Radius = radius;
         }
 
         private void UpdateVRFOV(bool ForceFOVReduction, float frameTime)
         {
-            float desiredRadius;
+            float desiredRadius = 1f;
             if (ForceFOVReduction)
             {
                 desiredRadius = VRFOVReductionMin;
             }
-            else
+            else if (VRComfortMode)
             {
                 Vector3 vel = Body.LinearVelocity;
                 float speed = vel.Length();
@@ -589,7 +580,7 @@ namespace Xenko.Physics.Bepu
 
                 if (fovReduction != null && !forceBlackout)
                 {
-                    if (VRComfortMode)
+                    if (VRComfortMode || fovReduction.Enabled)
                         UpdateVRFOV(fov_check, frame_time);
                     else
                         fovReduction.Enabled = false;
