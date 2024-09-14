@@ -199,6 +199,7 @@ namespace Xenko.VirtualReality
 
         public override Size2 ActualRenderFrameSize { get => renderSize; }
         public override float RenderFrameScaling { get; set; } = 1f;
+        public float FOVScale = 1f;
 
         public override DeviceState State
         {
@@ -768,11 +769,11 @@ namespace Xenko.VirtualReality
         {
             Matrix result = Matrix.Identity;
 
-            float tanAngleLeft = (float)Math.Tan(fov.AngleLeft);
-            float tanAngleRight = (float)Math.Tan(fov.AngleRight);
+            float tanAngleLeft = (float)Math.Tan(fov.AngleLeft * FOVScale);
+            float tanAngleRight = (float)Math.Tan(fov.AngleRight * FOVScale);
 
-            float tanAngleDown = (float)Math.Tan(fov.AngleDown);
-            float tanAngleUp = (float)Math.Tan(fov.AngleUp);
+            float tanAngleDown = (float)Math.Tan(fov.AngleDown * FOVScale);
+            float tanAngleUp = (float)Math.Tan(fov.AngleUp * FOVScale);
 
             float tanAngleWidth = tanAngleRight - tanAngleLeft;
             float tanAngleHeight = (tanAngleUp - tanAngleDown);
