@@ -189,28 +189,7 @@ namespace Xenko.Physics.Bepu
             return null;
         }
 
-        private bool forceBlackout;
-
-        /// <summary>
-        /// VR loading can cause annoying flicker. Turn this on just before loading to black out the screen (using the FOV reduction post processing filter). Turn off when done loading.
-        /// </summary>
-        public void SetVRLoadingBlackout(bool on)
-        {
-            if (!VR || fovReduction == null || forceBlackout == on) return;
-
-            forceBlackout = on;
-
-            if (on)
-            {
-                fovReduction.Enabled = true;
-                fovReduction.Radius = 0f;
-            }
-            else
-            {
-                fovReduction.Enabled = false;
-                fovReduction.Radius = 1f;
-            }
-        }
+        private bool lockFOVheal;
 
         public enum RESIZE_POSITION_OPTION
         {
@@ -358,7 +337,7 @@ namespace Xenko.Physics.Bepu
 
             if (Camera != null && VR && VRBlackoutThroughWall < 1f && fovReduction != null)
             {
-                Vector3 finalpos = Camera.Entity.Transform.WorldPosition() + Camera.Entity.Transform.Forward(true) * (Camera.NearClipPlane + 0.05f);
+                Vector3 finalpos = Camera.Entity.Transform.WorldPosition() + Camera.Entity.Transform.Forward(true) * (Camera.NearClipPlane + 0.1f);
                 var hit = BepuSimulation.instance.Raycast(Body.Position, finalpos, CollisionFilterGroupFlags.StaticFilter | CollisionFilterGroupFlags.KinematicFilter | CollisionFilterGroupFlags.StaticFeaturesFilter);
                 if (hit.Succeeded)
                 {
@@ -388,19 +367,22 @@ namespace Xenko.Physics.Bepu
         /// <summary>
         /// Set this to 1f to disable blacking out when trying to look through walls. Defaults to 0.1f, 0 will completely black out the screen.
         /// </summary>
-        public float VRBlackoutThroughWall = 0.05f;
+        public float VRBlackoutThroughWall = 0.025f;
 
         /// <summary>
-        /// Sets the VR field of view reduction immediately to the select value. 1 is off (reset), 0 is completely black.
+        /// Sets the VR field of view reduction immediately to the select value. 1 is off (reset), 0 is completely black. Radius can be null to skip setting it, useful for locking/unlocking.
         /// </summary>
-        public void SetVRFov(float radius)
+        public void SetVRFov(float? radius, bool lockAt = false)
         {
-            forceBlackout = false;
+            lockFOVheal = lockAt;
 
             if (!VR || fovReduction == null) return;
 
-            fovReduction.Enabled = false;
-            fovReduction.Radius = radius;
+            if (radius.HasValue)
+            {
+                fovReduction.Enabled = radius.Value < 1f;
+                fovReduction.Radius = radius.Value;
+            }
         }
 
         private void UpdateVRFOV(bool ForceFOVReduction, float frameTime)
@@ -578,7 +560,7 @@ namespace Xenko.Physics.Bepu
                     }
                 }
 
-                if (fovReduction != null && !forceBlackout)
+                if (fovReduction != null && !lockFOVheal)
                 {
                     if (VRComfortMode || fovReduction.Enabled)
                         UpdateVRFOV(fov_check, frame_time);
