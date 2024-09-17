@@ -851,8 +851,8 @@ namespace Xenko.VirtualReality
 
             eyeMat = adjustedHeadMatrix * Matrix.Scaling(BodyScaling) * cameraRotation * Matrix.Translation(cameraPosition + BodyOffset);
             eyeMat.Decompose(out scale, out rot, out pos);
-            var finalUp = Vector3.TransformCoordinate(new Vector3(0, 1, 0), rot);
-            var finalForward = Vector3.TransformCoordinate(new Vector3(0, 0, -1), rot);
+            var finalUp = Vector3.TransformCoordinate(Vector3.UnitY, rot);
+            var finalForward = Vector3.TransformCoordinate(new Vector3(0f, 0f, -1f), rot);
             view = Matrix.LookAtRH(pos, pos + finalForward, finalUp);
         }
 
