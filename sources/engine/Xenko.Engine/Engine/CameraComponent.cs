@@ -11,6 +11,7 @@ using Xenko.Engine.Design;
 using Xenko.Engine.Processors;
 using Xenko.Rendering;
 using Xenko.Rendering.Compositing;
+using Xenko.VirtualReality;
 
 namespace Xenko.Engine
 {
@@ -223,6 +224,9 @@ namespace Xenko.Engine
         {
             Update(null);
         }
+
+        [DataMemberIgnore]
+        public OpenXRHmd VRDeviceManaging;
 
         /// <summary>
         /// Calculates the projection matrix and view matrix.

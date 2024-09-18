@@ -302,6 +302,7 @@ namespace Xenko.Rendering.Compositing
                 {
                     Matrix* viewMatrices = stackalloc Matrix[2];
                     Matrix* projectionMatrices = stackalloc Matrix[2];
+                    camera.VRDeviceManaging = VRSettings.VRDevice as OpenXRHmd;
 
                     // only update the camera once, if we have multiple forward renderers on the same camera
                     ulong poseCount = VRSettings.VRDevice.PoseCount;

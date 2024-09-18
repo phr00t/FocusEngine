@@ -7,6 +7,7 @@ using Xenko.Core.Collections;
 using Xenko.Core.Diagnostics;
 using Xenko.Core.Mathematics;
 using Xenko.Engine;
+using Xenko.VirtualReality;
 
 namespace Xenko.Rendering.Compositing
 {
@@ -188,6 +189,7 @@ namespace Xenko.Rendering.Compositing
             // Copy camera data
             renderView.Camera = camera;
             renderView.CameraFOV = camera.VerticalFieldOfView;
+            if (camera.VRDeviceManaging != null) renderView.CameraFOV *= camera.VRDeviceManaging.FOVScale;
             renderView.View = camera.ViewMatrix;
             renderView.Projection = camera.ProjectionMatrix;
             renderView.NearClipPlane = camera.NearClipPlane;
