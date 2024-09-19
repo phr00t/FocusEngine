@@ -416,22 +416,6 @@ namespace Xenko.Physics.Bepu
             fovReduction.Enabled = fovReduction.Radius < 1f;
         }
 
-        private void SetRotateButKeepCameraPos(Quaternion rotation)
-        {
-            var existingPosition = LookTransform.WorldPosition();
-            Body.Entity.Transform.Rotation = rotation;
-            var newPosition = LookTransform.WorldPosition(true);
-            Body.Entity.Transform.Position -= (newPosition - existingPosition);
-        }
-
-        private void RotateButKeepCameraPos(Quaternion rotation)
-        {
-            var existingPosition = LookTransform.WorldPosition();
-            Body.Entity.Transform.Rotation *= rotation;
-            var newPosition = LookTransform.WorldPosition(true);
-            Body.Entity.Transform.Position -= (newPosition - existingPosition);
-        }
-
         /// <summary>
         /// Sets how the camera is looking for a player character. Has no effect in VR
         /// </summary>
@@ -471,7 +455,7 @@ namespace Xenko.Physics.Bepu
                     yaw = desiredYaw = ypr.X;
                     pitch = desiredPitch = ypr.Y;
                 }
-                else
+                else if (VRDeviceSystem.GetSystem?.Device is OpenXRHmd hmd)
                 {
                     Quaternion temp = Quaternion.Identity;
                     Quaternion camrot;
@@ -485,7 +469,7 @@ namespace Xenko.Physics.Bepu
                         camrot = Quaternion.Identity;
                     }
                     Quaternion.LookAt(ref temp, diff);
-                    SetRotateButKeepCameraPos(temp * camrot);
+                    hmd.BodyRotation = temp * camrot;
                 }
             }
             else Quaternion.LookAt(ref Body.Entity.Transform.Rotation, diff);
@@ -501,7 +485,7 @@ namespace Xenko.Physics.Bepu
             if (LookTransform == null)
                 throw new ArgumentNullException("No LookTransform/camera to look with!");
 
-            if (VR)
+            if (VR && VRDeviceSystem.GetSystem?.Device is OpenXRHmd hmd)
             {
                 bool fov_check = false;
 
@@ -517,7 +501,7 @@ namespace Xenko.Physics.Bepu
                         Vector2 thumb = rightController.ThumbstickAxis;
                         if (thumb.X > 0.1f || thumb.X < -0.1f)
                         {
-                            RotateButKeepCameraPos(global::Xenko.Core.Mathematics.Quaternion.RotationYDeg(thumb.X * frame_time * -VRSmoothTurnRate));
+                            hmd.BodyRotation *= Quaternion.RotationYDeg(thumb.X * frame_time * -VRSmoothTurnRate);
                             fov_check = true;
                         }
                     }
@@ -528,9 +512,9 @@ namespace Xenko.Physics.Bepu
                     if (VRPressToTurn)
                     {
                         if (VRButtons.LeftThumbstickLeft.IsPressed())
-                            RotateButKeepCameraPos(Quaternion.RotationYDeg(VRSnapTurnAmount));
+                            hmd.BodyRotation *= Quaternion.RotationYDeg(VRSnapTurnAmount);
                         else if (VRButtons.LeftThumbstickRight.IsPressed())
-                            RotateButKeepCameraPos(Quaternion.RotationYDeg(-VRSnapTurnAmount));
+                            hmd.BodyRotation *= Quaternion.RotationYDeg(-VRSnapTurnAmount);
                     }
                     else
                     {
@@ -543,7 +527,7 @@ namespace Xenko.Physics.Bepu
                             {
                                 if (shouldFlickTurn)
                                 {
-                                    RotateButKeepCameraPos(Quaternion.RotationYDeg(-VRSnapTurnAmount));
+                                    hmd.BodyRotation *= Quaternion.RotationYDeg(-VRSnapTurnAmount);
                                     shouldFlickTurn = false;
                                 }
                             }
@@ -551,7 +535,7 @@ namespace Xenko.Physics.Bepu
                             {
                                 if (shouldFlickTurn)
                                 {
-                                    RotateButKeepCameraPos(Quaternion.RotationYDeg(VRSnapTurnAmount));
+                                    hmd.BodyRotation *= Quaternion.RotationYDeg(VRSnapTurnAmount);
                                     shouldFlickTurn = false;
                                 }
                             }

@@ -301,6 +301,11 @@ namespace Xenko.VirtualReality
             return new Quaternion(-quat.X, -quat.Y, -quat.Z, quat.W);
         }
 
+        internal static Quaternionf ConvertToXR(Quaternion quat)
+        {
+            return new Quaternionf(-quat.X, -quat.Y, -quat.Z, quat.W);
+        }
+
         public override unsafe void UpdatePositions(GameTime gameTime)
         {
             ActiveActionSet active_actionsets = new ActiveActionSet()
@@ -337,19 +342,52 @@ namespace Xenko.VirtualReality
             uint view_count;
             Xr.LocateView(globalSession, &view_locate_info, &view_state, 2, &view_count, views);
 
-            // get head rotation
+            // since we got eye positions, our head is between our eyes
+            rawHeadPos.X = (views[0].Pose.Position.X + views[1].Pose.Position.X) * 0.5f;
+            rawHeadPos.Y = (views[0].Pose.Position.Y + views[1].Pose.Position.Y) * 0.5f;
+            rawHeadPos.Z = (views[0].Pose.Position.Z + views[1].Pose.Position.Z) * 0.5f;
+
+            Vector3 tempvec = Vector3.Zero;
+            for (int i=0; i<2; i++)
+            {
+                ref Posef pose = ref views[i].Pose;
+                // eye transform post-processing
+                if (BodyRotation != Quaternion.Identity)
+                {
+                    tempvec.X = pose.Position.X;
+                    tempvec.Y = pose.Position.Y;
+                    tempvec.Z = pose.Position.Z;
+                    // center us on our rotation center
+                    tempvec.X -= _rotCenter.X;
+                    tempvec.Z -= _rotCenter.Z;
+                    // now rotate position by BodyRotation
+                    Quaternion lbr = BodyRotation;
+                    Vector3.Transform(ref tempvec, ref lbr, out tempvec);
+                    // ok, push it back
+                    pose.Position.X = tempvec.X;
+                    pose.Position.Y = tempvec.Y;
+                    pose.Position.Z = tempvec.Z;
+                }
+
+                pose.Position.X *= BodyScaling;
+                pose.Position.Y *= BodyScaling;
+                pose.Position.Z *= BodyScaling;
+                pose.Position.X += BodyOffset.X;
+                pose.Position.Y += BodyOffset.Y;
+                pose.Position.Z += BodyOffset.Z;
+            }
+
+            // get final head position
+            headPos.X = (views[0].Pose.Position.X + views[1].Pose.Position.X) * 0.5f;
+            headPos.Y = (views[0].Pose.Position.Y + views[1].Pose.Position.Y) * 0.5f;
+            headPos.Z = (views[0].Pose.Position.Z + views[1].Pose.Position.Z) * 0.5f;
+
+            // get final head rotation
             headRot.X = views[0].Pose.Orientation.X;
             headRot.Y = views[0].Pose.Orientation.Y;
             headRot.Z = views[0].Pose.Orientation.Z;
             headRot.W = views[0].Pose.Orientation.W;
-
-            // since we got eye positions, our head is between our eyes
-            headPos.X = views[0].Pose.Position.X;
-            headPos.Y = views[0].Pose.Position.Y;
-            headPos.Z = views[0].Pose.Position.Z;
-
-            headPos *= BodyScaling;
-            headPos += BodyOffset;            
+            headRot = headRot * BodyRotation;
         }
 
         public override unsafe void Draw(GameTime gameTime)
@@ -827,33 +865,17 @@ namespace Xenko.VirtualReality
             return result;
         }
 
-        public override void ReadEyeParameters(Eyes eye, float near, float far, ref Vector3 cameraPosition, ref Matrix cameraRotation, bool ignoreHeadRotation, bool ignoreHeadPosition, out Matrix view, out Matrix projection)
+        public override void ReadEyeParameters(Eyes eye, float near, float far, ref Vector3 cameraPosition, ref Quaternion cameraRotation, bool ignoreHeadRotation, bool ignoreHeadPosition, out Matrix view, out Matrix projection)
         {
-            Matrix eyeMat, rot;
-            Vector3 pos, scale;
-
             View eyeview = views[(int)eye];
-
             projection = createProjectionFov(eyeview.Fov, near, far);
-            var adjustedHeadMatrix = createViewMatrix(new Vector3(-eyeview.Pose.Position.X, -eyeview.Pose.Position.Y, -eyeview.Pose.Position.Z),
-                                                      ConvertToFocus(ref eyeview.Pose.Orientation));
-            if (ignoreHeadPosition)
-            {
-                adjustedHeadMatrix.TranslationVector = Vector3.Zero;
-            }
-            if (ignoreHeadRotation)
-            {
-                // keep the scale just in case
-                adjustedHeadMatrix.Row1 = new Vector4(adjustedHeadMatrix.Row1.Length(), 0, 0, 0);
-                adjustedHeadMatrix.Row2 = new Vector4(0, adjustedHeadMatrix.Row2.Length(), 0, 0);
-                adjustedHeadMatrix.Row3 = new Vector4(0, 0, adjustedHeadMatrix.Row3.Length(), 0);
-            }
-
-            eyeMat = adjustedHeadMatrix * Matrix.Scaling(BodyScaling) * cameraRotation * Matrix.Translation(cameraPosition + BodyOffset);
-            eyeMat.Decompose(out scale, out rot, out pos);
-            var finalUp = Vector3.TransformCoordinate(Vector3.UnitY, rot);
-            var finalForward = Vector3.TransformCoordinate(new Vector3(0f, 0f, -1f), rot);
-            view = Matrix.LookAtRH(pos, pos + finalForward, finalUp);
+            Vector3 eyePos = new Vector3(eyeview.Pose.Position.X, eyeview.Pose.Position.Y, eyeview.Pose.Position.Z);
+            if (!ignoreHeadPosition) eyePos += cameraPosition;
+            Quaternion eyeRot = new Quaternion(eyeview.Pose.Orientation.X, eyeview.Pose.Orientation.Y, eyeview.Pose.Orientation.Z, eyeview.Pose.Orientation.W) * BodyRotation;
+            if (!ignoreHeadRotation) eyeRot *= cameraRotation;
+            var finalUp = Vector3.Transform(Vector3.UnitY, eyeRot);
+            var finalForward = Vector3.Transform(new Vector3(0f, 0f, -1f), eyeRot);
+            view = Matrix.LookAtRH(eyePos, eyePos + finalForward, finalUp);
         }
 
         public override unsafe void Update(GameTime gameTime)

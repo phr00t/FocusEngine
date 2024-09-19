@@ -294,6 +294,20 @@ namespace Xenko.Core.Mathematics
         }
 
         /// <summary>
+        /// Rotates around a 3D point with the given Quaternion
+        /// </summary>
+        public void RotateAround(Vector3 target, Quaternion q)
+        {
+            Vector3 local = this - target;
+            Transform(ref local, ref q, out local);
+            var result = target + local;
+
+            X = result.X;
+            Y = result.Y;
+            Z = result.Z;
+        }
+
+        /// <summary>
         /// Creates an array containing the elements of the vector.
         /// </summary>
         /// <returns>A three-element array containing the components of the vector.</returns>

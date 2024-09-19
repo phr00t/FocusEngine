@@ -311,7 +311,7 @@ namespace Xenko.Rendering.Compositing
                         camera.VRProjectionPose = poseCount;
 
                         Vector3 cameraPos, cameraScale;
-                        Matrix cameraRot;
+                        Quaternion cameraRot;
 
                         VRSettings.VRDevice.UpdatePositions(context.Time);
 
@@ -325,7 +325,7 @@ namespace Xenko.Rendering.Compositing
                             {
                                 cameraPos = Vector3.Zero;
                                 cameraScale = Vector3.One;
-                                cameraRot = Matrix.Identity;
+                                cameraRot = Quaternion.Identity;
                             }
 
                             // make sure camera position gets body scale
@@ -340,22 +340,24 @@ namespace Xenko.Rendering.Compositing
                             }
                             else
                             {
-                                camera.ViewMatrix.Decompose(out cameraScale, out cameraRot, out cameraPos);
-                                cameraRot.Transpose();
+                                Matrix cameraRotMat;
+                                camera.ViewMatrix.Decompose(out cameraScale, out cameraRotMat, out cameraPos);
+                                cameraRotMat.Transpose();
                                 Vector3.Negate(ref cameraPos, out cameraPos);
-                                Vector3.TransformCoordinate(ref cameraPos, ref cameraRot, out cameraPos);
+                                Vector3.TransformCoordinate(ref cameraPos, ref cameraRotMat, out cameraPos);
+                                cameraRotMat.GetRotationQuaternion(out cameraRot);
                             }
 
                             if (VRSettings.IgnoreCameraRotation)
                             {
                                 // only remove the local rotation of the camera
-                                cameraRot *= Matrix.RotationQuaternion(Quaternion.Invert(camera.Entity.Transform.Rotation));
+                                cameraRot *= Quaternion.Invert(camera.Entity.Transform.Rotation);
                             }
                         }
 
                         // if we have a rotation override, set it here
                         if (VRSettings.VRDevice.BaseRotationOverride != null)
-                            cameraRot = Matrix.RotationQuaternion(VRSettings.VRDevice.BaseRotationOverride.Value);
+                            cameraRot = VRSettings.VRDevice.BaseRotationOverride.Value;
 
                         // Compute both view and projection matrices
                         for (var i = 0; i < 2; ++i)

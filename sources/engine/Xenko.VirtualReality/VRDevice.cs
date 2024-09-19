@@ -54,6 +54,25 @@ namespace Xenko.VirtualReality
         /// </summary>
         public Quaternion? BaseRotationOverride { get; set; } = null;
 
+        /// <summary>
+        /// Like BodyOffset, this will rotate the player and controllers accordingly. Very useful for snap turning in-place. DO NOT use this for pitch/roll.
+        /// </summary>
+        public Quaternion BodyRotation {
+            get => _br;
+            set
+            {
+                if (_br != value)
+                {
+                    _br = value;
+                    _rotCenter = rawHeadPos;
+                }
+            }
+        }
+
+        internal Vector3 rawHeadPos;
+        private Quaternion _br = Quaternion.Identity;
+        internal Vector3 _rotCenter = Vector3.Zero;
+
         public abstract bool CanInitialize { get; }
 
         public abstract void Enable(GraphicsDevice device, GraphicsDeviceManager graphicsDeviceManager, VRDeviceSystem.MIRROR_OPTION requireMirror);
@@ -66,7 +85,7 @@ namespace Xenko.VirtualReality
         {
         }
 
-        public abstract void ReadEyeParameters(Eyes eye, float near, float far, ref Vector3 cameraPosition, ref Matrix cameraRotation, bool ignoreHeadRotation, bool ignoreHeadPosition, out Matrix view, out Matrix projection);
+        public abstract void ReadEyeParameters(Eyes eye, float near, float far, ref Vector3 cameraPosition, ref Quaternion cameraRotation, bool ignoreHeadRotation, bool ignoreHeadPosition, out Matrix view, out Matrix projection);
 
         public abstract void Commit(CommandList commandList, Texture renderFrame);
 

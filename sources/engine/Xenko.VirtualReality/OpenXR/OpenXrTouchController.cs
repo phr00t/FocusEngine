@@ -253,6 +253,18 @@ namespace Xenko.VirtualReality
                                    baseHMD.globalFrameState.PredictedDisplayTime, ref handLocation);
 
             // apply scaling and offset early, which might be needed for velocity backup calculation
+            bool hasBodyRot = baseHMD.BodyRotation != Quaternion.Identity;
+            if (hasBodyRot)
+            {
+                Vector3 handpos = new Vector3(handLocation.Pose.Position.X - baseHMD._rotCenter.X,
+                                              handLocation.Pose.Position.Y,
+                                              handLocation.Pose.Position.Z - baseHMD._rotCenter.Z);
+                Quaternion lbr = baseHMD.BodyRotation;
+                Vector3.Transform(ref handpos, ref lbr, out handpos);
+                handLocation.Pose.Position.X = handpos.X;
+                handLocation.Pose.Position.Y = handpos.Y;
+                handLocation.Pose.Position.Z = handpos.Z;
+            }
             handLocation.Pose.Position.X *= baseHMD.BodyScaling;
             handLocation.Pose.Position.Y *= baseHMD.BodyScaling;
             handLocation.Pose.Position.Z *= baseHMD.BodyScaling;
@@ -300,6 +312,8 @@ namespace Xenko.VirtualReality
                 currentRot.Z = handLocation.Pose.Orientation.Z;
                 currentRot.W = handLocation.Pose.Orientation.W;
             }
+
+            if (hasBodyRot) currentRot *= baseHMD.BodyRotation;
         }
     }
 }
