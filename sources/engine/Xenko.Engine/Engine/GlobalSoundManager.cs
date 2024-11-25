@@ -207,11 +207,14 @@ namespace Xenko.Engine
 
         public static void StopAllSounds()
         {
-            foreach (List<SoundInstance> si in instances.Values)
+            using (instanceLock.ReadLock())
             {
-                for (int i = 0; i < si.Count; i++)
+                foreach (List<SoundInstance> si in instances.Values)
                 {
-                    si[i].Stop();
+                    for (int i = 0; i < si.Count; i++)
+                    {
+                        si[i].Stop();
+                    }
                 }
             }
             currentAttached.Clear();
@@ -224,14 +227,17 @@ namespace Xenko.Engine
         public static List<SoundInstance> PauseLoopedSounds()
         {
             List<SoundInstance> paused = new List<SoundInstance>();
-            foreach (List<SoundInstance> si in instances.Values)
+            using (instanceLock.ReadLock())
             {
-                for (int i = 0; i < si.Count; i++)
+                foreach (List<SoundInstance> si in instances.Values)
                 {
-                    if (si[i].IsLooping && si[i].PlayState == Media.PlayState.Playing)
+                    for (int i = 0; i < si.Count; i++)
                     {
-                        si[i].Pause();
-                        paused.Add(si[i]);
+                        if (si[i].IsLooping && si[i].PlayState == Media.PlayState.Playing)
+                        {
+                            si[i].Pause();
+                            paused.Add(si[i]);
+                        }
                     }
                 }
             }
@@ -250,11 +256,14 @@ namespace Xenko.Engine
 
         public static void StopSound(string url)
         {
-            if (instances.TryGetValue(url, out var snds))
+            using (instanceLock.ReadLock())
             {
-                for (int i = 0; i < snds.Count; i++)
+                if (instances.TryGetValue(url, out var snds))
                 {
-                    snds[i].Stop();
+                    for (int i = 0; i < snds.Count; i++)
+                    {
+                        snds[i].Stop();
+                    }
                 }
             }
         }
@@ -268,16 +277,18 @@ namespace Xenko.Engine
         public static void Reset()
         {
             StopAllSounds();
-            Sounds.Clear();
-            foreach (List<SoundInstance> si in instances.Values)
+            using (instanceLock.WriteLock())
             {
-                for (int i = 0; i < si.Count; i++)
+                foreach (List<SoundInstance> si in instances.Values)
                 {
-                    si[i].Dispose();
+                    for (int i = 0; i < si.Count; i++)
+                    {
+                        si[i].Dispose();
+                    }
+                    si.Clear();
                 }
-                si.Clear();
+                instances.Clear();
             }
-            instances.Clear();
         }
 
         static GlobalSoundManager()
@@ -287,8 +298,7 @@ namespace Xenko.Engine
             internalGame = ServiceRegistry.instance?.GetService<IGame>() as Game;
         }
 
-        private static ConcurrentDictionary<string, Sound> Sounds = new ConcurrentDictionary<string, Sound>();
-        private static ConcurrentDictionary<string, List<SoundInstance>> instances = new ConcurrentDictionary<string, List<SoundInstance>>();
+        private static Dictionary<string, List<SoundInstance>> instances = new Dictionary<string, List<SoundInstance>>();
         private static ConcurrentHashSet<PositionalSound> currentAttached = new ConcurrentHashSet<PositionalSound>();
         private static System.Random rand;
         private static Game internalGame;
@@ -299,93 +309,88 @@ namespace Xenko.Engine
         /// <param name="url">Content URL of the audio</param>
         public static void PreloadAudio(string url)
         {
-            if (Sounds.TryGetValue(url, out var snd1) || instances.TryGetValue(url, out var ins))
-                return; // already loaded
+            using (instanceLock.WriteLock())
+            {
+                if (instances.TryGetValue(url, out var ins))
+                    return; // already loaded
 
-            // this might throw an exception if you provided a bad url
-            Sound snd2 = internalGame.Content.Load<Sound>(url);
+                // this might throw an exception if you provided a bad url
+                Sound snd2 = internalGame.Content.QuickLoad<Sound>(url);
 
-            // load this sound and prepare lists for it
-            SoundInstance si = snd2.CreateInstance(AudioEngine.DefaultListener);
-            List<SoundInstance> lsi = new List<SoundInstance>();
-            lsi.Add(si);
-            instances[url] = lsi;
-            Sounds[url] = snd2;
+                // load this sound and prepare lists for it
+                SoundInstance si = snd2.CreateInstance(AudioEngine.DefaultListener);
+                List<SoundInstance> lsi = new List<SoundInstance>();
+                lsi.Add(si);
+                instances[url] = lsi;
+            }
         }
+
+        private static ReaderWriterLockSlim instanceLock = new ReaderWriterLockSlim();
 
         private static SoundInstance getFreeInstance(string url, bool spatialized)
         {
             if (url == null) return null;
 
-            if (instances.TryGetValue(url, out var ins))
+            using (instanceLock.ReadLock())
             {
-                if (ReplaceSoundOverrides.TryGetValue(url, out var ReplacementPolicy) == false)
-                    ReplacementPolicy = DefaultReplacementPolicy;
-
-                SoundInstance oldestSI = null;
-                float replaceScore = 0f;
-                for (int i=0; i<ins.Count; i++)
+                if (instances.TryGetValue(url, out var ins))
                 {
-                    var snd = ins[i];
-                    if (snd.PlayState == Media.PlayState.Stopped)
-                        return snd;
+                    if (ReplaceSoundOverrides.TryGetValue(url, out var ReplacementPolicy) == false)
+                        ReplacementPolicy = DefaultReplacementPolicy;
 
-                    if (ReplacementPolicy != REPLACE_SOUND_POLICY.NO_REPLACING)
+                    SoundInstance oldestSI = null;
+                    float replaceScore = 0f;
+                    for (int i = 0; i < ins.Count; i++)
                     {
-                        float myscore = (float)snd.Position.TotalSeconds + (snd.IsSpatialized ? (snd.SpatializedPosition - snd.Listener.Position).Length() : 0f);
-                        if ((i == 0 || myscore > replaceScore) && (ReplacementPolicy == REPLACE_SOUND_POLICY.REPLACE_ANY || snd.IsLooping == false))
+                        var snd = ins[i];
+                        if (snd.PlayState == Media.PlayState.Stopped)
+                            return snd;
+
+                        if (ReplacementPolicy != REPLACE_SOUND_POLICY.NO_REPLACING)
                         {
-                            oldestSI = snd;
-                            replaceScore = myscore;
+                            float myscore = (float)snd.Position.TotalSeconds + (snd.IsSpatialized ? (snd.SpatializedPosition - snd.Listener.Position).Length() : 0f);
+                            if ((i == 0 || myscore > replaceScore) && (ReplacementPolicy == REPLACE_SOUND_POLICY.REPLACE_ANY || snd.IsLooping == false))
+                            {
+                                oldestSI = snd;
+                                replaceScore = myscore;
+                            }
                         }
                     }
-                }
 
-                // have we reached our max sounds though?
-                // are we going to try and replace it?
-                if (ins.Count >= MaxSameSoundOverlaps)
-                {
-                    if (oldestSI != null)
+                    // have we reached our max sounds though?
+                    // are we going to try and replace it?
+                    if (ins.Count >= MaxSameSoundOverlaps)
                     {
-                        oldestSI.Stop();
-                        return oldestSI;
+                        if (oldestSI != null)
+                        {
+                            oldestSI.Stop();
+                            return oldestSI;
+                        }
+
+                        // max reached and no replacement
+                        return null;
                     }
 
-                    // max reached and no replacement
-                    return null;
-                }
-
-                // don't have a free one to play, add a new one to the list
-                if (Sounds.TryGetValue(url, out var snd0))
-                {
-                    SoundInstance si0 = snd0.CreateInstance(AudioEngine.DefaultListener);
+                    // don't have a free one to play, add a new one to the list
+                    SoundInstance si0 = internalGame.Content.QuickLoad<Sound>(url).CreateInstance(AudioEngine.DefaultListener);
                     ins.Add(si0);
                     return si0;
                 }
             }
-
-            // don't have a list for this, make one
-            if (Sounds.TryGetValue(url, out var snd1))
+            
+            using (instanceLock.WriteLock())
             {
-                SoundInstance si1 = snd1.CreateInstance(AudioEngine.DefaultListener);
-                List<SoundInstance> lsi1 = new List<SoundInstance>();
-                lsi1.Add(si1);
-                instances[url] = lsi1;
-                return si1;
+                Sound snd = internalGame.Content.QuickLoad<Sound>(url);
+
+                if (!snd.Spatialized && spatialized)
+                    throw new InvalidOperationException("Trying to play " + url + " positionally, yet it is a non-spatialized sound!");
+
+                SoundInstance si = snd.CreateInstance(AudioEngine.DefaultListener);
+                List<SoundInstance> lsi = new List<SoundInstance>();
+                lsi.Add(si);
+                instances[url] = lsi;
+                return si;
             }
-
-            // this might throw an exception if you provided a bad url
-            Sound snd2 = internalGame.Content.Load<Sound>(url);
-
-            if (!snd2.Spatialized && spatialized)
-                throw new InvalidOperationException("Trying to play " + url + " positionally, yet it is a non-spatialized sound!");
-
-            SoundInstance si = snd2.CreateInstance(AudioEngine.DefaultListener);
-            List<SoundInstance> lsi = new List<SoundInstance>();
-            lsi.Add(si);
-            instances[url] = lsi;
-            Sounds[url] = snd2;
-            return si;
         }
 
         private class PositionalSound
