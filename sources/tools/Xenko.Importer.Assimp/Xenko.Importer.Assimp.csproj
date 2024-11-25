@@ -13,7 +13,7 @@
     <_SettingsFiles Remove="Analysis\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Silk.NET.Assimp" Version="2.19.0" />
+    <PackageReference Include="Silk.NET.Assimp" Version="2.22.0" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>

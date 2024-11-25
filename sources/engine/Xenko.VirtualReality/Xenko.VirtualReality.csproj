@@ -44,7 +44,7 @@
       <Project>{84deb606-77ed-49cd-9aed-d2b13c1f5a1e}</Project>
       <Name>Xenko.Input</Name>
     </ProjectReference>
-    <PackageReference Include="Silk.NET.OpenXR" Version="2.21.0" />
+    <PackageReference Include="Silk.NET.OpenXR" Version="2.22.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
   </ItemGroup>
   <Import Project="$(XenkoPostSettingsTargets)" />

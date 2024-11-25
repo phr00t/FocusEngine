@@ -132,7 +132,7 @@ namespace Xenko.VirtualReality
                 }
             }
 
-            var appInfo = new ApplicationInfo(1, 1, new Version64(1, 0, 36)); // Silk.NET 2.21 is 1.1.36, but we only need 1.0 OpenXR
+            var appInfo = new ApplicationInfo(1, 1, new Version64(1, 0, 42)); // Silk.NET 2.22 is 1.1.42, but we only need 1.0 OpenXR
             string engName = "FocusEngine";
             string appName = AppDomain.CurrentDomain.FriendlyName;
             Marshal.Copy(engName.ToCharArray(), 0, (IntPtr)appInfo.EngineName, engName.Length);
