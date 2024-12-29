@@ -17,7 +17,7 @@ namespace Xenko.Core.Assets
             if (mode == ArchiveMode.Serialize)
             {
                 stream.Write(assetReference.Id);
-                stream.Write(assetReference.Location);
+                stream.Write(assetReference.Location ?? "");
             }
             else
             {
