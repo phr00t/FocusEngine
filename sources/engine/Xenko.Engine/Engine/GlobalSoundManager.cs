@@ -291,6 +291,46 @@ namespace Xenko.Engine
             }
         }
 
+        /// <summary>
+        /// After this many sound instance creations, we will clean up existing ones to prevent audio engine getting saturated. This is like garbage collection
+        /// </summary>
+        public static int CleanTriggerCount = 64;
+        /// <summary>
+        /// What is the max number of sound instances to clean up when running a clean?
+        /// </summary>
+        public static int CleanCount = 32;
+
+        private static int clean_check;
+        /// <summary>
+        /// Sometimes when playing too many sounds, the audio backend gets buggy. This function will clean up unused instances. instancelock must already be locked
+        /// </summary>
+        private static void Clean()
+        {
+            if (Interlocked.Increment(ref clean_check) == CleanTriggerCount)
+            {
+                clean_check = 0;
+                int cleaned = 0;
+                using (instanceLock.WriteLock())
+                {
+                    foreach (List<SoundInstance> si in instances.Values)
+                    {
+                        for (int i = 0; i < si.Count; i++)
+                        {
+                            var snd = si[i];
+                            if (snd.PlayState == Media.PlayState.Stopped)
+                            {
+                                si.RemoveAt(i);
+                                snd.Dispose();
+                                cleaned++;
+                                if (cleaned >= CleanCount) return;
+                                i--;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         static GlobalSoundManager()
         {
             // global sound manager relies on listeners being shared, so everything can be
@@ -331,9 +371,11 @@ namespace Xenko.Engine
         {
             if (url == null) return null;
 
+            List<SoundInstance> ins = null;
+
             using (instanceLock.ReadLock())
             {
-                if (instances.TryGetValue(url, out var ins))
+                if (instances.TryGetValue(url, out ins))
                 {
                     if (ReplaceSoundOverrides.TryGetValue(url, out var ReplacementPolicy) == false)
                         ReplacementPolicy = DefaultReplacementPolicy;
@@ -370,14 +412,25 @@ namespace Xenko.Engine
                         // max reached and no replacement
                         return null;
                     }
+                }
+            }
 
+            // run a clean check cuz we be creating a new instance
+            Clean();
+
+            // if we have a sound instance list, add to that and return after clean
+            if (ins != null)
+            {
+                using (instanceLock.ReadLock())
+                {
                     // don't have a free one to play, add a new one to the list
                     SoundInstance si0 = internalGame.Content.QuickLoad<Sound>(url).CreateInstance(AudioEngine.DefaultListener);
                     ins.Add(si0);
                     return si0;
                 }
             }
-            
+
+            // no list or anything, need to make everything
             using (instanceLock.WriteLock())
             {
                 Sound snd = internalGame.Content.QuickLoad<Sound>(url);
