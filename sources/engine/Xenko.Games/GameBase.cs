@@ -335,6 +335,12 @@ namespace Xenko.Games
         public bool DrawEvenMinimized { get; set; }
 
         /// <summary>
+        /// If the game fails to render correctly, automatically set a DefaultResolution.txt to 1280x720 windowed for troubleshooting? Defaults to true.
+        /// If your program does not have a resolution picker, you probably want this false. Must be set before window creation.
+        /// </summary>
+        public bool ResetWindowOnRenderFail { get; set; } = true;
+
+        /// <summary>
         /// Gets the abstract window.
         /// </summary>
         /// <value>The window.</value>
@@ -997,9 +1003,10 @@ namespace Xenko.Games
             // make sure we render frames faster than vysnc if we are in vulkan
             int vsyncWiggleRoom = GraphicsDevice.Platform == GraphicsPlatform.Vulkan ? 1 : 0;
             // If we still have default values, let's set these based on SDL refresh rate (if we can)
-            if (gamePlatform.MainWindow is GameWindowSDL) {
+            if (gamePlatform.MainWindow is GameWindowSDL gwsdl) {
+                Graphics.SDL.Window._makeDefaultResolutionOnCrash = ResetWindowOnRenderFail;
                 if (TargetElapsedTime == defaultTimeSpan) {
-                    ((GameWindowSDL)gamePlatform.MainWindow).GetDisplayInformation(out int width, out int height, out int refresh_rate);
+                    gwsdl.GetDisplayInformation(out int width, out int height, out int refresh_rate);
                     TargetElapsedTime = TimeSpan.FromTicks(TimeSpan.TicksPerSecond / (refresh_rate + vsyncWiggleRoom));
                 }
                 if (WindowMinimumUpdateRate.MinimumElapsedTime == defaultTimeSpan) WindowMinimumUpdateRate.MinimumElapsedTime = TargetElapsedTime;

@@ -15,8 +15,8 @@
     Settings XenkoPlatform specific
   -->
   <PropertyGroup>
-    <!-- Using C# version 9.0 -->
-    <LangVersion>9.0</LangVersion>
+    <!-- Using C# version 12.0 -->
+    <LangVersion>12.0</LangVersion>
     <XenkoRuntimeTargetFramework>net6.0</XenkoRuntimeTargetFramework>
     <TargetFrameworkTool>net48</TargetFrameworkTool>
     <TargetFrameworkVersionTool>v4.8</TargetFrameworkVersionTool>

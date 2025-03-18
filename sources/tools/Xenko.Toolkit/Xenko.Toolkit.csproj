@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Description>A Toolkit for the Xenko game engine.</Description>
     <PackageTags>Xenko gamedev Game</PackageTags>

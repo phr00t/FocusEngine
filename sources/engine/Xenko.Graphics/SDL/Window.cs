@@ -22,7 +22,9 @@ namespace Xenko.Graphics.SDL
         #region Initialization
 
         private SDL.SDL_Rect displayBounds;
-        
+
+        internal static bool _makeDefaultResolutionOnCrash = true;
+
         /// <summary>
         /// Initializes static members of the <see cref="Window"/> class.
         /// </summary>
@@ -130,17 +132,21 @@ namespace Xenko.Graphics.SDL
 
         internal static void GenerateSwapchainError(string err)
         {
-            string error = "There was an error rendering to the screen. Try these things to fix it:\n\n1) Update your video drivers to latest\n2) Turn off 'fix apps that are blurry' in Windows 10\n3) Disable display scaling (use 100% display scale)\n4) Use a lower resolution or windowed-mode\n\nMonitor configurations or invalid resolution settings may also be to blame.\nResolution settings have been set to default for the next run.";
+            string error = "There was an error rendering to the screen. This is usually caused by ALT+TAB or switching desktops.\nOtherwise, try these things to fix it:\n\n1) Update your video drivers to latest\n2) Turn off 'fix apps that are blurry' in Windows 10\n3) Disable display scaling (use 100% display scale)\n4) Use a lower resolution or windowed-mode\n\nMonitor configurations or invalid resolution settings may also be to blame." + (_makeDefaultResolutionOnCrash ? "\nResolution settings have been set to default for the next run." : "");
             if (err != null) error += "\n\nDetails: " + err;
-            try
+            if (_makeDefaultResolutionOnCrash)
             {
-                System.IO.File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "/DefaultResolution.txt",
-                                            "1280\n" +
-                                            "720\n" +
-                                            "window\n" +
-                                            "-1\n" +
-                                            "0");
-            } catch (Exception e2) { }
+                try
+                {
+                    System.IO.File.WriteAllText(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + "/DefaultResolution.txt",
+                                                "1280\n" +
+                                                "720\n" +
+                                                "window\n" +
+                                                "-1\n" +
+                                                "0");
+                }
+                catch (Exception e2) { }
+            }
             SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "Failed to Render To Screen", error, IntPtr.Zero);
             Console.Error.WriteLine(error);
             Console.Out.WriteLine(error);
