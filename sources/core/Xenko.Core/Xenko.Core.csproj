@@ -34,6 +34,7 @@
   </Choose>
   
   <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="9.0.8" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
   </ItemGroup>

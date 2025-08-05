@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyModel;
 using NuGet.Commands;
+using NuGet.Common;
 using NuGet.DependencyResolver;
 using NuGet.LibraryModel;
 using NuGet.ProjectModel;
@@ -20,7 +22,7 @@ namespace Xenko.Core.Assets
 {
     partial class PackageSession
     {
-        private async Task<RestoreTargetGraph> GenerateRestoreGraph(ILogger log, string projectName, string projectPath)
+        private async Task<RestoreTargetGraph> GenerateRestoreGraph(Core.Diagnostics.ILogger log, string projectName, string projectPath)
         {
             var dgFile = await VSProjectHelper.GenerateRestoreGraphFile(log, projectPath);
             var dgProvider = new DependencyGraphSpecRequestProvider(new RestoreCommandProvidersCache(), dgFile);
@@ -67,7 +69,7 @@ namespace Xenko.Core.Assets
             }
         }
 
-        private async Task PreLoadPackageDependencies(ILogger log, SolutionProject project, PackageLoadParameters loadParameters)
+        private async Task PreLoadPackageDependencies(Core.Diagnostics.ILogger log, SolutionProject project, PackageLoadParameters loadParameters)
         {
             if (log == null) throw new ArgumentNullException(nameof(log));
             if (project == null) throw new ArgumentNullException(nameof(project));
@@ -329,6 +331,46 @@ namespace Xenko.Core.Assets
             }
         }
 
+        public class ConsoleLogger : NuGet.Common.ILogger
+        {
+            public void Log(LogLevel level, string data)
+            {
+                WriteDebugLine($"NuGet [{level}]: {data}");
+            }
+
+            public void Log(NuGet.Common.ILogMessage message)
+            {
+                Log(message.Level, message.Message);
+            }
+
+            public Task LogAsync(LogLevel level, string data)
+            {
+                Log(level, data);
+                return Task.CompletedTask;
+            }
+
+            public Task LogAsync(NuGet.Common.ILogMessage message)
+            {
+                Log(message);
+                return Task.CompletedTask;
+            }
+
+            public void LogDebug(string data) => Log(LogLevel.Debug, data);
+            public void LogVerbose(string data) => Log(LogLevel.Verbose, data);
+            public void LogInformation(string data) => Log(LogLevel.Information, data);
+            public void LogMinimal(string data) => Log(LogLevel.Minimal, data);
+            public void LogWarning(string data) => Log(LogLevel.Warning, data);
+            public void LogError(string data) => Log(LogLevel.Error, data);
+            public void LogInformationSummary(string data) => Log(LogLevel.Information, data);
+        }
+
+        public static void WriteDebugLine(string line)
+        {
+            System.Diagnostics.Debug.WriteLine(line);
+            Console.WriteLine(line);
+            Console.Error.WriteLine(line);
+        }
+
         public static void UpdateDependencies(SolutionProject project, bool directDependencies, bool flattenedDependencies)
         {
             if (flattenedDependencies)
@@ -339,7 +381,8 @@ namespace Xenko.Core.Assets
             if (File.Exists(projectAssetsJsonPath))
             {
                 var format = new LockFileFormat();
-                var projectAssets = format.Read(projectAssetsJsonPath);
+                ConsoleLogger consoleLogger = new ConsoleLogger();
+                var projectAssets = format.Read(projectAssetsJsonPath, consoleLogger);
 
                 // Update dependencies
                 if (flattenedDependencies)
@@ -355,17 +398,24 @@ namespace Xenko.Core.Assets
 
                 if (directDependencies)
                 {
-                    foreach (var projectReference in projectAssets.PackageSpec.RestoreMetadata.TargetFrameworks.First().ProjectReferences)
-                    {
-                        var projectName = new UFile(projectReference.ProjectUniqueName).GetFileNameWithoutExtension();
-                        project.DirectDependencies.Add(new DependencyRange(projectName, null, DependencyType.Project) { MSBuildProject = projectReference.ProjectPath });
-                    }
+                    PackageSpec ps = projectAssets.PackageSpec;
 
-                    foreach (var dependency in projectAssets.PackageSpec.TargetFrameworks.First().Dependencies)
+                    if (ps?.RestoreMetadata?.TargetFrameworks != null)
                     {
-                        if (dependency.AutoReferenced)
-                            continue;
-                        project.DirectDependencies.Add(new DependencyRange(dependency.Name, dependency.LibraryRange.VersionRange.ToPackageVersionRange(), DependencyType.Package));
+                        foreach (var projectReference in ps.RestoreMetadata.TargetFrameworks.First().ProjectReferences)
+                        {
+                            var projectName = new UFile(projectReference.ProjectUniqueName).GetFileNameWithoutExtension();
+                            project.DirectDependencies.Add(new DependencyRange(projectName, null, DependencyType.Project) { MSBuildProject = projectReference.ProjectPath });
+                        }
+
+                        foreach (var dependency in ps.TargetFrameworks.First().Dependencies)
+                        {
+                            if (dependency.AutoReferenced)
+                                continue;
+                            project.DirectDependencies.Add(new DependencyRange(dependency.Name, dependency.LibraryRange.VersionRange.ToPackageVersionRange(), DependencyType.Package));
+                        }
+                    } else {
+                        WriteDebugLine("Warning: " + projectAssets.Path + " couldn't find PackageSpec.");
                     }
                 }
             }

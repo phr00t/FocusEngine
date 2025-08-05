@@ -31,6 +31,7 @@
 	  <NoWarn>NU1605</NoWarn>
 	</PackageReference>
 	<PackageReference Include="Mono.Options" Version="6.12.0.148" />
+	<PackageReference Include="System.Text.Json" Version="9.0.8" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
