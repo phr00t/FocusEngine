@@ -28,7 +28,6 @@ namespace Xenko.Physics
         /// <summary>
         /// If set to true, forcefully disable any Bullet physics processing.
         /// </summary>
-        [DataMember]
-        public bool OnlyUseBepu = false;
+        public bool OnlyUseBepu = true;
     }
 }

@@ -16,7 +16,7 @@ namespace Xenko.Core.Threading
         public static int MaxDegreeOfParallelism = 1;
 #else
         public static int MaxDegreeOfParallelism = Environment.ProcessorCount;
-        public static int MaxPhysicsParallelism = MaxDegreeOfParallelism / 2;
+        public static int MaxPhysicsParallelism = Math.Max(4, MaxDegreeOfParallelism / 3);
 #endif
 
         public delegate void ValueAction<T>(ref T obj);

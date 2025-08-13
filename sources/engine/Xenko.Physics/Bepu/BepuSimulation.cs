@@ -386,7 +386,7 @@ namespace Xenko.Physics.Bepu
         /// <param name="processor"></param>
         /// <param name="configuration"></param>
         /// <exception cref="System.NotImplementedException">SoftBody processing is not yet available</exception>
-        internal BepuSimulation(PhysicsSettings configuration)
+        internal BepuSimulation(int iterations)
         {
             Game GameService = ServiceRegistry.instance.GetService<IGame>() as Game;
             GameService.SceneSystem.SceneInstance.EntityAdded += EntityAdded;
@@ -396,7 +396,7 @@ namespace Xenko.Physics.Bepu
             poseCallbacks = new PoseIntegratorCallbacks();
 
             // we will give the simulation its own bufferpool
-            internalSimulation = BepuPhysics.Simulation.Create(new BufferPool(), new NarrowPhaseCallbacks(), poseCallbacks, new BepuPhysics.PositionLastTimestepper());
+            internalSimulation = BepuPhysics.Simulation.Create(new BufferPool(), new NarrowPhaseCallbacks(), poseCallbacks, new BepuPhysics.PositionLastTimestepper(), iterations);
             instance = this;
         }
 

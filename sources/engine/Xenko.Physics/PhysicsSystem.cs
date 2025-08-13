@@ -29,8 +29,11 @@ namespace Xenko.Physics
         private Thread physicsThread;
         private static Thread simulationThread;
 
-        public static int MaxSubSteps = 2;
-        public static float MaximumSimulationTime = 0.025f;
+        // by default, don't do more substeps (since running the simulation twice will lead to just more lag)
+        public static int MaxSubSteps = 1, SolverIterations = 8;
+
+        // only slow down physics if going under 30fps
+        public static float MaximumSimulationTime = 0.034f;
 
         private readonly List<PhysicsScene> scenes = new List<PhysicsScene>();
 
@@ -61,9 +64,6 @@ namespace Xenko.Physics
         public override void Initialize()
         {
             physicsConfiguration = Game?.Settings != null ? Game.Settings.Configurations.Get<PhysicsSettings>() : new PhysicsSettings();
-
-            MaximumSimulationTime = physicsConfiguration.FixedTimeStep;
-            MaxSubSteps = physicsConfiguration.MaxSubSteps;
             EntityManager.preventPhysicsProcessor = physicsConfiguration.OnlyUseBepu;
 
             if (isMultithreaded)
@@ -108,7 +108,7 @@ namespace Xenko.Physics
             { 
                 Processor = sceneProcessor,
                 Simulation = bepu == false ? new Simulation(sceneProcessor, physicsConfiguration) : null,
-                BepuSimulation = bepu ? new BepuSimulation(physicsConfiguration) : null
+                BepuSimulation = bepu ? new BepuSimulation(SolverIterations) : null
             };
             scenes.Add(scene);
             return bepu ? (object)scene.BepuSimulation : (object)scene.Simulation;
