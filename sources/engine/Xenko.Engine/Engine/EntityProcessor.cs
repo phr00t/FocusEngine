@@ -224,7 +224,6 @@ namespace Xenko.Engine
         protected readonly List<TData> ComponentDataValues = new List<TData>();
         protected readonly Dictionary<TComponent, int> KeyIndex = new System.Collections.Generic.Dictionary<TComponent, int>();
         private readonly HashSet<Entity> reentrancyCheck = new HashSet<Entity>();
-        private readonly FastList<TypeInfo> checkRequiredTypes = new FastList<TypeInfo>();
 
         protected EntityProcessor([NotNull] params Type[] requiredAdditionalTypes)
             : base(typeof(TComponent), requiredAdditionalTypes)
@@ -371,30 +370,21 @@ namespace Xenko.Engine
         {
             // When a processor has no requirement components, it always match with at least the component of entity
             if (!HasRequiredComponents)
-            {
                 return true;
-            }
 
-            checkRequiredTypes.Clear();
-            for (var i = 0; i < RequiredTypes.Length; i++)
-            {
-                checkRequiredTypes.Add(RequiredTypes[i]);
-            }
-
+            int score_track = RequiredTypes.Length;
             var components = entity.Components;
             for (var i = 0; i < components.Count; i++)
             {
                 var componentType = components[i].GetType().GetTypeInfo();
-                for (var j = checkRequiredTypes.Count - 1; j >= 0; j--)
+                for (var j = RequiredTypes.Length - 1; j >= 0; j--)
                 {
-                    if (checkRequiredTypes.Items[j].IsAssignableFrom(componentType))
+                    if (RequiredTypes[j].IsAssignableFrom(componentType))
                     {
-                        checkRequiredTypes.RemoveAt(j);
+                        score_track--;
 
-                        if (checkRequiredTypes.Count == 0)
-                        {
+                        if (score_track <= 0)
                             return true;
-                        }
                     }
                 }
             }
