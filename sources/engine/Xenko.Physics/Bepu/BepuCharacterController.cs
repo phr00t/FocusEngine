@@ -365,7 +365,7 @@ namespace Xenko.Physics.Bepu
         public float VRFOVReductionSpeed = 10f;
 
         /// <summary>
-        /// Set this to 1f to disable blacking out when trying to look through walls. Defaults to 0.1f, 0 will completely black out the screen.
+        /// Set this to 1f to disable blacking out when trying to look through walls. Defaults to 0.025f, 0 will completely black out the screen.
         /// </summary>
         public float VRBlackoutThroughWall = 0.025f;
 

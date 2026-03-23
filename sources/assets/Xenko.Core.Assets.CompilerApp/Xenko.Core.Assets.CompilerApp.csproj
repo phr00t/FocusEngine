@@ -26,12 +26,12 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EnvDTE" Version="8.0.2" />
-    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.14" />
 	<PackageReference Include="System.Numerics.Vectors" Version="4.5.0">
 	  <NoWarn>NU1605</NoWarn>
 	</PackageReference>
 	<PackageReference Include="Mono.Options" Version="6.12.0.148" />
-	<PackageReference Include="System.Text.Json" Version="9.0.8" />
+	<PackageReference Include="System.Text.Json" Version="9.0.14" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
