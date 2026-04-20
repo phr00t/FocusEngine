@@ -308,6 +308,9 @@ namespace Xenko.VirtualReality
 
         public override unsafe void UpdatePositions(GameTime gameTime)
         {
+            // wait until we have a legit predict time
+            if (globalFrameState.PredictedDisplayTime <= 0) return;
+
             ActiveActionSet active_actionsets = new ActiveActionSet()
             {
                  ActionSet = globalActionSet
